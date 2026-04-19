@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Club Profile | NM District</title>
+    <meta name="description" content="Detailed NM club profile with team, events, social links, and gallery." />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script defer src="assets/js/data.js"></script>
+    <script defer src="assets/js/main.js"></script>
+    <script defer src="assets/js/club.js"></script>
+  </head>
+  <body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <header class="floating-nav" id="floatingNav">
+      <div class="nav-inner">
+        <a class="brand" href="index.html" aria-label="NM District home">
+          <span class="brand-logo">NM</span>
+          <span>NM District</span>
+        </a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a class="nav-link" data-nav-link href="index.html">Home</a>
+          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
+          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
+          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
+          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
+          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
+        </nav>
+        <div class="nav-actions">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
+          <a class="btn-inline" href="clubs.html">Back to Directory</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="club-profile-shell">
+        <article class="club-profile-hero reveal">
+          <div class="club-profile-top">
+            <img id="clubCoverImage" src="" alt="Club cover" />
+            <div class="club-profile-overlay">
+              <div>
+                <p class="eyebrow" id="clubEyebrow">Club Profile</p>
+                <h1 class="page-title" id="clubName" style="font-size: clamp(1.9rem, 5vw, 3rem)">Club Name</h1>
+                <p class="page-subtitle" id="clubTagline">Tagline</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <div class="club-profile-grid">
+          <div class="content-stack">
+            <article class="section-block reveal">
+              <h2>About</h2>
+              <p id="clubDescription"></p>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>Team Members</h2>
+              <div class="rules-list" id="clubTeam"></div>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>Upcoming Events</h2>
+              <div class="similar-grid" id="clubUpcoming"></div>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>Past Events</h2>
+              <div class="similar-grid" id="clubPast"></div>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>Gallery</h2>
+              <div class="gallery-grid" id="clubGallery"></div>
+            </article>
+          </div>
+
+          <aside class="sidebar-panel reveal" style="padding: 1rem; height: fit-content">
+            <h3 style="margin: 0">Community Snapshot</h3>
+            <div class="list-stack" style="margin-top: 0.8rem">
+              <div class="list-item">Followers: <strong id="clubFollowers">0</strong></div>
+              <div class="list-item">Hosted Events: <strong id="clubEventsCount">0</strong></div>
+              <div class="list-item">Membership: <strong>Open for NM Students</strong></div>
+            </div>
+
+            <h3 style="margin-top: 1rem">Social Links</h3>
+            <div class="list-stack" id="clubSocial"></div>
+
+            <div style="margin-top: 1rem">
+              <a class="btn-primary" id="clubPrimaryCTA" href="explore.html">Explore Club Events</a>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

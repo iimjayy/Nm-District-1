@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Pass | NM District</title>
+    <meta name="description" content="Premium multi-step pass booking flow for NM College events." />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script defer src="assets/js/data.js"></script>
+    <script defer src="assets/js/main.js"></script>
+    <script defer src="assets/js/booking.js"></script>
+  </head>
+  <body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <header class="floating-nav" id="floatingNav">
+      <div class="nav-inner">
+        <a class="brand" href="index.html" aria-label="NM District home">
+          <span class="brand-logo">NM</span>
+          <span>NM District</span>
+        </a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a class="nav-link" data-nav-link href="index.html">Home</a>
+          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
+          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
+          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
+          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
+          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
+        </nav>
+        <div class="nav-actions">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
+          <a class="btn-inline" href="dashboard.html">My Tickets</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section booking-shell">
+        <div class="section-head reveal">
+          <div>
+            <p class="eyebrow">Secure Checkout · NM Student Access</p>
+            <h1 class="page-title" style="font-size: clamp(1.8rem, 5vw, 2.8rem)">Complete Your Booking</h1>
+            <p class="page-subtitle">Effortless premium booking designed for NM students.</p>
+            <div class="booking-confidence-strip" id="bookingConfidenceStrip">
+              <span class="confidence-pill">SSL Secured</span>
+              <span class="confidence-pill">Instant QR Delivery</span>
+              <span class="confidence-pill">Refund Support Enabled</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stepper reveal" id="bookingSteps">
+          <div class="step active" data-step="1">Pass Selection</div>
+          <div class="step" data-step="2">Student Details</div>
+          <div class="step" data-step="3">Payment</div>
+          <div class="step" data-step="4">Ticket</div>
+        </div>
+
+        <section class="booking-stage active reveal" data-stage="1">
+          <article class="form-shell">
+            <h2 class="card-title" id="bookingEventTitle">Loading Event</h2>
+            <p class="card-subtitle" id="bookingEventMeta">Please wait while we prepare your booking journey.</p>
+
+            <div class="ticket-option-list" id="bookingTicketOptions" style="margin-top: 0.8rem"></div>
+
+            <div class="quantity-selector">
+              <button class="qty-btn" id="bookingQtyMinus" type="button">-</button>
+              <div class="qty-display" id="bookingQtyDisplay">1</div>
+              <button class="qty-btn" id="bookingQtyPlus" type="button">+</button>
+            </div>
+
+            <div class="summary-line total">
+              <span>Subtotal</span>
+              <span id="bookingSubtotal">₹0</span>
+            </div>
+
+            <div class="smart-suggestions" id="smartSuggestions"></div>
+
+            <div style="margin-top: 0.85rem; display: flex; gap: 0.6rem; flex-wrap: wrap">
+              <button class="btn-primary" id="toDetailsBtn" type="button">Continue to Student Details</button>
+              <a class="btn-secondary" href="explore.html">Back to Explore</a>
+            </div>
+          </article>
+        </section>
+
+        <section class="booking-stage reveal" data-stage="2">
+          <article class="form-shell">
+            <h2 class="card-title">Student Details</h2>
+            <p class="card-subtitle">Your details are used for entry verification and ticket assignment.</p>
+
+            <form class="form-grid" id="studentForm" novalidate>
+              <div>
+                <label class="filter-label" for="studentName">Full Name</label>
+                <input class="form-input" id="studentName" required />
+              </div>
+              <div>
+                <label class="filter-label" for="studentEmail">College Email</label>
+                <input class="form-input" id="studentEmail" type="email" placeholder="name@nmcollege.in" required />
+              </div>
+              <div>
+                <label class="filter-label" for="studentPhone">Phone</label>
+                <input class="form-input" id="studentPhone" type="tel" required />
+              </div>
+              <div>
+                <label class="filter-label" for="studentYear">Year</label>
+                <select class="form-select" id="studentYear" required>
+                  <option value="">Select year</option>
+                  <option value="FY">FY</option>
+                  <option value="SY">SY</option>
+                  <option value="TY">TY</option>
+                </select>
+              </div>
+              <div>
+                <label class="filter-label" for="studentId">Student ID</label>
+                <input class="form-input" id="studentId" placeholder="NM-2026-XXXX" required />
+              </div>
+              <div>
+                <label class="filter-label" for="refCode">Referral Code (Optional)</label>
+                <input class="form-input" id="refCode" placeholder="Enter code" />
+                <p class="referral-reward-note" id="refRewardNote">Add a referral code to unlock up to ₹220 discount.</p>
+              </div>
+              <div class="full">
+                <label class="filter-label" for="notes">Special Notes</label>
+                <textarea class="form-textarea" id="notes" placeholder="Accessibility, seating, or other requests"></textarea>
+              </div>
+            </form>
+
+            <div style="margin-top: 0.9rem; display: flex; gap: 0.6rem; flex-wrap: wrap">
+              <button class="btn-secondary" id="backToPassBtn" type="button">Back</button>
+              <button class="btn-primary" id="toPaymentBtn" type="button">Continue to Payment</button>
+            </div>
+          </article>
+        </section>
+
+        <section class="booking-stage reveal" data-stage="3">
+          <article class="order-summary">
+            <h2 class="card-title">Order Summary</h2>
+            <div class="summary-line"><span>Event</span><span id="summaryEvent">-</span></div>
+            <div class="summary-line"><span>Pass</span><span id="summaryPass">-</span></div>
+            <div class="summary-line"><span>Quantity</span><span id="summaryQty">1</span></div>
+            <div class="summary-line"><span>Student</span><span id="summaryStudent">-</span></div>
+            <div class="summary-line"><span>Base Total</span><span id="summaryBase">₹0</span></div>
+            <div class="summary-line"><span>Platform Fee</span><span id="summaryFee">₹0</span></div>
+            <div class="summary-line"><span>Referral Discount</span><span id="summaryDiscount">₹0</span></div>
+            <div class="summary-line total"><span>Payable</span><span id="summaryPayable">₹0</span></div>
+
+            <h3 style="margin-top: 0.8rem">Choose Payment Method</h3>
+            <div class="payment-grid" id="paymentMethods">
+              <button class="payment-choice active" data-payment="UPI" type="button">UPI</button>
+              <button class="payment-choice" data-payment="Card" type="button">Card</button>
+              <button class="payment-choice" data-payment="Wallet" type="button">Wallet</button>
+            </div>
+
+            <div class="payment-confidence" id="paymentConfidence">
+              <span>Bank-grade encryption</span>
+              <span>PCI-compliant checkout</span>
+              <span>Auto receipt in 5 sec</span>
+            </div>
+
+            <div style="margin-top: 0.9rem; display: flex; gap: 0.6rem; flex-wrap: wrap">
+              <button class="btn-secondary" id="backToDetailsBtn" type="button">Back</button>
+              <button class="btn-primary btn-gold" id="payNowBtn" type="button">Pay & Confirm</button>
+            </div>
+          </article>
+        </section>
+
+        <section class="booking-stage reveal" data-stage="4">
+          <article class="success-pane" style="position: relative">
+            <div class="confetti-zone" id="confettiZone"></div>
+            <p class="eyebrow">Booking Confirmed</p>
+            <h2 class="card-title">Your NM Pass is Ready</h2>
+            <p class="card-subtitle">Show this QR at the entry gate for seamless check-in.</p>
+
+            <div class="ticket-card" id="ticketCard">
+              <div class="ticket-head">
+                <div>
+                  <div class="pill">NM District Access</div>
+                  <h3 id="ticketEventTitle" style="margin: 0.5rem 0 0">Event Name</h3>
+                </div>
+                <div class="status-pill">Confirmed</div>
+              </div>
+              <div class="ticket-grid">
+                <div>
+                  <div class="ticket-field"><strong id="ticketHolder">Student Name</strong>Pass Holder</div>
+                  <div class="ticket-field"><strong id="ticketSeatInfo">Pass Type · Qty</strong>Ticket Configuration</div>
+                  <div class="ticket-field"><strong id="ticketTimeInfo">Date & Time</strong>Schedule</div>
+                  <div class="ticket-field"><strong id="ticketCode">NM-XXXX</strong>Booking Reference</div>
+                </div>
+                <div class="qr-frame">
+                  <div id="qrCode"></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 0.9rem; display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap">
+              <button class="btn-primary" id="downloadTicketBtn" type="button">Download Ticket</button>
+              <button class="btn-inline" id="addCalendarBtn" type="button">Add to Calendar</button>
+              <button class="btn-inline" id="shareTicketBtn" type="button">Share Ticket</button>
+              <a class="btn-secondary" href="dashboard.html">Go to Dashboard</a>
+            </div>
+          </article>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>

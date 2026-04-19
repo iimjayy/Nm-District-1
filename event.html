@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Details | NM District</title>
+    <meta name="description" content="Premium event details and pass booking panel for NM College experiences." />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script defer src="assets/js/data.js"></script>
+    <script defer src="assets/js/main.js"></script>
+    <script defer src="assets/js/event.js"></script>
+  </head>
+  <body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <header class="floating-nav" id="floatingNav">
+      <div class="nav-inner">
+        <a class="brand" href="index.html" aria-label="NM District home">
+          <span class="brand-logo">NM</span>
+          <span>NM District</span>
+        </a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a class="nav-link" data-nav-link href="index.html">Home</a>
+          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
+          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
+          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
+          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
+          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
+        </nav>
+        <div class="nav-actions">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
+          <a class="btn-inline" href="booking.html">Checkout</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero hero-compact reveal" id="eventHero">
+        <div class="hero-media" id="eventHeroMedia"></div>
+        <div class="hero-content">
+          <p class="eyebrow" id="eventEyebrow">Category · Organizer</p>
+          <div class="badge-cloud" id="eventBadges"></div>
+          <h1 id="eventTitle">Loading event...</h1>
+          <p class="hero-subtitle" id="eventSubline"></p>
+          <div class="hero-cta">
+            <span class="pill" id="eventDatePill">Date</span>
+            <span class="pill" id="eventVenuePill">Venue</span>
+            <span class="pill" id="eventModePill">Mode</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section container">
+        <div class="detail-layout">
+          <div class="content-stack">
+            <article class="section-block reveal">
+              <h2>About</h2>
+              <p id="aboutText"></p>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>Timeline / Agenda</h2>
+              <div class="agenda-grid" id="agendaGrid"></div>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>Speakers / Guests</h2>
+              <div class="people-grid" id="peopleGrid"></div>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>Who Is Attending</h2>
+              <div class="attending-row" id="attendingRow"></div>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>FAQs</h2>
+              <div class="inline-list" id="faqList"></div>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>Rules & Terms</h2>
+              <div class="rules-list" id="rulesList"></div>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>Gallery</h2>
+              <div class="gallery-slider-shell">
+                <button class="carousel-arrow prev" id="galleryPrev" type="button">‹</button>
+                <div class="gallery-grid gallery-slider-track" id="galleryGrid"></div>
+                <button class="carousel-arrow next" id="galleryNext" type="button">›</button>
+              </div>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>Venue Map</h2>
+              <div class="venue-map" id="venueMap"></div>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>Reviews & Ratings</h2>
+              <div class="review-grid" id="reviewGrid"></div>
+            </article>
+
+            <article class="section-block reveal">
+              <h2>Similar Events</h2>
+              <div class="similar-grid" id="similarEvents"></div>
+            </article>
+          </div>
+
+          <aside class="booking-panel reveal">
+            <h3 style="margin: 0">Book Your Pass</h3>
+            <p class="muted" id="availabilityStatus">Checking availability...</p>
+
+            <div class="urgency-stack" id="urgencyStack">
+              <div class="urgency-pill" id="urgencyClose">Registration closes soon</div>
+              <div class="urgency-pill" id="urgencySeats">65 seats left</div>
+              <div class="urgency-pill" id="urgencyInterested">2,300 students interested</div>
+            </div>
+
+            <div class="ticket-option-list" id="ticketOptions" style="margin-top: 0.8rem"></div>
+
+            <div class="quantity-selector">
+              <button class="qty-btn" id="qtyMinus" type="button">-</button>
+              <div class="qty-display" id="qtyDisplay">1</div>
+              <button class="qty-btn" id="qtyPlus" type="button">+</button>
+            </div>
+
+            <div class="summary-line total" style="margin-top: 0.8rem">
+              <span>Total</span>
+              <span id="ticketTotal">₹0</span>
+            </div>
+
+            <div class="countdown" id="regCountdown">Registration closes soon.</div>
+
+            <div class="action-stack">
+              <a class="btn-primary" id="bookNowBtn" href="booking.html">Book Now</a>
+            </div>
+
+            <div class="side-actions">
+              <button class="btn-inline" type="button" id="wishlistBtn">Save</button>
+              <button class="btn-inline" type="button" id="shareBtn">Share</button>
+              <button class="btn-inline" type="button" id="calendarBtn">Calendar</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <div class="mobile-action-bar" id="mobileActionBar">
+        <button class="btn-inline" type="button" id="mobileSave">Save</button>
+        <button class="btn-inline" type="button" id="mobileShare">Share</button>
+        <a class="btn-primary" id="mobileBook" href="booking.html">Book</a>
+      </div>
+    </main>
+  </body>
+</html>

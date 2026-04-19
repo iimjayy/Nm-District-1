@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clubs & Committees | NM District</title>
+    <meta name="description" content="Discover NM College clubs and committees with premium profile previews and event insights." />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script defer src="assets/js/data.js"></script>
+    <script defer src="assets/js/main.js"></script>
+    <script defer src="assets/js/clubs.js"></script>
+  </head>
+  <body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <header class="floating-nav" id="floatingNav">
+      <div class="nav-inner">
+        <a class="brand" href="index.html" aria-label="NM District home">
+          <span class="brand-logo">NM</span>
+          <span>NM District</span>
+        </a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a class="nav-link" data-nav-link href="index.html">Home</a>
+          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
+          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
+          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
+          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
+          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
+        </nav>
+        <div class="nav-actions">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
+          <a class="btn-inline" href="explore.html">Find Events</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="clubs-hero reveal">
+        <p class="eyebrow">Clubs & Committees Directory</p>
+        <h1 class="page-title" style="font-size: clamp(1.8rem, 5vw, 3rem)">The Communities Behind NM Culture</h1>
+        <p class="page-subtitle">
+          Explore official clubs, core committees, and their upcoming experiences with a premium profile-led browse flow.
+        </p>
+
+        <div class="glass-search" style="margin-top: 1rem">
+          <input id="clubSearch" type="search" placeholder="Search by club name, focus, or tagline" />
+          <select id="clubSort" class="filter-select" style="min-width: 180px">
+            <option value="followers">Sort: Most followers</option>
+            <option value="events">Sort: Most events</option>
+            <option value="name">Sort: Name A-Z</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="section" style="padding-top: 1rem">
+        <div class="container">
+          <div class="section-head reveal">
+            <div>
+              <h2 class="section-title">Club Directory</h2>
+              <p class="section-copy">Tap into each community's team, history, social links, and events.</p>
+            </div>
+            <strong id="clubCount">0 clubs</strong>
+          </div>
+        </div>
+        <div class="clubs-directory-grid" id="clubsDirectory"></div>
+      </section>
+    </main>
+  </body>
+</html>

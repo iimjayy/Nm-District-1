@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Explore Events | NM District</title>
+    <meta name="description" content="Discover and filter NM College events with premium search, filters, and booking cards." />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script defer src="assets/js/data.js"></script>
+    <script defer src="assets/js/main.js"></script>
+    <script defer src="assets/js/explore.js"></script>
+  </head>
+  <body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <header class="floating-nav" id="floatingNav">
+      <div class="nav-inner">
+        <a class="brand" href="index.html" aria-label="NM District home">
+          <span class="brand-logo">NM</span>
+          <span>NM District</span>
+        </a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a class="nav-link" data-nav-link href="index.html">Home</a>
+          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
+          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
+          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
+          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
+          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
+        </nav>
+        <div class="nav-actions">
+          <a class="btn-inline nav-cta" href="dashboard.html">My Passes</a>
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero hero-compact reveal">
+        <div class="hero-media">
+          <img
+            src="assets/images/49592495dd5ed7b56deccc37d092881a.jpg"
+            alt="NM College event crowd"
+          />
+        </div>
+        <div class="hero-ambient-lights" aria-hidden="true"></div>
+        <div class="hero-content">
+          <p class="eyebrow">Explore · Curated Campus Experiences</p>
+          <h1>Find Your Next NM Moment</h1>
+          <p class="hero-subtitle">
+            Premium discovery across fests, competitions, workshops, sports, and guest sessions.
+          </p>
+          <div class="quick-category-row" id="quickCategoryRow">
+            <button class="quick-cat-chip" data-quick="Fests" type="button">Fests</button>
+            <button class="quick-cat-chip" data-quick="Workshops" type="button">Workshops</button>
+            <button class="quick-cat-chip" data-quick="Networking" type="button">Networking</button>
+            <button class="quick-cat-chip" data-quick="Sports" type="button">Sports</button>
+            <button class="quick-cat-chip" data-quick="Cultural Events" type="button">Cultural</button>
+            <button class="quick-cat-chip" data-quick="Free" type="button">Free</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section container" style="padding-top: 1rem; padding-bottom: 0.8rem;">
+        <div class="discovery-filter-bar reveal" id="exploreQuickPills">
+          <button class="filter-pill active" data-explore-pill="all" type="button">All</button>
+          <button class="filter-pill" data-explore-pill="today" type="button">Today</button>
+          <button class="filter-pill" data-explore-pill="tomorrow" type="button">Tomorrow</button>
+          <button class="filter-pill" data-explore-pill="thisweek" type="button">This Week</button>
+          <button class="filter-pill" data-explore-pill="free" type="button">Free</button>
+          <button class="filter-pill" data-explore-pill="paid" type="button">Paid</button>
+          <button class="filter-pill" data-explore-pill="Sports" type="button">Sports</button>
+          <button class="filter-pill" data-explore-pill="Music" type="button">Music</button>
+          <button class="filter-pill" data-explore-pill="Workshops" type="button">Workshops</button>
+          <button class="filter-pill" data-explore-pill="Cultural Events" type="button">Cultural</button>
+          <button class="filter-pill" data-explore-pill="Networking" type="button">Networking</button>
+          <button class="btn-inline" id="exploreMoreFiltersBtn" type="button">More Filters</button>
+        </div>
+      </section>
+
+      <section class="section container">
+        <div class="quick-sticky-bar reveal">
+          <div class="muted">Quick Access</div>
+          <div class="quick-pill-wrap" id="quickPillWrap"></div>
+          <button class="btn-inline" id="mapToggleBtn" type="button">Map Preview</button>
+        </div>
+
+        <article class="featured-banner reveal" id="featuredExploreBanner"></article>
+
+        <div class="layout-split">
+          <aside class="filters-panel reveal" aria-label="Explore filters">
+            <div class="section-head" style="margin-bottom: 0.7rem">
+              <h2 class="section-title" style="font-size: 1.2rem">Filters</h2>
+              <button class="btn-inline" id="clearFiltersBtn" type="button">Reset</button>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label" for="searchFilter">⌕ Search</label>
+              <input class="filter-input" id="searchFilter" type="search" placeholder="Event, organizer, venue" />
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label" for="typeFilter">◈ Event Type</label>
+              <select class="filter-select" id="typeFilter"></select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label" for="clubFilter">◉ Club</label>
+              <select class="filter-select" id="clubFilter"></select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label" for="dateFilter">◌ Date</label>
+              <input class="filter-input" id="dateFilter" type="date" />
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label" for="priceFilter">₹ Free or Paid</label>
+              <select class="filter-select" id="priceFilter">
+                <option value="all">All</option>
+                <option value="free">Free</option>
+                <option value="paid">Paid</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label" for="venueFilter">⌂ Venue</label>
+              <select class="filter-select" id="venueFilter"></select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label" for="modeFilter">⌁ Online or Offline</label>
+              <select class="filter-select" id="modeFilter">
+                <option value="all">All</option>
+                <option value="offline">Offline</option>
+                <option value="online">Online</option>
+                <option value="hybrid">Hybrid</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label" for="popularityFilter">⚡ Popularity Threshold</label>
+              <input id="popularityFilter" type="range" min="0" max="100" value="0" />
+              <div class="muted" id="popularityValue">0+</div>
+            </div>
+          </aside>
+
+          <section class="results-panel reveal">
+            <div class="results-toolbar">
+              <div>
+                <strong id="resultsCount">0 events</strong>
+                <div class="muted">Sorted and tailored to your preferences</div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap">
+                <label class="muted" for="sortFilter">Sort by</label>
+                <select class="filter-select" id="sortFilter" style="min-width: 180px">
+                  <option value="popular">Most popular</option>
+                  <option value="closest">Closest date</option>
+                  <option value="newest">Newest</option>
+                  <option value="trending">Trending</option>
+                </select>
+                <div class="toggle-group" role="tablist" aria-label="View mode">
+                  <button class="view-btn active" type="button" data-view="grid">Grid</button>
+                  <button class="view-btn" type="button" data-view="list">List</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="explore-category-tabs" id="categoryTabs"></div>
+
+            <div id="activeFilters" style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.8rem"></div>
+            <div class="recent-explore-row" id="recentExploreRow"></div>
+
+            <div class="map-preview" id="mapPreview" hidden>
+              <div class="muted">Venue Map Preview</div>
+              <div class="map-canvas">NM Campus Venue Heatmap</div>
+            </div>
+
+            <aside class="hover-preview" id="hoverPreview" hidden>
+              <img src="" alt="Event preview" id="hoverPreviewImage" />
+              <div>
+                <h3 id="hoverPreviewTitle">Hover over an event</h3>
+                <p class="muted" id="hoverPreviewMeta">Quick details will appear here.</p>
+              </div>
+            </aside>
+
+            <div id="resultsLoading" class="skeleton-list" hidden>
+              <div class="skeleton-card"></div>
+              <div class="skeleton-card"></div>
+              <div class="skeleton-card"></div>
+            </div>
+
+            <div class="events-view grid" id="exploreResults"></div>
+
+            <article class="recommended-section" id="recommendedSection">
+              <div class="section-head" style="margin-top: 1.2rem">
+                <div>
+                  <h2 class="section-title" style="font-size: 1.25rem">Recommended For You</h2>
+                  <p class="section-copy">Based on trends across similar NM student interests.</p>
+                </div>
+              </div>
+              <div class="club-grid" id="recommendedGrid"></div>
+            </article>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div class="campus-modal-backdrop" id="campusModal" hidden>
+      <div class="campus-modal" role="dialog" aria-modal="true" aria-labelledby="campusModalTitle">
+        <div class="campus-modal-head">
+          <h3 id="campusModalTitle">Choose Campus Location</h3>
+          <button class="icon-btn" id="campusModalClose" type="button" aria-label="Close campus selector">&#10005;</button>
+        </div>
+        <div class="campus-modal-controls">
+          <input class="form-input" id="campusSearchInput" type="search" placeholder="Search campus venues" />
+          <button class="btn-inline" id="useCurrentCampus" type="button">Use My Current Location on Campus</button>
+        </div>
+        <div class="campus-quick-lists">
+          <div>
+            <p class="filter-label">Recent Locations</p>
+            <div class="campus-pill-row" id="recentCampusList"></div>
+          </div>
+          <div>
+            <p class="filter-label">Popular Venues</p>
+            <div class="campus-pill-row" id="popularCampusList"></div>
+          </div>
+        </div>
+        <div class="campus-card-grid" id="campusCardGrid"></div>
+      </div>
+    </div>
+  </body>
+</html>

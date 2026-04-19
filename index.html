@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NM District | Discover Every Campus Moment</title>
+    <meta
+      name="description"
+      content="NM District is the premium discovery and pass-booking platform for NM College events, festivals, workshops, and club experiences."
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script defer src="assets/js/data.js"></script>
+    <script defer src="assets/js/main.js"></script>
+  </head>
+  <body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <header class="floating-nav" id="floatingNav">
+      <div class="nav-inner">
+        <a class="brand" href="index.html" aria-label="NM District home">
+          <span class="brand-logo">NM</span>
+          <span>NM District</span>
+        </a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a class="nav-link" data-nav-link href="index.html">Home</a>
+          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
+          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
+          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
+          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
+          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
+        </nav>
+        <div class="nav-actions">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="district-hero reveal" id="districtHero">
+        <div class="hero-glow-palette" id="heroGlowPalette" aria-hidden="true"></div>
+        <div class="district-hero-shell">
+          <button class="carousel-arrow prev" id="heroPrev" type="button" aria-label="Previous featured event">&#8249;</button>
+          <div class="hero-slide-stage" id="heroSlideStage">
+            <div class="hero-slide-image-wrap">
+              <img id="heroSlideImage" src="assets/images/4f7b4ae0986f4a7502e84ba08890af84.jpg" alt="Featured event visual" />
+            </div>
+            <article class="hero-slide-content glass-panel">
+              <p class="eyebrow" id="heroSlideType">Featured Event</p>
+              <h1 id="heroSlideTitle">Loading featured events...</h1>
+              <p class="hero-subtitle" id="heroSlideSummary"></p>
+              <div class="hero-slide-meta" id="heroSlideMeta"></div>
+              <div class="hero-cta">
+                <a class="btn-primary" id="heroPrimaryCta" href="explore.html">Book Pass</a>
+                <a class="btn-secondary" id="heroSecondaryCta" href="event.html">View Details</a>
+              </div>
+            </article>
+          </div>
+          <button class="carousel-arrow next" id="heroNext" type="button" aria-label="Next featured event">&#8250;</button>
+        </div>
+        <div class="hero-carousel-dots" id="heroDots" aria-label="Featured event slides"></div>
+      </section>
+
+      <section class="section container">
+        <div class="section-head reveal">
+          <div>
+            <h2 class="section-title">Explore Categories</h2>
+            <p class="section-copy">Structured like District, refined for NM College event discovery.</p>
+          </div>
+        </div>
+        <div class="category-rail" id="premiumCategoryRail"></div>
+      </section>
+
+      <section class="section container">
+        <div class="section-head reveal">
+          <div>
+            <h2 class="section-title">Artists, Speakers, and Guests</h2>
+            <p class="section-copy">Campus icons, judges, hosts, and invited talent.</p>
+          </div>
+          <a class="btn-inline" href="explore.html">View All &#8250;</a>
+        </div>
+        <div class="featured-people-row" id="featuredPeopleRow"></div>
+      </section>
+
+      <section class="section container" id="discoverySection">
+        <div class="section-head reveal">
+          <div>
+            <h2 class="section-title">Browse Events Fast</h2>
+            <p class="section-copy">Simple discoverability with premium visual polish.</p>
+          </div>
+        </div>
+
+        <div class="discovery-filter-bar reveal" id="discoveryFilterBar">
+          <button class="filter-pill active" data-discovery-pill="all" type="button">All</button>
+          <button class="filter-pill" data-discovery-pill="today" type="button">Today</button>
+          <button class="filter-pill" data-discovery-pill="tomorrow" type="button">Tomorrow</button>
+          <button class="filter-pill" data-discovery-pill="thisweek" type="button">This Week</button>
+          <button class="filter-pill" data-discovery-pill="free" type="button">Free</button>
+          <button class="filter-pill" data-discovery-pill="paid" type="button">Paid</button>
+          <button class="filter-pill" data-discovery-pill="Sports" type="button">Sports</button>
+          <button class="filter-pill" data-discovery-pill="Music" type="button">Music</button>
+          <button class="filter-pill" data-discovery-pill="Workshops" type="button">Workshops</button>
+          <button class="filter-pill" data-discovery-pill="Cultural Events" type="button">Cultural</button>
+          <button class="filter-pill" data-discovery-pill="Networking" type="button">Networking</button>
+          <button class="btn-inline" id="discoveryMoreFiltersBtn" type="button">More Filters</button>
+        </div>
+
+        <div class="discovery-more-filters" id="discoveryMoreFiltersPanel" hidden>
+          <div class="filter-grid-row">
+            <label>
+              <span class="filter-label">Start Date</span>
+              <input class="form-input" id="discoveryDateStart" type="date" />
+            </label>
+            <label>
+              <span class="filter-label">End Date</span>
+              <input class="form-input" id="discoveryDateEnd" type="date" />
+            </label>
+            <label>
+              <span class="filter-label">Venue</span>
+              <select class="form-select" id="discoveryVenue">
+                <option value="all">All venues</option>
+              </select>
+            </label>
+            <label>
+              <span class="filter-label">Committee</span>
+              <select class="form-select" id="discoveryCommittee">
+                <option value="all">All committees</option>
+              </select>
+            </label>
+            <label>
+              <span class="filter-label">Pass Price</span>
+              <select class="form-select" id="discoveryPrice">
+                <option value="all">All</option>
+                <option value="free">Free</option>
+                <option value="paid">Paid</option>
+              </select>
+            </label>
+            <label>
+              <span class="filter-label">Mode</span>
+              <select class="form-select" id="discoveryMode">
+                <option value="all">All</option>
+                <option value="offline">Offline</option>
+                <option value="online">Online</option>
+                <option value="hybrid">Hybrid</option>
+              </select>
+            </label>
+          </div>
+          <div class="filter-actions-row">
+            <button class="btn-primary" id="discoveryApplyFilters" type="button">Apply Filters</button>
+            <button class="btn-secondary" id="discoveryResetFilters" type="button">Clear All</button>
+          </div>
+        </div>
+
+        <div class="active-filter-badges" id="discoveryActiveBadges"></div>
+
+        <div class="district-event-grid" id="districtEventGrid"></div>
+        <div class="empty-state" id="districtEmptyState" hidden>No events match these filters yet.</div>
+      </section>
+
+      <section class="section container">
+        <div class="floating-cta-row">
+          <article class="floating-cta-card">
+            <h3>Book Your Fest Pass</h3>
+            <p>Skip the queue and secure entry early.</p>
+            <a class="btn-inline" href="explore.html">Browse Fests</a>
+          </article>
+          <article class="floating-cta-card">
+            <h3>Explore Clubs</h3>
+            <p>Discover all NM committees and student communities.</p>
+            <a class="btn-inline" href="clubs.html">Open Club Directory</a>
+          </article>
+          <article class="floating-cta-card">
+            <h3>Join NM's Biggest Events</h3>
+            <p>Trending nights, workshops, and signature campus moments.</p>
+            <a class="btn-inline" href="event.html">See Highlights</a>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-particles" aria-hidden="true"></div>
+      <div class="container footer-grid-rich">
+        <div>
+          <h4>NM District</h4>
+          <p class="muted">
+            A premium, NM College-exclusive event discovery and pass booking layer built for speed, structure, and cinematic polish.
+          </p>
+          <p class="muted footer-contact">
+            Narsee Monjee College of Commerce and Economics<br />
+            Vile Parle West, Mumbai
+          </p>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <a class="footer-link" href="explore.html">Explore Events</a>
+          <a class="footer-link" href="booking.html">Book Pass</a>
+          <a class="footer-link" href="dashboard.html">My Dashboard</a>
+          <a class="footer-link" href="clubs.html">Club Directory</a>
+        </div>
+        <div>
+          <h4>Support</h4>
+          <a class="footer-link" href="#">FAQs</a>
+          <a class="footer-link" href="#">Ticketing Help</a>
+          <a class="footer-link" href="#">Campus Guidelines</a>
+          <a class="footer-link" href="#">Contact Support</a>
+        </div>
+        <div>
+          <h4>Connect</h4>
+          <div class="footer-socials">
+            <a href="#" aria-label="Instagram">IG</a>
+            <a href="#" aria-label="LinkedIn">IN</a>
+            <a href="#" aria-label="YouTube">YT</a>
+          </div>
+          <form class="newsletter-form" id="newsletterForm">
+            <span class="newsletter-icon">&#9993;</span>
+            <input type="email" placeholder="you@nmcollege.in" aria-label="Email" required />
+            <button class="btn-primary" type="submit">Join</button>
+          </form>
+          <div class="muted" id="newsletterFeedback"></div>
+        </div>
+        <div class="footer-qr-block">
+          <h4>NM District App</h4>
+          <div class="footer-qr" aria-label="Future app QR code"></div>
+          <p class="muted">Scan to get early access when mobile app launches.</p>
+        </div>
+      </div>
+      <div class="container footer-bottom">© 2026 NM District · Built for NM College students</div>
+    </footer>
+
+    <div class="campus-modal-backdrop" id="campusModal" hidden>
+      <div class="campus-modal" role="dialog" aria-modal="true" aria-labelledby="campusModalTitle">
+        <div class="campus-modal-head">
+          <h3 id="campusModalTitle">Choose Campus Location</h3>
+          <button class="icon-btn" id="campusModalClose" type="button" aria-label="Close campus selector">&#10005;</button>
+        </div>
+        <div class="campus-modal-controls">
+          <input class="form-input" id="campusSearchInput" type="search" placeholder="Search campus venues" />
+          <button class="btn-inline" id="useCurrentCampus" type="button">Use My Current Location on Campus</button>
+        </div>
+        <div class="campus-quick-lists">
+          <div>
+            <p class="filter-label">Recent Locations</p>
+            <div class="campus-pill-row" id="recentCampusList"></div>
+          </div>
+          <div>
+            <p class="filter-label">Popular Venues</p>
+            <div class="campus-pill-row" id="popularCampusList"></div>
+          </div>
+        </div>
+        <div class="campus-card-grid" id="campusCardGrid"></div>
+      </div>
+    </div>
+
+    <div class="preview-modal-backdrop" id="eventPreviewModal" hidden>
+      <div class="preview-modal" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+        <button class="icon-btn preview-close" id="previewClose" type="button" aria-label="Close preview">&#10005;</button>
+        <img id="previewImage" src="" alt="Event preview" />
+        <div class="preview-content">
+          <p class="eyebrow" id="previewMeta">Event Preview</p>
+          <h3 id="previewTitle">Event</h3>
+          <p class="muted" id="previewAbout"></p>
+          <div class="hero-cta">
+            <a class="btn-primary" id="previewViewLink" href="event.html">View Details</a>
+            <a class="btn-secondary" id="previewBookLink" href="booking.html">Quick Book</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Organizer Studio | NM District</title>
+    <meta name="description" content="Premium organizer dashboard for NM event operations, registrations, analytics, and QR scans." />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script defer src="assets/js/data.js"></script>
+    <script defer src="assets/js/main.js"></script>
+    <script defer src="assets/js/admin.js"></script>
+  </head>
+  <body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <header class="floating-nav" id="floatingNav">
+      <div class="nav-inner">
+        <a class="brand" href="index.html" aria-label="NM District home">
+          <span class="brand-logo">NM</span>
+          <span>NM District</span>
+        </a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a class="nav-link" data-nav-link href="index.html">Home</a>
+          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
+          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
+          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
+          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
+          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
+        </nav>
+        <div class="nav-actions">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
+          <a class="btn-inline" href="explore.html">View Public Feed</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="admin-hero reveal">
+        <p class="eyebrow">Organizer Console · Premium Ops</p>
+        <h1 class="page-title" style="font-size: clamp(1.8rem, 5vw, 3rem)">NM Organizer Studio</h1>
+        <p class="page-subtitle">
+          Build, publish, and manage high-impact events with analytics, QR scanning, and attendee operations.
+        </p>
+      </section>
+
+      <section class="section" style="padding-top: 1rem">
+        <div class="container reveal">
+          <div class="analytics-grid" id="analyticsGrid">
+            <article class="analytics-tile">
+              <div class="analytics-label">Active Events</div>
+              <div class="analytics-value" id="activeEventsCount">0</div>
+            </article>
+            <article class="analytics-tile">
+              <div class="analytics-label">Total Registrations</div>
+              <div class="analytics-value" id="totalRegistrationsCount">0</div>
+            </article>
+            <article class="analytics-tile">
+              <div class="analytics-label">Revenue</div>
+              <div class="analytics-value" id="totalRevenueCount">₹0</div>
+            </article>
+            <article class="analytics-tile">
+              <div class="analytics-label">Engagement Rate</div>
+              <div class="analytics-value" id="engagementRateCount">0%</div>
+            </article>
+          </div>
+
+          <div class="admin-panel" style="margin-top: 1rem">
+            <h2 class="card-title">Weekly Engagement Pulse</h2>
+            <p class="card-subtitle">Audience interactions across the last 7 days</p>
+            <div class="bar-chart" id="engagementChart"></div>
+          </div>
+        </div>
+
+        <div class="admin-layout">
+          <article class="admin-panel reveal">
+            <h2 class="card-title">Create / Edit Event</h2>
+            <p class="card-subtitle">Publish premium listings with ticket inventory controls.</p>
+
+            <form id="adminEventForm" class="form-grid" novalidate>
+              <div class="full">
+                <label class="filter-label" for="adminEventTitle">Event Name</label>
+                <input class="form-input" id="adminEventTitle" required />
+              </div>
+
+              <div>
+                <label class="filter-label" for="adminEventCategory">Category</label>
+                <select class="form-select" id="adminEventCategory" required></select>
+              </div>
+
+              <div>
+                <label class="filter-label" for="adminEventClub">Club</label>
+                <select class="form-select" id="adminEventClub" required></select>
+              </div>
+
+              <div>
+                <label class="filter-label" for="adminEventDate">Date</label>
+                <input class="form-input" id="adminEventDate" type="date" required />
+              </div>
+
+              <div>
+                <label class="filter-label" for="adminEventTime">Time</label>
+                <input class="form-input" id="adminEventTime" placeholder="6:00 PM - 9:00 PM" required />
+              </div>
+
+              <div>
+                <label class="filter-label" for="adminEventVenue">Venue</label>
+                <input class="form-input" id="adminEventVenue" required />
+              </div>
+
+              <div>
+                <label class="filter-label" for="adminEventMode">Mode</label>
+                <select class="form-select" id="adminEventMode" required>
+                  <option value="offline">Offline</option>
+                  <option value="online">Online</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="filter-label" for="adminEventPrice">Ticket Price</label>
+                <input class="form-input" id="adminEventPrice" type="number" min="0" value="0" />
+              </div>
+
+              <div>
+                <label class="filter-label" for="adminEventSeats">Ticket Inventory</label>
+                <input class="form-input" id="adminEventSeats" type="number" min="1" value="200" />
+              </div>
+
+              <div>
+                <label class="filter-label" for="adminBannerUrl">Banner URL</label>
+                <input class="form-input" id="adminBannerUrl" placeholder="https://..." />
+              </div>
+
+              <div>
+                <label class="filter-label" for="adminPosterUrl">Poster URL</label>
+                <input class="form-input" id="adminPosterUrl" placeholder="https://..." />
+              </div>
+
+              <div class="full">
+                <label class="filter-label" for="adminEventDesc">Event Description</label>
+                <textarea class="form-textarea" id="adminEventDesc" required></textarea>
+              </div>
+
+              <div class="full" style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap">
+                <button class="btn-secondary" id="saveDraftBtn" type="button">Save Draft</button>
+                <button class="btn-primary" id="publishEventBtn" type="submit">Publish Event</button>
+                <span class="muted" id="publishStatus">No drafts created yet.</span>
+              </div>
+            </form>
+          </article>
+
+          <article class="admin-panel reveal">
+            <h2 class="card-title">Registrations & Attendees</h2>
+            <p class="card-subtitle">Manage attendees and export operational sheets.</p>
+
+            <div class="table-shell">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Booking Code</th>
+                    <th>Student</th>
+                    <th>Event</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="attendeeTableBody"></tbody>
+              </table>
+            </div>
+
+            <div style="margin-top: 0.8rem; display: flex; gap: 0.6rem; flex-wrap: wrap">
+              <button class="btn-primary" id="exportAttendeesBtn" type="button">Export Attendees CSV</button>
+              <button class="btn-secondary" id="refreshAttendeesBtn" type="button">Refresh</button>
+            </div>
+
+            <h3 style="margin-top: 1rem">Ticket Inventory Control</h3>
+            <div class="list-stack" id="inventoryList"></div>
+
+            <h3 style="margin-top: 1rem">QR Check-In Scanner</h3>
+            <input class="form-input" id="scanInput" placeholder="Enter / scan booking code" />
+            <div class="scan-box" id="scanResult">Awaiting booking code...</div>
+          </article>
+        </div>
+
+        <div class="container" style="margin-top: 1rem">
+          <article class="admin-panel reveal">
+            <h2 class="card-title">Event Visibility Control</h2>
+            <p class="card-subtitle">Publish or unpublish events in one click.</p>
+            <div class="list-stack" id="publishList"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

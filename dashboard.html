@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard | NM District</title>
+    <meta name="description" content="Premium NM student dashboard for upcoming events, tickets, rewards, and payments." />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script defer src="assets/js/data.js"></script>
+    <script defer src="assets/js/main.js"></script>
+    <script defer src="assets/js/dashboard.js"></script>
+  </head>
+  <body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <header class="floating-nav" id="floatingNav">
+      <div class="nav-inner">
+        <a class="brand" href="index.html" aria-label="NM District home">
+          <span class="brand-logo">NM</span>
+          <span>NM District</span>
+        </a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a class="nav-link" data-nav-link href="index.html">Home</a>
+          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
+          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
+          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
+          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
+          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
+        </nav>
+        <div class="nav-actions">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
+          <a class="btn-inline" href="explore.html">Discover More</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="dashboard-hero reveal">
+        <p class="eyebrow">Student Command Center</p>
+        <h1 class="page-title" style="font-size: clamp(1.9rem, 5vw, 3rem)">Welcome back, NM Student</h1>
+        <p class="page-subtitle">Track your events, passes, rewards, and account settings in one polished experience.</p>
+      </section>
+
+      <section class="section" style="padding-top: 1rem">
+        <div class="container metric-grid reveal">
+          <article class="metric-tile">
+            <div class="analytics-label">Upcoming Events</div>
+            <div class="analytics-value" id="upcomingCount">0</div>
+          </article>
+          <article class="metric-tile">
+            <div class="analytics-label">Saved Events</div>
+            <div class="analytics-value" id="savedCount">0</div>
+          </article>
+          <article class="metric-tile">
+            <div class="analytics-label">Referral Rewards</div>
+            <div class="analytics-value" id="rewardCount">₹0</div>
+          </article>
+          <article class="metric-tile">
+            <div class="analytics-label">Profile Completion</div>
+            <div class="analytics-value" id="profileCompletionValue">0%</div>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="dashboard-card reveal">
+            <h2 class="card-title">My Events</h2>
+            <p class="card-subtitle">Upcoming and past registrations</p>
+            <div class="inline-tabs" id="eventTabs">
+              <button class="tab-btn active" data-tab="upcoming" type="button">Upcoming</button>
+              <button class="tab-btn" data-tab="past" type="button">Past</button>
+            </div>
+            <div class="list-stack" id="dashboardEventList"></div>
+          </article>
+
+          <article class="dashboard-card reveal">
+            <h2 class="card-title">Student Profile</h2>
+            <p class="card-subtitle">Linked credentials and profile quality</p>
+
+            <div class="profile-progress">
+              <div class="summary-line">
+                <span>Completion</span>
+                <span id="profileCompletionText">0%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="profileProgressFill" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="list-stack" style="margin-top: 0.85rem">
+              <div class="list-item">Linked Student ID: <strong id="linkedStudentId">NM-2026-2184</strong></div>
+              <div class="list-item">Program: <strong>B.Com · Semester IV</strong></div>
+              <div class="list-item">Preferred Interests: <strong>Fests, Finance, Networking</strong></div>
+            </div>
+
+            <h3 style="margin-top: 0.95rem">Settings</h3>
+            <div class="list-stack">
+              <div class="list-item">Notification Preference: <strong>Instant Push + Email</strong></div>
+              <div class="list-item">Theme: <strong>Synced with top-right toggle</strong></div>
+              <div class="list-item">Security: <strong>2-step verification enabled</strong></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="dashboard-grid" style="margin-top: 1rem">
+          <article class="dashboard-card reveal">
+            <h2 class="card-title">Saved Events</h2>
+            <p class="card-subtitle">Your curated watchlist</p>
+            <div class="list-stack" id="savedEventsList"></div>
+          </article>
+
+          <article class="dashboard-card reveal">
+            <h2 class="card-title">Notifications</h2>
+            <p class="card-subtitle">Latest alerts and updates</p>
+            <div class="list-stack" id="notificationList"></div>
+          </article>
+        </div>
+
+        <div class="dashboard-grid" style="margin-top: 1rem">
+          <article class="dashboard-card reveal">
+            <h2 class="card-title">Payment History</h2>
+            <p class="card-subtitle">All booking transactions and statuses</p>
+            <div class="table-shell">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Booking</th>
+                    <th>Event</th>
+                    <th>Amount</th>
+                    <th>Payment</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="paymentHistoryBody"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="dashboard-card reveal">
+            <h2 class="card-title">Tickets & Downloads</h2>
+            <p class="card-subtitle">Access your active QR passes</p>
+            <div class="list-stack" id="downloadTicketsList"></div>
+
+            <h3 style="margin-top: 1rem">Referral Rewards</h3>
+            <div class="list-stack">
+              <div class="list-item">Reward Balance: <strong id="rewardBalance">₹0</strong></div>
+              <div class="list-item">Successful Referrals: <strong id="referralCount">0</strong></div>
+              <div class="list-item">Next Milestone: <strong>Refer 2 friends for ₹250 bonus</strong></div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
