@@ -9,6 +9,7 @@
   const CAMPUS_RECENT_KEY = "nm-recent-campuses";
   const SHARED_EVENT_TRANSITION_KEY = "nm-shared-event-transition";
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let pushToast = () => {};
 
   const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -549,6 +550,8 @@
         const eventId = saveBtn.getAttribute("data-save-event");
         toggleSavedEvent(eventId);
         syncSaveButtonStates();
+        const isSaved = isSavedEvent(eventId);
+        pushToast(isSaved ? "Added to your saved events" : "Removed from your saved events");
         saveBtn.classList.add("heart-pop");
         window.setTimeout(() => {
           saveBtn.classList.remove("heart-pop");
@@ -569,6 +572,7 @@
         if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
           await navigator.clipboard.writeText(shareUrl);
           shareBtn.textContent = "✓";
+          pushToast("Event link copied to clipboard");
           window.setTimeout(() => {
             shareBtn.textContent = "↗";
           }, 1000);
@@ -1246,6 +1250,7 @@
       if (message) {
         message.textContent = "Subscribed. You will receive NM premium event drops first.";
       }
+      pushToast("You are on the priority drop list");
       form.reset();
     });
   };
@@ -1777,7 +1782,6 @@
         const opacity = item.alpha * opacityRamp * scrollFade;
 
         item.element.style.opacity = `${opacity.toFixed(3)}`;
-        item.element.style.filter = `blur(${(item.blur + scrollProgress * 2.1).toFixed(2)}px)`;
         item.element.style.transform = `translate3d(calc(-50% + ${(x + mouseCurrentX * item.parallax * 0.08).toFixed(2)}px), calc(-50% + ${(y + mouseCurrentY * item.parallax * 0.08).toFixed(2)}px), 0) rotate(${rotation.toFixed(2)}deg) scale(${item.scale.toFixed(3)})`;
       });
 
@@ -2010,6 +2014,270 @@
     window.addEventListener("resize", queueUpdate);
   };
 
+  const initAccessibilityScaffold = () => {
+    const main = document.querySelector("main");
+    if (main && !main.id) {
+      main.id = "mainContent";
+    }
+
+    if (main && !document.querySelector(".skip-to-content")) {
+      const skip = document.createElement("a");
+      skip.className = "skip-to-content";
+      skip.href = `#${main.id}`;
+      skip.textContent = "Skip to content";
+      document.body.prepend(skip);
+    }
+
+    const activeLink = document.querySelector("[data-nav-link].active");
+    if (activeLink) {
+      activeLink.setAttribute("aria-current", "page");
+    }
+  };
+
+  const initGlobalToastSystem = () => {
+    const container = document.createElement("div");
+    container.className = "global-toast-stack";
+    container.setAttribute("aria-live", "polite");
+    container.setAttribute("aria-atomic", "true");
+    document.body.appendChild(container);
+
+    pushToast = (message, duration = 2200) => {
+      if (!message) {
+        return;
+      }
+
+      const toast = document.createElement("div");
+      toast.className = "global-toast";
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.add("visible");
+      });
+
+      window.setTimeout(() => {
+        toast.classList.remove("visible");
+        window.setTimeout(() => {
+          toast.remove();
+        }, 260);
+      }, duration);
+    };
+  };
+
+  const initScrollProgressBar = () => {
+    const line = document.createElement("div");
+    line.className = "scroll-progress-line";
+    document.body.appendChild(line);
+
+    const update = () => {
+      const doc = document.documentElement;
+      const total = Math.max(1, doc.scrollHeight - doc.clientHeight);
+      const progress = clamp(window.scrollY / total, 0, 1);
+      line.style.setProperty("--progress", progress.toFixed(4));
+    };
+
+    let ticking = false;
+    const queue = () => {
+      if (ticking) {
+        return;
+      }
+      ticking = true;
+      requestAnimationFrame(() => {
+        update();
+        ticking = false;
+      });
+    };
+
+    update();
+    window.addEventListener("scroll", queue, { passive: true });
+    window.addEventListener("resize", queue);
+  };
+
+  const initBackToTopControl = () => {
+    const button = document.createElement("button");
+    button.className = "back-to-top-btn";
+    button.type = "button";
+    button.textContent = "↑";
+    button.setAttribute("aria-label", "Back to top");
+    document.body.appendChild(button);
+
+    const update = () => {
+      button.classList.toggle("visible", window.scrollY > 540);
+    };
+
+    button.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: prefersReducedMotion ? "auto" : "smooth"
+      });
+    });
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+  };
+
+  const initMobileNavigationDrawer = () => {
+    const nav = document.getElementById("floatingNav");
+    const navRoot = nav?.querySelector(".nav-links");
+    const navActions = nav?.querySelector(".nav-actions");
+    if (!navRoot || !navActions) {
+      return;
+    }
+
+    if (navActions.querySelector(".mobile-menu-toggle")) {
+      return;
+    }
+
+    const links = Array.from(navRoot.querySelectorAll("a"));
+    if (!links.length) {
+      return;
+    }
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "icon-btn mobile-menu-toggle";
+    toggle.setAttribute("aria-label", "Open navigation menu");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.setAttribute("aria-controls", "mobileNavDrawer");
+    toggle.innerHTML = "☰";
+    navActions.appendChild(toggle);
+
+    const backdrop = document.createElement("div");
+    backdrop.className = "mobile-nav-drawer-backdrop";
+    backdrop.setAttribute("hidden", "");
+    backdrop.innerHTML = `
+      <aside class="mobile-nav-drawer" id="mobileNavDrawer" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+        <div class="mobile-nav-head">
+          <a class="brand" href="index.html" aria-label="NM District home">
+            <span class="brand-logo">NM</span>
+            <span>NM District</span>
+          </a>
+          <button class="icon-btn mobile-nav-close" type="button" aria-label="Close navigation">✕</button>
+        </div>
+        <nav class="mobile-nav-links" aria-label="Mobile main navigation">
+          ${links
+            .map((link) => {
+              const active = link.classList.contains("active") ? "active" : "";
+              const href = link.getAttribute("href") || "#";
+              return `<a class="mobile-nav-link ${active}" href="${href}">${link.textContent?.trim() || "Link"}</a>`;
+            })
+            .join("")}
+        </nav>
+      </aside>
+    `;
+    document.body.appendChild(backdrop);
+
+    const closeBtn = backdrop.querySelector(".mobile-nav-close");
+    const drawer = backdrop.querySelector(".mobile-nav-drawer");
+
+    const open = () => {
+      backdrop.hidden = false;
+      requestAnimationFrame(() => {
+        backdrop.classList.add("open");
+      });
+      document.body.classList.add("menu-open");
+      toggle.setAttribute("aria-expanded", "true");
+    };
+
+    const close = () => {
+      backdrop.classList.remove("open");
+      document.body.classList.remove("menu-open");
+      toggle.setAttribute("aria-expanded", "false");
+      window.setTimeout(() => {
+        backdrop.hidden = true;
+      }, 180);
+    };
+
+    toggle.addEventListener("click", () => {
+      if (backdrop.classList.contains("open")) {
+        close();
+      } else {
+        open();
+      }
+    });
+
+    closeBtn?.addEventListener("click", close);
+
+    backdrop.addEventListener("click", (event) => {
+      if (event.target === backdrop) {
+        close();
+      }
+    });
+
+    drawer?.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", close);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && backdrop.classList.contains("open")) {
+        close();
+      }
+    });
+  };
+
+  const initMobileBottomDock = () => {
+    if (document.querySelector(".mobile-bottom-dock")) {
+      return;
+    }
+
+    const path = window.location.pathname.split("/").pop() || "index.html";
+    const items = [
+      { href: "index.html", label: "Home", icon: "⌂" },
+      { href: "explore.html", label: "Explore", icon: "⌕" },
+      { href: "booking.html", label: "Book", icon: "◈" },
+      { href: "dashboard.html", label: "Dashboard", icon: "◎" },
+      { href: "clubs.html", label: "Clubs", icon: "◉" }
+    ];
+
+    const dock = document.createElement("nav");
+    dock.className = "mobile-bottom-dock";
+    dock.setAttribute("aria-label", "Quick mobile navigation");
+    dock.innerHTML = items
+      .map((item) => {
+        const active = path === item.href ? "active" : "";
+        return `
+          <a class="mobile-dock-link ${active}" href="${item.href}">
+            <span class="mobile-dock-icon" aria-hidden="true">${item.icon}</span>
+            <span>${item.label}</span>
+          </a>
+        `;
+      })
+      .join("");
+
+    document.body.appendChild(dock);
+    document.body.classList.add("has-mobile-dock");
+  };
+
+  const initKeyboardShortcuts = () => {
+    const isTypingTarget = (target) => {
+      if (!(target instanceof Element)) {
+        return false;
+      }
+      return Boolean(target.closest("input, textarea, [contenteditable='true'], select"));
+    };
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "/") {
+        return;
+      }
+      if (isTypingTarget(event.target)) {
+        return;
+      }
+
+      const searchTarget = document.querySelector(
+        "#heroFloatingSearchInput, #searchFilter, #clubSearch, #campusSearchInput, input[type='search']"
+      );
+      if (!(searchTarget instanceof HTMLInputElement)) {
+        return;
+      }
+
+      event.preventDefault();
+      searchTarget.focus();
+      searchTarget.select();
+      pushToast("Search is focused. Start typing.", 1600);
+    });
+  };
+
   window.NM_UTILS = {
     ...window.NM_UTILS,
     events: data.events,
@@ -2030,8 +2298,14 @@
   };
 
   markActiveNav();
+  initAccessibilityScaffold();
+  initGlobalToastSystem();
+  initScrollProgressBar();
+  initBackToTopControl();
   initHomeStorySnap();
   initNavUtilities();
+  initMobileNavigationDrawer();
+  initMobileBottomDock();
   initCampusSelector();
   initTheme();
   initFloatingNav();
@@ -2054,6 +2328,7 @@
   initMagneticCTAs();
   initTiltCards();
   initGlobalParallax();
+  initKeyboardShortcuts();
   rehydrateDynamicContent(document);
   initDynamicMotionObserver();
 
