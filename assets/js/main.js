@@ -1205,6 +1205,7 @@
       return;
     }
     root.innerHTML = events.map((eventItem) => createEventCardHTML(eventItem, options)).join("");
+    rehydrateDynamicContent(root);
   };
 
   const autoScrollTrack = (track) => {
@@ -1390,6 +1391,7 @@
       const markLoaded = () => {
         img.classList.remove("media-pending");
         img.classList.add("media-loaded");
+        shell?.classList.add("media-ready");
       };
 
       if (img.complete && img.naturalWidth > 0) {
@@ -1669,6 +1671,12 @@
       }
 
       event.preventDefault();
+      const curtain = document.createElement("div");
+      curtain.className = "page-transition-curtain";
+      document.body.appendChild(curtain);
+      requestAnimationFrame(() => {
+        curtain.classList.add("active");
+      });
       document.body.classList.add("page-transition-out");
       window.setTimeout(() => {
         window.location.href = href;
@@ -1830,17 +1838,27 @@
     createEventCardHTML
   };
 
+  window.NM_MOTION = {
+    rehydrateDynamicContent
+  };
+
   markActiveNav();
+  initHomeStorySnap();
   initNavUtilities();
   initCampusSelector();
   initTheme();
   initFloatingNav();
   initCursorGlow();
   initRevealAnimations();
+  initNarrativeMotion();
+  initSectionStoryState();
   initCounters();
   initSaveButtons();
+  initCardToEventTransitions();
+  initSharedEventEntranceTransition();
   initHeroSearch();
   initHeroParallax();
+  initDistrictHeroCinematics();
   initHomepage();
   initFeaturedCarousel();
   initTestimonialCarousel();
@@ -1848,6 +1866,9 @@
   initRippleButtons();
   initMagneticCTAs();
   initTiltCards();
+  initGlobalParallax();
+  rehydrateDynamicContent(document);
+  initDynamicMotionObserver();
 
   window.requestAnimationFrame(() => {
     document.body.classList.add("is-ready");
