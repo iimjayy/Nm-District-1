@@ -549,6 +549,10 @@
         const eventId = saveBtn.getAttribute("data-save-event");
         toggleSavedEvent(eventId);
         syncSaveButtonStates();
+        saveBtn.classList.add("heart-pop");
+        window.setTimeout(() => {
+          saveBtn.classList.remove("heart-pop");
+        }, 360);
         return;
       }
 
@@ -1261,34 +1265,554 @@
     });
   };
 
-  const initMagneticCTAs = () => {
-    const targets = document.querySelectorAll(".btn-primary, .btn-secondary");
+  const collectElements = (scope, selector) => {
+    if (!(scope instanceof Element || scope instanceof Document)) {
+      return [];
+    }
+    const collected = Array.from(scope.querySelectorAll(selector));
+    if (scope instanceof Element && scope.matches(selector)) {
+      collected.unshift(scope);
+    }
+    return collected;
+  };
+
+  let observeNarrativeTargets = () => {};
+
+  const registerCinematicNodes = (scope = document) => {
+    const cinematicTargets = collectElements(
+      scope,
+      ".reveal, .event-card, .club-card, .featured-person-card, .floating-cta-card, .agenda-item, .person-card, .review-card, .ticket-option, .list-item, .analytics-tile, .metric-tile, .gallery-card, .suggestion-card, .rail-category-card"
+    );
+
+    cinematicTargets.forEach((item) => {
+      item.classList.add("cinematic-reveal");
+      if (!item.style.getPropertyValue("--reveal-delay")) {
+        item.style.setProperty("--reveal-delay", "0s");
+      }
+    });
+
+    collectElements(scope, ".section-head").forEach((head) => {
+      Array.from(head.children).forEach((child, index) => {
+        child.classList.add("cinematic-reveal");
+        if (!child.dataset.motionDelay) {
+          child.style.setProperty("--reveal-delay", `${(index * 0.08).toFixed(2)}s`);
+          child.dataset.motionDelay = "1";
+        }
+      });
+    });
+
+    const staggerGroups = collectElements(
+      scope,
+      ".district-event-grid, .events-view, .club-grid, .similar-grid, .people-grid, .agenda-grid, .review-grid, .featured-people-row, .floating-cta-row, .category-rail, .list-stack, .analytics-grid, .metric-grid, .ticket-option-list, .smart-suggestions, .clubs-directory-grid, .gallery-grid, .gallery-slider-track, .campus-card-grid"
+    );
+
+    staggerGroups.forEach((group) => {
+      const children = Array.from(
+        group.querySelectorAll(
+          ":scope > .event-card, :scope > .club-card, :scope > .featured-person-card, :scope > .floating-cta-card, :scope > .rail-category-card, :scope > .agenda-item, :scope > .person-card, :scope > .review-card, :scope > .ticket-option, :scope > .list-item, :scope > .analytics-tile, :scope > .metric-tile, :scope > .gallery-card, :scope > .suggestion-card, :scope > .campus-card"
+        )
+      );
+
+      children.forEach((item, index) => {
+        item.classList.add("cinematic-reveal");
+        if (!item.dataset.motionDelay) {
+          item.style.setProperty("--reveal-delay", `${(Math.min(index, 12) * 0.075).toFixed(3)}s`);
+          item.dataset.motionDelay = "1";
+        }
+      });
+    });
+  };
+
+  const initNarrativeMotion = () => {
+    registerCinematicNodes(document);
+
+    if (prefersReducedMotion) {
+      collectElements(document, ".cinematic-reveal").forEach((item) => {
+        item.classList.add("is-cinematic-visible", "visible");
+      });
+      observeNarrativeTargets = (scope = document) => {
+        registerCinematicNodes(scope);
+        collectElements(scope, ".cinematic-reveal").forEach((item) => {
+          item.classList.add("is-cinematic-visible", "visible");
+        });
+      };
+      return;
+    }
+
+    const seen = new WeakSet();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            return;
+          }
+          entry.target.classList.add("is-cinematic-visible", "visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        rootMargin: "0px 0px -10% 0px",
+        threshold: 0.16
+      }
+    );
+
+    observeNarrativeTargets = (scope = document) => {
+      registerCinematicNodes(scope);
+      collectElements(scope, ".cinematic-reveal").forEach((item) => {
+        if (seen.has(item)) {
+          return;
+        }
+        seen.add(item);
+        observer.observe(item);
+      });
+    };
+
+    observeNarrativeTargets(document);
+  };
+
+  const initLazyMedia = (scope = document) => {
+    const images = collectElements(scope, "img");
+    images.forEach((img) => {
+      if (!(img instanceof HTMLImageElement) || img.dataset.mediaEnhanced) {
+        return;
+      }
+
+      img.dataset.mediaEnhanced = "1";
+
+      const isHeroCritical = Boolean(img.closest(".district-hero-media, .hero-slide-image-wrap, .hero-media, #eventHeroMedia"));
+      if (!isHeroCritical && !img.getAttribute("loading")) {
+        img.setAttribute("loading", "lazy");
+      }
+
+      const shell = img.closest(".event-media, .gallery-card, .featured-person-card, .club-cover, .hero-slide-image-wrap, .suggestion-card, .preview-modal");
+      shell?.classList.add("media-shell");
+
+      const markLoaded = () => {
+        img.classList.remove("media-pending");
+        img.classList.add("media-loaded");
+      };
+
+      if (img.complete && img.naturalWidth > 0) {
+        markLoaded();
+        return;
+      }
+
+      img.classList.add("media-pending");
+      img.addEventListener("load", markLoaded, { once: true });
+      img.addEventListener("error", markLoaded, { once: true });
+    });
+  };
+
+  const bindMagneticTargets = (scope = document) => {
+    if (prefersReducedMotion) {
+      return;
+    }
+
+    const targets = collectElements(scope, ".btn-primary, .btn-secondary, [data-magnetic]");
     targets.forEach((target) => {
+      if (!(target instanceof HTMLElement) || target.dataset.magneticBound) {
+        return;
+      }
+      target.dataset.magneticBound = "1";
+
+      const strength = target.hasAttribute("data-magnetic") ? 12 : 8;
+
       target.addEventListener("mousemove", (event) => {
         const rect = target.getBoundingClientRect();
         const x = (event.clientX - rect.left - rect.width / 2) / rect.width;
         const y = (event.clientY - rect.top - rect.height / 2) / rect.height;
-        target.style.transform = `translate(${x * 7}px, ${y * 6}px)`;
+        target.style.transform = `translate3d(${(x * strength).toFixed(2)}px, ${(y * (strength * 0.85)).toFixed(2)}px, 0)`;
       });
+
       target.addEventListener("mouseleave", () => {
-        target.style.transform = "translate(0, 0)";
+        target.style.transform = "";
+      });
+    });
+  };
+
+  const initMagneticCTAs = () => {
+    bindMagneticTargets(document);
+  };
+
+  const bindTiltToCards = (scope = document) => {
+    if (prefersReducedMotion) {
+      return;
+    }
+
+    const cards = collectElements(scope, ".event-card, .hero-preview-card, .organizer-card, .rail-category-card");
+    cards.forEach((card) => {
+      if (!(card instanceof HTMLElement) || card.dataset.tiltBound) {
+        return;
+      }
+      card.dataset.tiltBound = "1";
+
+      card.addEventListener("mousemove", (event) => {
+        const rect = card.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - 0.5;
+        const y = (event.clientY - rect.top) / rect.height - 0.5;
+        card.style.transform = `rotateX(${(y * -4.8).toFixed(2)}deg) rotateY(${(x * 6).toFixed(2)}deg) translateY(-4px)`;
+      });
+
+      card.addEventListener("mouseleave", () => {
+        card.style.transform = "";
       });
     });
   };
 
   const initTiltCards = () => {
-    const cards = document.querySelectorAll(".event-card, .hero-preview-card, .organizer-card");
-    cards.forEach((card) => {
-      card.addEventListener("mousemove", (event) => {
-        const rect = card.getBoundingClientRect();
-        const x = (event.clientX - rect.left) / rect.width - 0.5;
-        const y = (event.clientY - rect.top) / rect.height - 0.5;
-        card.style.transform = `rotateX(${y * -5}deg) rotateY(${x * 6}deg) translateY(-3px)`;
-      });
-      card.addEventListener("mouseleave", () => {
-        card.style.transform = "";
+    bindTiltToCards(document);
+  };
+
+  const rehydrateDynamicContent = (scope = document) => {
+    registerCinematicNodes(scope);
+    observeNarrativeTargets(scope);
+    initLazyMedia(scope);
+    bindMagneticTargets(scope);
+    bindTiltToCards(scope);
+  };
+
+  const initDynamicMotionObserver = () => {
+    if (!("MutationObserver" in window)) {
+      return;
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (!(node instanceof Element)) {
+            return;
+          }
+          rehydrateDynamicContent(node);
+        });
       });
     });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  };
+
+  const initHomeStorySnap = () => {
+    const storyMain = document.querySelector("main.story-main");
+    if (!storyMain) {
+      return;
+    }
+
+    document.documentElement.classList.add("home-story-scroll");
+    storyMain.querySelectorAll(":scope > section").forEach((section) => {
+      section.classList.add("story-snap-section");
+    });
+  };
+
+  const initSectionStoryState = () => {
+    const sections = Array.from(document.querySelectorAll("main > section"));
+    if (!sections.length) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          entry.target.classList.toggle("is-story-active", entry.isIntersecting);
+        });
+      },
+      {
+        threshold: 0.4
+      }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+  };
+
+  const initDistrictHeroCinematics = () => {
+    const hero = document.getElementById("districtHero");
+    if (!hero) {
+      return;
+    }
+
+    const searchForm = document.getElementById("heroFloatingSearch");
+    const searchInput = document.getElementById("heroFloatingSearchInput");
+    const particles = document.getElementById("heroParticles");
+
+    if (particles && !particles.children.length && !prefersReducedMotion) {
+      for (let index = 0; index < 22; index += 1) {
+        const piece = document.createElement("span");
+        piece.style.setProperty("--x", `${(Math.random() * 100).toFixed(2)}%`);
+        piece.style.setProperty("--y", `${(Math.random() * 100).toFixed(2)}%`);
+        piece.style.setProperty("--size", `${(Math.random() * 2.4 + 1.4).toFixed(2)}px`);
+        piece.style.setProperty("--duration", `${(Math.random() * 14 + 12).toFixed(2)}s`);
+        piece.style.setProperty("--delay", `${(Math.random() * -12).toFixed(2)}s`);
+        particles.appendChild(piece);
+      }
+    }
+
+    const syncScrollProgress = () => {
+      const rect = hero.getBoundingClientRect();
+      const progress = clamp((0 - rect.top) / Math.max(rect.height * 0.92, 1), 0, 1);
+      hero.style.setProperty("--hero-scroll", progress.toFixed(4));
+    };
+
+    let ticking = false;
+    const queueSync = () => {
+      if (ticking) {
+        return;
+      }
+      ticking = true;
+      requestAnimationFrame(() => {
+        syncScrollProgress();
+        ticking = false;
+      });
+    };
+
+    syncScrollProgress();
+    window.addEventListener("scroll", queueSync, { passive: true });
+    window.addEventListener("resize", queueSync);
+
+    if (!prefersReducedMotion) {
+      hero.addEventListener("mousemove", (event) => {
+        const rect = hero.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - 0.5;
+        const y = (event.clientY - rect.top) / rect.height - 0.5;
+        hero.style.setProperty("--hero-tilt-x", `${(y * -5).toFixed(2)}deg`);
+        hero.style.setProperty("--hero-tilt-y", `${(x * 6).toFixed(2)}deg`);
+        hero.style.setProperty("--hero-pointer-x", `${((x + 0.5) * 100).toFixed(2)}%`);
+        hero.style.setProperty("--hero-pointer-y", `${((y + 0.5) * 100).toFixed(2)}%`);
+      });
+
+      hero.addEventListener("mouseleave", () => {
+        hero.style.setProperty("--hero-tilt-x", "0deg");
+        hero.style.setProperty("--hero-tilt-y", "0deg");
+        hero.style.setProperty("--hero-pointer-x", "50%");
+        hero.style.setProperty("--hero-pointer-y", "50%");
+      });
+    }
+
+    if (searchForm) {
+      searchForm.addEventListener("focusin", () => {
+        searchForm.classList.add("is-focused");
+      });
+
+      searchForm.addEventListener("focusout", () => {
+        searchForm.classList.remove("is-focused");
+      });
+
+      searchForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const value = searchInput?.value.trim() || "";
+        const params = new URLSearchParams();
+        if (value) {
+          params.set("q", value);
+        }
+        window.location.href = `explore.html${params.toString() ? `?${params.toString()}` : ""}`;
+      });
+    }
+  };
+
+  const getEventIdFromHref = (href) => {
+    try {
+      const url = new URL(href, window.location.href);
+      return url.searchParams.get("id");
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const initCardToEventTransitions = () => {
+    document.addEventListener("click", (event) => {
+      const link = event.target.closest("a[href*='event.html']");
+      if (!link) {
+        return;
+      }
+
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        link.target === "_blank" ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const href = link.getAttribute("href");
+      if (!href || !href.includes("event.html")) {
+        return;
+      }
+
+      const card = link.closest(".event-card");
+      if (!card) {
+        return;
+      }
+
+      const image = card.querySelector(".event-media img");
+      const source = image || card;
+      const rect = source.getBoundingClientRect();
+
+      const payload = {
+        eventId: getEventIdFromHref(href) || link.getAttribute("data-event-link") || card.getAttribute("data-event-id"),
+        image: image?.currentSrc || image?.src || "",
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height,
+        radius: parseFloat(window.getComputedStyle(source).borderRadius) || 16,
+        timestamp: Date.now()
+      };
+
+      sessionStorage.setItem(SHARED_EVENT_TRANSITION_KEY, JSON.stringify(payload));
+
+      if (prefersReducedMotion) {
+        return;
+      }
+
+      event.preventDefault();
+      document.body.classList.add("page-transition-out");
+      window.setTimeout(() => {
+        window.location.href = href;
+      }, 150);
+    });
+  };
+
+  const initSharedEventEntranceTransition = () => {
+    const path = window.location.pathname.split("/").pop();
+    if (path !== "event.html") {
+      return;
+    }
+
+    const raw = sessionStorage.getItem(SHARED_EVENT_TRANSITION_KEY);
+    if (!raw) {
+      return;
+    }
+    sessionStorage.removeItem(SHARED_EVENT_TRANSITION_KEY);
+
+    let payload;
+    try {
+      payload = JSON.parse(raw);
+    } catch (error) {
+      return;
+    }
+
+    if (!payload || Date.now() - Number(payload.timestamp || 0) > 8000) {
+      return;
+    }
+
+    const pageEventId = new URLSearchParams(window.location.search).get("id");
+    if (payload.eventId && pageEventId && payload.eventId !== pageEventId) {
+      return;
+    }
+
+    let attempts = 0;
+
+    const tryPlay = () => {
+      const mediaTarget = document.querySelector("#eventHeroMedia img, #eventHeroMedia video");
+      const heroTarget = document.getElementById("eventHero");
+      if (!mediaTarget || !heroTarget) {
+        attempts += 1;
+        if (attempts < 24) {
+          requestAnimationFrame(tryPlay);
+        }
+        return;
+      }
+
+      const targetRect = heroTarget.getBoundingClientRect();
+      if (!targetRect.width || !targetRect.height) {
+        return;
+      }
+
+      const mediaSource =
+        mediaTarget instanceof HTMLVideoElement
+          ? mediaTarget.poster || ""
+          : mediaTarget instanceof HTMLImageElement
+            ? mediaTarget.currentSrc || mediaTarget.src
+            : "";
+
+      if (!payload.image && !mediaSource) {
+        return;
+      }
+
+      const dim = document.createElement("div");
+      dim.className = "shared-element-dim";
+
+      const flyover = document.createElement("img");
+      flyover.className = "shared-element-flyover";
+      flyover.src = payload.image || mediaSource;
+      flyover.alt = "";
+      flyover.style.left = `${payload.x}px`;
+      flyover.style.top = `${payload.y}px`;
+      flyover.style.width = `${payload.width}px`;
+      flyover.style.height = `${payload.height}px`;
+      flyover.style.borderRadius = `${payload.radius || 16}px`;
+
+      document.body.appendChild(dim);
+      document.body.appendChild(flyover);
+
+      if (prefersReducedMotion) {
+        flyover.remove();
+        dim.remove();
+        return;
+      }
+
+      document.body.classList.add("page-transition-in");
+      requestAnimationFrame(() => {
+        flyover.style.left = `${targetRect.left}px`;
+        flyover.style.top = `${targetRect.top}px`;
+        flyover.style.width = `${targetRect.width}px`;
+        flyover.style.height = `${targetRect.height}px`;
+        flyover.style.borderRadius = `${parseFloat(window.getComputedStyle(heroTarget).borderRadius) || 28}px`;
+        dim.style.opacity = "0";
+      });
+
+      window.setTimeout(() => {
+        flyover.remove();
+        dim.remove();
+        document.body.classList.remove("page-transition-in");
+      }, 640);
+    };
+
+    requestAnimationFrame(tryPlay);
+  };
+
+  const initGlobalParallax = () => {
+    if (prefersReducedMotion) {
+      return;
+    }
+
+    const layers = Array.from(document.querySelectorAll(".featured-banner, .floating-cta-card, .dashboard-hero, .admin-hero, .clubs-hero"));
+    if (!layers.length) {
+      return;
+    }
+
+    const update = () => {
+      const viewport = window.innerHeight || 1;
+      layers.forEach((layer, index) => {
+        const rect = layer.getBoundingClientRect();
+        if (rect.bottom < -120 || rect.top > viewport + 120) {
+          return;
+        }
+        const depth = 4 + (index % 3) * 2;
+        const centerShift = (rect.top + rect.height / 2 - viewport / 2) / viewport;
+        layer.style.setProperty("--parallax-y", `${(centerShift * -depth).toFixed(2)}px`);
+      });
+    };
+
+    let ticking = false;
+    const queueUpdate = () => {
+      if (ticking) {
+        return;
+      }
+      ticking = true;
+      requestAnimationFrame(() => {
+        update();
+        ticking = false;
+      });
+    };
+
+    update();
+    window.addEventListener("scroll", queueUpdate, { passive: true });
+    window.addEventListener("resize", queueUpdate);
   };
 
   window.NM_UTILS = {
