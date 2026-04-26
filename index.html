@@ -37,41 +37,95 @@
     </header>
 
     <main class="story-main">
-      <section class="district-hero reveal" id="districtHero">
-        <div class="district-hero-media" aria-hidden="true">
-          <video autoplay muted loop playsinline poster="assets/images/4f7b4ae0986f4a7502e84ba08890af84.jpg">
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-crowd-in-a-concert-3-large.mp4" type="video/mp4" />
-          </video>
-        </div>
-        <div class="hero-cinematic-gradient" aria-hidden="true"></div>
-        <div class="hero-grain-overlay" aria-hidden="true"></div>
-        <div class="hero-particle-layer" id="heroParticles" aria-hidden="true"></div>
-        <div class="hero-glow-palette" id="heroGlowPalette" aria-hidden="true"></div>
+      <section class="district-hero apple-event-hero reveal" id="districtHero">
+        <div class="hero-soft-canvas" aria-hidden="true"></div>
+        <div class="hero-light-ribbon" aria-hidden="true"></div>
+        <div class="hero-burst-layer" id="heroBurstLayer" aria-hidden="true"></div>
+        <div class="hero-floating-elements" id="heroFloatingElements" aria-hidden="true"></div>
+
         <div class="district-hero-shell">
-          <button class="carousel-arrow prev" id="heroPrev" type="button" aria-label="Previous featured event">&#8249;</button>
-          <div class="hero-slide-stage" id="heroSlideStage">
-            <div class="hero-slide-image-wrap">
-              <img id="heroSlideImage" src="assets/images/4f7b4ae0986f4a7502e84ba08890af84.jpg" alt="Featured event visual" />
+          <article class="hero-story-copy" id="heroStoryCopy">
+            <p class="hero-story-eyebrow">NM District Experience</p>
+            <h1 class="hero-story-title hero-entry-item" id="heroStoryTitle">Discover Every Campus Moment</h1>
+            <p class="hero-story-subtext hero-entry-item" id="heroStorySubtext">
+              Festivals, music nights, networking circles, competitions, and workshops flowing together in one cinematic discovery layer.
+            </p>
+            <div class="hero-story-cta-wrap hero-entry-item">
+              <a class="btn-primary hero-main-cta magnetic-target" data-magnetic id="heroPrimaryCta" href="explore.html">Explore Events</a>
             </div>
-            <article class="hero-slide-content glass-panel">
-              <p class="eyebrow" id="heroSlideType">Featured Event</p>
-              <h1 id="heroSlideTitle">Loading featured events...</h1>
-              <p class="hero-subtitle" id="heroSlideSummary"></p>
-              <div class="hero-slide-meta" id="heroSlideMeta"></div>
-              <form class="hero-floating-search" id="heroFloatingSearch" aria-label="Search for events">
-                <span class="hero-search-icon" aria-hidden="true">⌕</span>
-                <input id="heroFloatingSearchInput" type="search" placeholder="Search fests, workshops, creators, speakers" />
-                <button class="btn-primary hero-search-btn magnetic-target" data-magnetic type="submit">Discover</button>
-              </form>
-              <div class="hero-cta">
-                <a class="btn-primary magnetic-target" data-magnetic id="heroPrimaryCta" href="explore.html">Book Pass</a>
-                <a class="btn-secondary" id="heroSecondaryCta" href="event.html">View Details</a>
-              </div>
-            </article>
+          </article>
+
+          <div class="event-core-stage" id="eventCoreStage" aria-hidden="true">
+            <svg class="event-core-svg" id="eventCoreSvg" viewBox="0 0 420 420" role="img" aria-label="Animated event ecosystem composition">
+              <defs>
+                <linearGradient id="coreHubGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#ffb664" />
+                  <stop offset="52%" stop-color="#ff6992" />
+                  <stop offset="100%" stop-color="#a977ff" />
+                </linearGradient>
+                <linearGradient id="coreInnerGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#fff7cf" />
+                  <stop offset="100%" stop-color="#fff1de" />
+                </linearGradient>
+                <linearGradient id="coreLineGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#ffb35f" />
+                  <stop offset="45%" stop-color="#ff6f95" />
+                  <stop offset="100%" stop-color="#956fff" />
+                </linearGradient>
+              </defs>
+
+              <g class="core-rings">
+                <circle class="core-ring ring-outer" cx="210" cy="210" r="140"></circle>
+                <circle class="core-ring ring-mid" cx="210" cy="210" r="102"></circle>
+              </g>
+
+              <g class="core-links">
+                <path data-core-line pathLength="100" d="M210 210 Q156 158 97 130"></path>
+                <path data-core-line pathLength="100" d="M210 210 Q252 160 319 132"></path>
+                <path data-core-line pathLength="100" d="M210 210 Q143 232 108 291"></path>
+                <path data-core-line pathLength="100" d="M210 210 Q280 236 327 276"></path>
+                <path data-core-line pathLength="100" d="M210 210 Q212 288 210 332"></path>
+                <path data-core-line pathLength="100" d="M210 210 Q302 196 342 210"></path>
+              </g>
+
+              <g class="core-hub">
+                <circle class="hub-shell" cx="210" cy="210" r="64"></circle>
+                <circle class="hub-inner" cx="210" cy="210" r="34"></circle>
+                <text x="210" y="218" text-anchor="middle">NM</text>
+              </g>
+
+              <g class="core-node node-music" data-core-node style="--node-offset-x: -32px; --node-offset-y: 26px; --node-rot: -16deg" transform="translate(97 130)">
+                <circle cx="0" cy="0" r="30"></circle>
+                <path d="M7 -11v15.2a6 6 0 1 1-2.6-5V-9L-8 -6.2v14.4a6 6 0 1 1-2.6-5v-12L7 -13z"></path>
+              </g>
+
+              <g class="core-node node-mic" data-core-node style="--node-offset-x: 29px; --node-offset-y: 28px; --node-rot: 15deg" transform="translate(318 133)">
+                <circle cx="0" cy="0" r="30"></circle>
+                <path d="M0 -13v16M-5 -14a5 5 0 0 1 10 0v9a5 5 0 0 1-10 0zM-10 -3a10 10 0 0 0 20 0M0 8v5M-6 13h12"></path>
+              </g>
+
+              <g class="core-node node-trophy" data-core-node style="--node-offset-x: -30px; --node-offset-y: -18px; --node-rot: -14deg" transform="translate(108 290)">
+                <circle cx="0" cy="0" r="30"></circle>
+                <path d="M-8 -10h16v4a8 8 0 0 1-16 0zM-6 6h12M-4 11h8M-11 -9h-4a4 4 0 0 0 4 4M11 -9h4a4 4 0 0 1-4 4"></path>
+              </g>
+
+              <g class="core-node node-ticket" data-core-node style="--node-offset-x: 26px; --node-offset-y: -14px; --node-rot: 14deg" transform="translate(326 276)">
+                <circle cx="0" cy="0" r="30"></circle>
+                <path d="M-12 -8h24a2 2 0 0 1 2 2v2.2a3.3 3.3 0 0 0 0 6.5V5a2 2 0 0 1-2 2h-24a2 2 0 0 1-2-2V2.7a3.3 3.3 0 0 0 0-6.5V-6a2 2 0 0 1 2-2zM1 -8V8"></path>
+              </g>
+
+              <g class="core-node node-people" data-core-node style="--node-offset-x: 0px; --node-offset-y: -24px; --node-rot: -8deg" transform="translate(210 332)">
+                <circle cx="0" cy="0" r="30"></circle>
+                <path d="M-6 -3a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM8 -3a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4zM-14 9c1-4.1 4.2-6.5 8-6.5s7 2.4 8 6.5M2 9c.8-3.1 3.2-5 6.1-5 2.5 0 4.6 1.4 5.8 3.8"></path>
+              </g>
+
+              <g class="core-node node-workshop" data-core-node style="--node-offset-x: 24px; --node-offset-y: 4px; --node-rot: 10deg" transform="translate(343 210)">
+                <circle cx="0" cy="0" r="30"></circle>
+                <path d="M0 -13a7.6 7.6 0 0 1 4.3 13.9V4h-8.6V0.9A7.6 7.6 0 0 1 0 -13zM-4 9h8M-3 13h6"></path>
+              </g>
+            </svg>
           </div>
-          <button class="carousel-arrow next" id="heroNext" type="button" aria-label="Next featured event">&#8250;</button>
         </div>
-        <div class="hero-carousel-dots" id="heroDots" aria-label="Featured event slides"></div>
       </section>
 
       <section class="section container">

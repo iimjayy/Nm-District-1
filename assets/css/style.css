@@ -4455,3 +4455,381 @@ img.media-loaded {
     display: none !important;
   }
 }
+
+/* Apple-style event hero timeline */
+.district-hero.apple-event-hero {
+  --hero-scroll: 0;
+  --hero-parallax-x: 0px;
+  --hero-parallax-y: 0px;
+  --hero-float-fade: 1;
+  --hero-pointer-x: 50%;
+  --hero-pointer-y: 50%;
+  width: min(1260px, calc(100% - 1.5rem));
+  min-height: clamp(620px, 88vh, 920px);
+  border-radius: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.84);
+  background: linear-gradient(145deg, #fffaf4 0%, #fff6fa 36%, #f9f4ff 70%, #fff8eb 100%);
+  box-shadow: 0 44px 100px rgba(203, 136, 105, 0.24), 0 20px 52px rgba(141, 102, 190, 0.18);
+  color: #2f2441;
+  perspective: 1200px;
+}
+
+[data-theme="dark"] .district-hero.apple-event-hero {
+  border-color: rgba(255, 255, 255, 0.76);
+}
+
+.apple-event-hero .hero-soft-canvas,
+.apple-event-hero .hero-light-ribbon,
+.apple-event-hero .hero-burst-layer,
+.apple-event-hero .hero-floating-elements {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.apple-event-hero .hero-soft-canvas {
+  z-index: 0;
+  background:
+    radial-gradient(circle at 16% 26%, rgba(255, 201, 116, 0.35), transparent 42%),
+    radial-gradient(circle at 80% 12%, rgba(255, 117, 156, 0.3), transparent 40%),
+    radial-gradient(circle at 76% 78%, rgba(167, 129, 255, 0.32), transparent 44%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0.12));
+}
+
+.apple-event-hero .hero-light-ribbon {
+  z-index: 1;
+  mix-blend-mode: multiply;
+  opacity: 0.75;
+  background:
+    radial-gradient(circle at var(--hero-pointer-x) var(--hero-pointer-y), rgba(255, 191, 131, 0.38), transparent 42%),
+    radial-gradient(circle at 70% 30%, rgba(255, 119, 163, 0.24), transparent 35%),
+    radial-gradient(circle at 35% 78%, rgba(153, 110, 255, 0.26), transparent 40%);
+  transition: background 0.25s ease;
+}
+
+.apple-event-hero .hero-burst-layer {
+  z-index: 2;
+  opacity: 0;
+  background: radial-gradient(circle at var(--hero-pointer-x) var(--hero-pointer-y), rgba(255, 211, 149, 0.58), rgba(255, 136, 169, 0.34), transparent 62%);
+}
+
+.apple-event-hero.is-bursting .hero-burst-layer {
+  animation: hero-signature-burst 1.02s var(--ease-cinematic) forwards;
+}
+
+@keyframes hero-signature-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.36);
+  }
+
+  38% {
+    opacity: 0.76;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(2.35);
+  }
+}
+
+.apple-event-hero .hero-floating-elements {
+  z-index: 2;
+  opacity: var(--hero-float-fade);
+}
+
+.apple-event-hero .district-hero-shell {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1fr);
+  align-items: center;
+  gap: clamp(1rem, 3.6vw, 2.6rem);
+  min-height: inherit;
+  padding: clamp(1.2rem, 3.4vw, 2.4rem);
+  transform: translate3d(0, calc(var(--hero-scroll) * -36px), 0);
+  transition: transform 0.65s var(--ease-cinematic);
+}
+
+.apple-event-hero .hero-story-copy {
+  position: relative;
+  max-width: 35rem;
+  opacity: calc(1 - (var(--hero-scroll) * 1.14));
+  transform: translate3d(calc(var(--hero-parallax-x) * 0.22), calc(var(--hero-parallax-y) * 0.2), 0);
+  transition: opacity 0.45s linear, transform 0.65s var(--ease-cinematic);
+}
+
+.apple-event-hero .hero-story-eyebrow {
+  margin: 0 0 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.34rem 0.72rem;
+  border: 1px solid rgba(86, 58, 126, 0.2);
+  background: rgba(255, 255, 255, 0.66);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  color: rgba(79, 49, 120, 0.86);
+}
+
+.apple-event-hero .hero-story-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 5.9vw, 4.1rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: #2c2140;
+}
+
+.apple-event-hero .hero-story-subtext {
+  margin: 1rem 0 0;
+  max-width: 54ch;
+  color: rgba(59, 43, 86, 0.84);
+  font-size: clamp(0.97rem, 1.6vw, 1.12rem);
+}
+
+.apple-event-hero .hero-story-cta-wrap {
+  margin-top: 1.15rem;
+}
+
+.apple-event-hero .hero-main-cta {
+  min-width: 172px;
+  border: 0;
+  color: #ffffff;
+  background: linear-gradient(130deg, #ffac62 0%, #ff6f91 43%, #a675ff 82%, #ffd272 100%);
+  box-shadow: 0 18px 38px rgba(210, 111, 132, 0.34);
+}
+
+.apple-event-hero .hero-main-cta:hover {
+  box-shadow: 0 24px 46px rgba(196, 95, 135, 0.42), 0 0 0 1px rgba(255, 255, 255, 0.28) inset;
+}
+
+.apple-event-hero .hero-entry-item {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0) scale(0.986);
+  filter: blur(10px);
+  transition: transform 0.86s var(--ease-cinematic), opacity 0.8s var(--ease-cinematic), filter 0.8s var(--ease-cinematic);
+}
+
+.apple-event-hero .hero-entry-item.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: blur(0);
+}
+
+.apple-event-hero .event-core-stage {
+  width: min(500px, 48vw);
+  aspect-ratio: 1;
+  justify-self: center;
+  opacity: 0;
+  transform: translate3d(0, 16px, 0) scale(0.95);
+  transition: transform 0.9s var(--ease-cinematic), opacity 0.9s var(--ease-cinematic), filter 0.9s var(--ease-cinematic);
+  filter: drop-shadow(0 26px 48px rgba(184, 105, 156, 0.24));
+}
+
+.apple-event-hero .event-core-stage.is-visible {
+  opacity: 1;
+  transform: translate3d(calc(var(--hero-parallax-x) * 0.55), calc(var(--hero-parallax-y) * 0.55), 0) scale(1);
+}
+
+.apple-event-hero.phase-floating .event-core-stage.is-visible {
+  transform: translate3d(calc(var(--hero-parallax-x) * 0.76), calc(var(--hero-parallax-y) * 0.74), 0) scale(0.94);
+}
+
+.apple-event-hero .event-core-stage.is-pulse {
+  animation: core-pulse-signature 0.84s var(--ease-spring);
+}
+
+.apple-event-hero .event-core-stage.is-burst {
+  opacity: 0.24;
+  transform: translate3d(calc(var(--hero-parallax-x) * 0.76), calc(var(--hero-parallax-y) * 0.74), 0) scale(0.74);
+}
+
+@keyframes core-pulse-signature {
+  0% {
+    transform: translate3d(calc(var(--hero-parallax-x) * 0.55), calc(var(--hero-parallax-y) * 0.55), 0) scale(1);
+  }
+
+  45% {
+    transform: translate3d(calc(var(--hero-parallax-x) * 0.55), calc(var(--hero-parallax-y) * 0.55), 0) scale(1.062);
+  }
+
+  100% {
+    transform: translate3d(calc(var(--hero-parallax-x) * 0.55), calc(var(--hero-parallax-y) * 0.55), 0) scale(1);
+  }
+}
+
+.apple-event-hero .event-core-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.apple-event-hero .core-ring {
+  fill: none;
+  stroke-width: 1.6;
+  stroke: rgba(167, 117, 255, 0.28);
+}
+
+.apple-event-hero .ring-mid {
+  stroke: rgba(255, 130, 160, 0.28);
+}
+
+.apple-event-hero .hub-shell {
+  fill: url(#coreHubGrad);
+}
+
+.apple-event-hero .hub-inner {
+  fill: url(#coreInnerGrad);
+  opacity: 0.88;
+}
+
+.apple-event-hero .core-hub text {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  fill: #ffffff;
+}
+
+.apple-event-hero [data-core-line] {
+  fill: none;
+  stroke: url(#coreLineGrad);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  opacity: 0;
+  transition: stroke-dashoffset 0.84s var(--ease-cinematic), opacity 0.4s ease;
+}
+
+.apple-event-hero [data-core-line].is-built {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+.apple-event-hero [data-core-node] {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: translate(var(--node-offset-x), var(--node-offset-y)) rotate(var(--node-rot)) scale(0.72);
+  transition: transform 0.74s var(--ease-spring), opacity 0.52s ease;
+}
+
+.apple-event-hero [data-core-node].is-built {
+  opacity: 1;
+  transform: translate(0, 0) rotate(0deg) scale(1);
+}
+
+.apple-event-hero [data-core-node] circle {
+  fill: rgba(255, 255, 255, 0.62);
+  stroke: rgba(151, 106, 224, 0.24);
+  stroke-width: 1.5;
+}
+
+.apple-event-hero [data-core-node] path {
+  fill: none;
+  stroke: #593e82;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.apple-event-hero .hero-floating-item {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--size, 32px);
+  height: var(--size, 32px);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.5));
+  box-shadow: 0 10px 20px rgba(143, 88, 169, 0.18);
+  color: #74459a;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: translate3d(-50%, -50%, 0);
+  will-change: transform, opacity, filter;
+}
+
+.apple-event-hero .hero-floating-item svg {
+  width: 62%;
+  height: 62%;
+}
+
+.apple-event-hero .hero-floating-item path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.apple-event-hero .hero-floating-item.depth-0 {
+  color: #6e3f94;
+}
+
+.apple-event-hero .hero-floating-item.depth-1 {
+  color: #9150a5;
+  opacity: 0.8;
+}
+
+.apple-event-hero .hero-floating-item.depth-2 {
+  color: #a573be;
+  opacity: 0.65;
+}
+
+@media (max-width: 1080px) {
+  .apple-event-hero .district-hero-shell {
+    grid-template-columns: 1fr;
+    text-align: center;
+    justify-items: center;
+  }
+
+  .apple-event-hero .hero-story-copy {
+    max-width: 40rem;
+  }
+
+  .apple-event-hero .event-core-stage {
+    width: min(500px, 70vw);
+  }
+}
+
+@media (max-width: 760px) {
+  .district-hero.apple-event-hero {
+    min-height: clamp(560px, 82vh, 760px);
+    border-radius: 28px;
+  }
+
+  .apple-event-hero .district-hero-shell {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .apple-event-hero .hero-story-title {
+    font-size: clamp(1.8rem, 8.8vw, 2.9rem);
+  }
+
+  .apple-event-hero .hero-story-subtext {
+    font-size: 0.96rem;
+  }
+
+  .apple-event-hero .event-core-stage {
+    width: min(420px, 88vw);
+  }
+
+  .apple-event-hero .hero-main-cta {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apple-event-hero,
+  .apple-event-hero * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

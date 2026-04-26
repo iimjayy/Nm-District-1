@@ -1529,90 +1529,273 @@
 
   const initDistrictHeroCinematics = () => {
     const hero = document.getElementById("districtHero");
-    if (!hero) {
+    if (!hero || !hero.classList.contains("apple-event-hero")) {
       return;
     }
 
-    const searchForm = document.getElementById("heroFloatingSearch");
-    const searchInput = document.getElementById("heroFloatingSearchInput");
-    const particles = document.getElementById("heroParticles");
+    const entryItems = Array.from(hero.querySelectorAll(".hero-entry-item"));
+    const subtext = document.getElementById("heroStorySubtext");
+    const primaryCta = document.getElementById("heroPrimaryCta");
+    const coreStage = document.getElementById("eventCoreStage");
+    const lineNodes = Array.from(hero.querySelectorAll("[data-core-line]"));
+    const iconNodes = Array.from(hero.querySelectorAll("[data-core-node]"));
+    const burstLayer = document.getElementById("heroBurstLayer");
+    const floatingLayer = document.getElementById("heroFloatingElements");
 
-    if (particles && !particles.children.length && !prefersReducedMotion) {
-      for (let index = 0; index < 22; index += 1) {
-        const piece = document.createElement("span");
-        piece.style.setProperty("--x", `${(Math.random() * 100).toFixed(2)}%`);
-        piece.style.setProperty("--y", `${(Math.random() * 100).toFixed(2)}%`);
-        piece.style.setProperty("--size", `${(Math.random() * 2.4 + 1.4).toFixed(2)}px`);
-        piece.style.setProperty("--duration", `${(Math.random() * 14 + 12).toFixed(2)}s`);
-        piece.style.setProperty("--delay", `${(Math.random() * -12).toFixed(2)}s`);
-        particles.appendChild(piece);
-      }
+    if (!coreStage || !burstLayer || !floatingLayer) {
+      return;
     }
 
-    const syncScrollProgress = () => {
+    const featuredEvent = [...data.events].sort((a, b) => b.popularity - a.popularity)[0];
+    if (featuredEvent && primaryCta instanceof HTMLAnchorElement) {
+      primaryCta.href = `explore.html?q=${encodeURIComponent(featuredEvent.category)}`;
+    }
+
+    if (subtext) {
+      subtext.textContent =
+        "From college festivals and music events to networking, competitions, and workshops, discover every scene as one fluid campus story.";
+    }
+
+    const ICON_MARKUP = {
+      note:
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 4v10.8a4.2 4.2 0 1 1-2-3.6V7.2L7.4 9v8.2a4.2 4.2 0 1 1-2-3.6V7.4L16 4z"/></svg>',
+      mic:
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zM6 11a6 6 0 1 0 12 0M12 17v4M8 21h8"/></svg>',
+      trophy:
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v3a5 5 0 0 1-10 0zM9 13h6M10 17h4M5 5H3a3 3 0 0 0 3 3M19 5h2a3 3 0 0 1-3 3"/></svg>',
+      people:
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9a2.8 2.8 0 1 0 0.1 0M16.8 9.7a2.2 2.2 0 1 0 0.1 0M3.8 18c0.8-2.8 2.8-4.4 5.2-4.4 2.5 0 4.5 1.6 5.3 4.4M13.7 18c0.6-2 2.1-3.2 3.9-3.2 1.5 0 2.8 0.8 3.5 2.2"/></svg>',
+      ticket:
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.8h17a1.8 1.8 0 0 1 1.8 1.8v1a2.7 2.7 0 0 0 0 5.3v1a1.8 1.8 0 0 1-1.8 1.8h-17a1.8 1.8 0 0 1-1.8-1.8v-1a2.7 2.7 0 0 0 0-5.3v-1a1.8 1.8 0 0 1 1.8-1.8zM10.7 7.8v10.8"/></svg>',
+      spark:
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6a5.7 5.7 0 0 1 3.2 10.4v2.1H8.8V14A5.7 5.7 0 0 1 12 3.6zM9.3 19h5.4M10.1 21h3.8"/></svg>',
+      light:
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M6.8 5.2l1.8 2.1M17.2 5.2l-1.8 2.1M4 11h3M17 11h3M7.3 17.8l1.8-2.1M16.7 17.8l-1.8-2.1M12 18v3"/></svg>'
+    };
+
+    const iconKeys = Object.keys(ICON_MARKUP);
+    const floatingItems = [];
+    let animationId = 0;
+    let mouseCurrentX = 0;
+    let mouseCurrentY = 0;
+    let mouseTargetX = 0;
+    let mouseTargetY = 0;
+
+    const ENTRY_START = 120;
+    const ENTRY_STAGGER = 220;
+    const CORE_REVEAL = 760;
+    const BUILD_START = 1360;
+    const LINE_STAGGER = 150;
+    const ICON_STAGGER = 175;
+    const BURST_START = 3900;
+
+    const sequenceStart = performance.now();
+    const timers = [];
+    const queue = (callback, delay) => {
+      const id = window.setTimeout(callback, delay);
+      timers.push(id);
+    };
+
+    const createFloatingSystem = () => {
+      floatingLayer.innerHTML = "";
+      floatingItems.length = 0;
+
+      const total = 36;
+      const sectors = 12;
+
+      for (let index = 0; index < total; index += 1) {
+        const ring = Math.floor(index / sectors);
+        const sector = index % sectors;
+        const baseAngle = (sector / sectors) * Math.PI * 2;
+        const angle = baseAngle + (Math.random() - 0.5) * ((Math.PI * 2) / sectors) * 0.68;
+        const baseRadius = 150 + ring * 78 + Math.random() * 42;
+        const tx = Math.cos(angle) * baseRadius;
+        const ty = Math.sin(angle) * baseRadius * 0.84;
+
+        const curveDirection = Math.random() > 0.5 ? 1 : -1;
+        const curveAngle = angle + curveDirection * (0.34 + Math.random() * 0.55);
+        const curveRadius = baseRadius * (0.3 + Math.random() * 0.24);
+        const cx = Math.cos(curveAngle) * curveRadius;
+        const cy = Math.sin(curveAngle) * curveRadius - 20;
+
+        const depth = ring === 0 ? 0 : ring === 1 ? 1 : 2;
+        const size = depth === 0 ? 44 + Math.random() * 8 : depth === 1 ? 33 + Math.random() * 7 : 24 + Math.random() * 6;
+        const alpha = depth === 0 ? 0.9 : depth === 1 ? 0.72 : 0.54;
+        const scale = depth === 0 ? 1 : depth === 1 ? 0.86 : 0.74;
+        const blur = depth === 0 ? 0 : depth === 1 ? 0.6 : 1.8;
+
+        const item = document.createElement("span");
+        item.className = `hero-floating-item depth-${depth}`;
+        item.style.setProperty("--size", `${size.toFixed(2)}px`);
+        const icon = iconKeys[index % iconKeys.length];
+        item.innerHTML = ICON_MARKUP[icon];
+        floatingLayer.appendChild(item);
+
+        floatingItems.push({
+          element: item,
+          tx,
+          ty,
+          cx,
+          cy,
+          alpha,
+          scale,
+          blur,
+          rotation: (Math.random() - 0.5) * 220,
+          burstDuration: 900 + Math.random() * 280,
+          releaseDelay: Math.random() * 220,
+          driftX: 10 + Math.random() * (depth === 0 ? 14 : 10),
+          driftY: 7 + Math.random() * (depth === 0 ? 12 : 8),
+          driftSpeed: 0.5 + Math.random() * 0.7,
+          phase: Math.random() * Math.PI * 2,
+          parallax: 15 - depth * 4
+        });
+      }
+    };
+
+    createFloatingSystem();
+
+    const makeVisible = () => {
+      entryItems.forEach((item, index) => {
+        queue(() => {
+          item.classList.add("is-visible");
+        }, ENTRY_START + index * ENTRY_STAGGER);
+      });
+
+      queue(() => {
+        coreStage.classList.add("is-visible");
+        hero.classList.add("phase-entry");
+      }, CORE_REVEAL);
+
+      queue(() => {
+        hero.classList.add("phase-build");
+        lineNodes.forEach((line, index) => {
+          queue(() => {
+            line.classList.add("is-built");
+          }, index * LINE_STAGGER);
+        });
+
+        iconNodes.forEach((node, index) => {
+          queue(() => {
+            node.classList.add("is-built");
+          }, 380 + index * ICON_STAGGER);
+        });
+      }, BUILD_START);
+
+      queue(() => {
+        coreStage.classList.add("is-pulse");
+      }, BURST_START - 620);
+
+      queue(() => {
+        hero.classList.add("is-bursting", "phase-burst");
+        coreStage.classList.add("is-burst");
+      }, BURST_START);
+
+      queue(() => {
+        coreStage.classList.remove("is-pulse");
+      }, BURST_START + 820);
+
+      queue(() => {
+        hero.classList.add("phase-floating");
+        hero.classList.remove("is-bursting", "phase-burst");
+      }, BURST_START + 1140);
+    };
+
+    const renderReducedMotion = () => {
+      hero.classList.add("phase-entry", "phase-build", "phase-floating");
+      entryItems.forEach((item) => item.classList.add("is-visible"));
+      coreStage.classList.add("is-visible");
+      lineNodes.forEach((line) => line.classList.add("is-built"));
+      iconNodes.forEach((node) => node.classList.add("is-built"));
+
+      floatingItems.forEach((item) => {
+        item.element.style.opacity = `${item.alpha}`;
+        item.element.style.filter = `blur(${item.blur}px)`;
+        item.element.style.transform = `translate3d(calc(-50% + ${item.tx.toFixed(2)}px), calc(-50% + ${item.ty.toFixed(2)}px), 0) rotate(${item.rotation.toFixed(2)}deg) scale(${item.scale.toFixed(3)})`;
+      });
+    };
+
+    if (prefersReducedMotion) {
+      renderReducedMotion();
+      return;
+    }
+
+    makeVisible();
+
+    hero.addEventListener("mousemove", (event) => {
       const rect = hero.getBoundingClientRect();
-      const progress = clamp((0 - rect.top) / Math.max(rect.height * 0.92, 1), 0, 1);
-      hero.style.setProperty("--hero-scroll", progress.toFixed(4));
-    };
+      const normalizedX = (event.clientX - rect.left) / rect.width - 0.5;
+      const normalizedY = (event.clientY - rect.top) / rect.height - 0.5;
+      mouseTargetX = normalizedX * 26;
+      mouseTargetY = normalizedY * 21;
+      hero.style.setProperty("--hero-pointer-x", `${((normalizedX + 0.5) * 100).toFixed(2)}%`);
+      hero.style.setProperty("--hero-pointer-y", `${((normalizedY + 0.5) * 100).toFixed(2)}%`);
+    });
 
-    let ticking = false;
-    const queueSync = () => {
-      if (ticking) {
-        return;
-      }
-      ticking = true;
-      requestAnimationFrame(() => {
-        syncScrollProgress();
-        ticking = false;
-      });
-    };
+    hero.addEventListener("mouseleave", () => {
+      mouseTargetX = 0;
+      mouseTargetY = 0;
+      hero.style.setProperty("--hero-pointer-x", "50%");
+      hero.style.setProperty("--hero-pointer-y", "50%");
+    });
 
-    syncScrollProgress();
-    window.addEventListener("scroll", queueSync, { passive: true });
-    window.addEventListener("resize", queueSync);
+    const animate = (now) => {
+      const elapsed = now - sequenceStart;
+      mouseCurrentX += (mouseTargetX - mouseCurrentX) * 0.1;
+      mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.1;
 
-    if (!prefersReducedMotion) {
-      hero.addEventListener("mousemove", (event) => {
-        const rect = hero.getBoundingClientRect();
-        const x = (event.clientX - rect.left) / rect.width - 0.5;
-        const y = (event.clientY - rect.top) / rect.height - 0.5;
-        hero.style.setProperty("--hero-tilt-x", `${(y * -5).toFixed(2)}deg`);
-        hero.style.setProperty("--hero-tilt-y", `${(x * 6).toFixed(2)}deg`);
-        hero.style.setProperty("--hero-pointer-x", `${((x + 0.5) * 100).toFixed(2)}%`);
-        hero.style.setProperty("--hero-pointer-y", `${((y + 0.5) * 100).toFixed(2)}%`);
-      });
+      const heroRect = hero.getBoundingClientRect();
+      const scrollProgress = clamp((0 - heroRect.top) / Math.max(heroRect.height * 0.9, 1), 0, 1);
+      const scrollFade = clamp(1 - scrollProgress * 1.35, 0, 1);
 
-      hero.addEventListener("mouseleave", () => {
-        hero.style.setProperty("--hero-tilt-x", "0deg");
-        hero.style.setProperty("--hero-tilt-y", "0deg");
-        hero.style.setProperty("--hero-pointer-x", "50%");
-        hero.style.setProperty("--hero-pointer-y", "50%");
-      });
-    }
+      hero.style.setProperty("--hero-scroll", scrollProgress.toFixed(4));
+      hero.style.setProperty("--hero-parallax-x", `${(mouseCurrentX * 0.65).toFixed(2)}px`);
+      hero.style.setProperty("--hero-parallax-y", `${(mouseCurrentY * 0.65).toFixed(2)}px`);
+      hero.style.setProperty("--hero-float-fade", `${scrollFade.toFixed(3)}`);
 
-    if (searchForm) {
-      searchForm.addEventListener("focusin", () => {
-        searchForm.classList.add("is-focused");
-      });
-
-      searchForm.addEventListener("focusout", (event) => {
-        const nextFocused = event.relatedTarget;
-        if (nextFocused instanceof Element && searchForm.contains(nextFocused)) {
+      floatingItems.forEach((item) => {
+        const sinceBurst = elapsed - BURST_START - item.releaseDelay;
+        if (sinceBurst <= 0) {
+          item.element.style.opacity = "0";
           return;
         }
-        searchForm.classList.remove("is-focused");
+
+        const burstProgress = clamp(sinceBurst / item.burstDuration, 0, 1);
+        const oneMinus = 1 - burstProgress;
+
+        let x = oneMinus * oneMinus * 0 + 2 * oneMinus * burstProgress * item.cx + burstProgress * burstProgress * item.tx;
+        let y = oneMinus * oneMinus * 0 + 2 * oneMinus * burstProgress * item.cy + burstProgress * burstProgress * item.ty;
+        let rotation = item.rotation * burstProgress;
+
+        if (burstProgress >= 1) {
+          const ambientTime = (sinceBurst - item.burstDuration) / 1000;
+          x += Math.sin(ambientTime * item.driftSpeed + item.phase) * item.driftX;
+          y += Math.cos(ambientTime * item.driftSpeed * 0.84 + item.phase) * item.driftY;
+          rotation += Math.sin(ambientTime * 0.72 + item.phase) * 7;
+        }
+
+        const opacityRamp = burstProgress < 0.1 ? burstProgress / 0.1 : 1;
+        const opacity = item.alpha * opacityRamp * scrollFade;
+
+        item.element.style.opacity = `${opacity.toFixed(3)}`;
+        item.element.style.filter = `blur(${(item.blur + scrollProgress * 2.1).toFixed(2)}px)`;
+        item.element.style.transform = `translate3d(calc(-50% + ${(x + mouseCurrentX * item.parallax * 0.08).toFixed(2)}px), calc(-50% + ${(y + mouseCurrentY * item.parallax * 0.08).toFixed(2)}px), 0) rotate(${rotation.toFixed(2)}deg) scale(${item.scale.toFixed(3)})`;
       });
 
-      searchForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const value = searchInput?.value.trim() || "";
-        const params = new URLSearchParams();
-        if (value) {
-          params.set("q", value);
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    window.addEventListener(
+      "pagehide",
+      () => {
+        timers.forEach((id) => window.clearTimeout(id));
+        if (animationId) {
+          cancelAnimationFrame(animationId);
         }
-        window.location.href = `explore.html${params.toString() ? `?${params.toString()}` : ""}`;
-      });
-    }
+      },
+      { once: true }
+    );
   };
 
   const getEventIdFromHref = (href) => {
