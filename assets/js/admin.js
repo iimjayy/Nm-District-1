@@ -369,4 +369,5 @@
   renderInventory();
   renderPublishList();
   bindEvents();
+  window.NM_MOTION?.rehydrateDynamicContent(document);
 })();

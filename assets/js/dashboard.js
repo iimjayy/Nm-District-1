@@ -260,4 +260,5 @@
   renderPayments();
   renderDownloadTickets();
   bindEvents();
+  window.NM_MOTION?.rehydrateDynamicContent(document);
 })();

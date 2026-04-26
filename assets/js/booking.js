@@ -241,7 +241,7 @@
     refs.confettiZone.innerHTML = "";
     const colors = ["#62e5c3", "#4ba8ff", "#f3cb83", "#9957ff", "#ffffff"];
 
-    for (let i = 0; i < 70; i += 1) {
+    for (let i = 0; i < 46; i += 1) {
       const piece = document.createElement("span");
       piece.className = "confetti-piece";
       piece.style.left = `${Math.random() * 100}%`;

@@ -1595,7 +1595,11 @@
         searchForm.classList.add("is-focused");
       });
 
-      searchForm.addEventListener("focusout", () => {
+      searchForm.addEventListener("focusout", (event) => {
+        const nextFocused = event.relatedTarget;
+        if (nextFocused instanceof Element && searchForm.contains(nextFocused)) {
+          return;
+        }
         searchForm.classList.remove("is-focused");
       });
 

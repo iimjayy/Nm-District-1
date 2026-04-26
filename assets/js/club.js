@@ -88,4 +88,6 @@
       `
     )
     .join("");
+
+  window.NM_MOTION?.rehydrateDynamicContent(document);
 })();

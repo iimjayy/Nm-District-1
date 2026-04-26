@@ -69,6 +69,8 @@
         `
       )
       .join("");
+
+      window.NM_MOTION?.rehydrateDynamicContent(root);
   };
 
   refs.search.addEventListener("input", (event) => {
