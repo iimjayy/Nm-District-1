@@ -7,6 +7,10 @@
   const SAVE_KEY = "nm-saved-events";
   const CAMPUS_KEY = "nm-selected-campus";
   const CAMPUS_RECENT_KEY = "nm-recent-campuses";
+  const SHARED_EVENT_TRANSITION_KEY = "nm-shared-event-transition";
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
   const getSavedEvents = () => {
     try {
@@ -106,11 +110,11 @@
     const premiumTag = event.price > 500 ? "Premium Passes" : event.price === 0 ? "Free Entry" : "Trending";
 
     return `
-      <article class="event-card ${cardMode === "list" ? "list" : ""}">
-        <a class="event-media" href="event.html?id=${event.id}">
+      <article class="event-card motion-card ${cardMode === "list" ? "list" : ""}" data-event-id="${event.id}">
+        <a class="event-media" data-event-link="${event.id}" href="event.html?id=${event.id}">
           <span class="urgency-label">${urgency}</span>
           <span class="premium-tag">${premiumTag}</span>
-          <img src="${resolveAssetPath(event.image)}" alt="${event.title}">
+          <img src="${resolveAssetPath(event.image)}" alt="${event.title}" loading="lazy">
         </a>
         <div class="event-body">
           <div class="item-head">
@@ -132,8 +136,8 @@
               <span class="club-mini-logo">${clubTag}</span>
               <button class="icon-btn card-share" data-share-event="${event.id}" aria-label="Share event">↗</button>
               <button class="icon-btn card-preview" data-preview-event="${event.id}" aria-label="Quick preview">◍</button>
-              <a class="btn-inline" href="event.html?id=${event.id}">View</a>
-              <a class="btn-inline" href="booking.html?id=${event.id}">Quick Book</a>
+              <a class="btn-inline" data-event-link="${event.id}" href="event.html?id=${event.id}">View</a>
+              <a class="btn-inline btn-book-now" href="booking.html?id=${event.id}">Quick Book</a>
             </div>
           </div>
           <div class="attendee-row">
@@ -219,11 +223,15 @@
     }
 
     const sync = () => {
-      nav.classList.toggle("scrolled", window.scrollY > 8);
+      const scroll = window.scrollY;
+      const progress = clamp(scroll / 260, 0, 1);
+      nav.classList.toggle("scrolled", scroll > 8);
+      nav.style.setProperty("--nav-scale", `${(1 - progress * 0.035).toFixed(4)}`);
+      nav.style.setProperty("--nav-opacity", `${(0.58 + progress * 0.22).toFixed(3)}`);
     };
 
     sync();
-    window.addEventListener("scroll", sync);
+    window.addEventListener("scroll", sync, { passive: true });
   };
 
   const initCursorGlow = () => {
@@ -232,9 +240,25 @@
       return;
     }
 
+    const interactiveSelector = "a, button, input, select, textarea, .event-card, .filter-pill, .quick-cat-chip, .category-tab-chip";
+
     window.addEventListener("mousemove", (event) => {
       glow.style.left = `${event.clientX}px`;
       glow.style.top = `${event.clientY}px`;
+    });
+
+    document.addEventListener("mouseover", (event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest(interactiveSelector)) {
+        glow.classList.add("interactive");
+      }
+    });
+
+    document.addEventListener("mouseout", (event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest(interactiveSelector)) {
+        glow.classList.remove("interactive");
+      }
     });
 
     document.addEventListener("mouseleave", () => {
@@ -252,17 +276,25 @@
       return;
     }
 
+    if (prefersReducedMotion) {
+      targets.forEach((item) => {
+        item.classList.add("visible", "is-cinematic-visible");
+      });
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
+            entry.target.classList.add("visible", "is-cinematic-visible");
             observer.unobserve(entry.target);
           }
         });
       },
       {
-        rootMargin: "0px 0px -80px 0px"
+        rootMargin: "0px 0px -12% 0px",
+        threshold: 0.08
       }
     );
 
@@ -969,6 +1001,8 @@
           `
         )
         .join("");
+
+      rehydrateDynamicContent(categoryRail);
     }
 
     if (featuredPeopleRow) {
@@ -988,6 +1022,8 @@
           `
         )
         .join("");
+
+      rehydrateDynamicContent(featuredPeopleRow);
     }
 
     if (eventGrid) {
@@ -1105,6 +1141,7 @@
           emptyState.hidden = filtered.length > 0;
         }
         renderActiveBadges();
+        rehydrateDynamicContent(eventGrid);
       };
 
       filterPills.forEach((button) => {
