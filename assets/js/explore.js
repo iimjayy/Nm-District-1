@@ -319,6 +319,8 @@
         .join("");
     }
 
+    window.NM_MOTION?.rehydrateDynamicContent(resultsRoot);
+
     state.renderedEvents = sorted;
     Array.from(resultsRoot.querySelectorAll(".event-card")).forEach((card, index) => {
       const eventItem = sorted[index];
@@ -347,6 +349,7 @@
       recommendedGrid.innerHTML = recommended
         .map((eventItem) => createEventCardHTML(eventItem, { showLive: true }))
         .join("");
+      window.NM_MOTION?.rehydrateDynamicContent(recommendedGrid);
     }
   };
 
@@ -368,6 +371,8 @@
         </div>
       </div>
     `;
+
+    window.NM_MOTION?.rehydrateDynamicContent(featuredBanner);
   };
 
   const toggleMapPreview = () => {

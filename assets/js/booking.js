@@ -43,8 +43,10 @@
     ticketSeatInfo: document.getElementById("ticketSeatInfo"),
     ticketTimeInfo: document.getElementById("ticketTimeInfo"),
     ticketCode: document.getElementById("ticketCode"),
+    ticketCard: document.getElementById("ticketCard"),
     qrCode: document.getElementById("qrCode"),
     confettiZone: document.getElementById("confettiZone"),
+    successPane: document.getElementById("bookingSuccessPane"),
     downloadTicket: document.getElementById("downloadTicketBtn"),
     addCalendar: document.getElementById("addCalendarBtn"),
     shareTicket: document.getElementById("shareTicketBtn")
@@ -85,6 +87,21 @@
         stageElement.classList.add(step > previousStep ? "slide-forward" : "slide-backward");
       }
     });
+
+    if (refs.successPane) {
+      refs.successPane.classList.toggle("is-revealed", step === 4);
+    }
+
+    if (refs.ticketCard) {
+      refs.ticketCard.classList.remove("ticket-reveal");
+      if (step === 4) {
+        requestAnimationFrame(() => {
+          refs.ticketCard?.classList.add("ticket-reveal");
+        });
+      }
+    }
+
+    window.NM_MOTION?.rehydrateDynamicContent(document);
   };
 
   const updateSubtotal = () => {
@@ -115,6 +132,7 @@
       .join("");
 
     updateSubtotal();
+    window.NM_MOTION?.rehydrateDynamicContent(refs.ticketOptions);
   };
 
   const renderSmartSuggestions = () => {
@@ -140,6 +158,8 @@
         `
       )
       .join("");
+
+    window.NM_MOTION?.rehydrateDynamicContent(refs.smartSuggestions);
   };
 
   const updateReferralRewardNote = () => {
@@ -291,6 +311,8 @@
 
     saveBookingRecord(studentDetails);
     launchConfetti();
+    refs.successPane?.classList.add("is-revealed");
+    refs.ticketCard?.classList.add("ticket-reveal");
   };
 
   const downloadTicketFile = () => {

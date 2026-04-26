@@ -56,7 +56,8 @@
     mobileActionBar: document.getElementById("mobileActionBar"),
     mobileSave: document.getElementById("mobileSave"),
     mobileShare: document.getElementById("mobileShare"),
-    mobileBook: document.getElementById("mobileBook")
+    mobileBook: document.getElementById("mobileBook"),
+    bookingPanel: document.getElementById("eventBookingPanel")
   };
 
   const state = {
@@ -268,6 +269,29 @@
     refs.similar.innerHTML = similar
       .map((eventItem) => createEventCardHTML(eventItem, { showType: false }))
       .join("");
+
+    window.NM_MOTION?.rehydrateDynamicContent(document);
+  };
+
+  const initDetailMotion = () => {
+    if (refs.bookingPanel) {
+      requestAnimationFrame(() => {
+        refs.bookingPanel.classList.add("panel-visible");
+      });
+    }
+
+    [refs.agenda, refs.people, refs.reviews, refs.similar].forEach((group) => {
+      if (!group) {
+        return;
+      }
+      Array.from(group.children).forEach((item, index) => {
+        item.classList.add("cinematic-reveal");
+        if (!item.dataset.motionDelay) {
+          item.style.setProperty("--reveal-delay", `${(Math.min(index, 8) * 0.08).toFixed(2)}s`);
+          item.dataset.motionDelay = "1";
+        }
+      });
+    });
   };
 
   const startCountdown = () => {
@@ -468,5 +492,6 @@
   renderTickets();
   syncWishlistButton();
   startCountdown();
+  initDetailMotion();
   bindInteractions();
 })();
