@@ -36,8 +36,16 @@
       </div>
     </header>
 
-    <main>
+    <main class="story-main">
       <section class="district-hero reveal" id="districtHero">
+        <div class="district-hero-media" aria-hidden="true">
+          <video autoplay muted loop playsinline poster="assets/images/4f7b4ae0986f4a7502e84ba08890af84.jpg">
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-crowd-in-a-concert-3-large.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <div class="hero-cinematic-gradient" aria-hidden="true"></div>
+        <div class="hero-grain-overlay" aria-hidden="true"></div>
+        <div class="hero-particle-layer" id="heroParticles" aria-hidden="true"></div>
         <div class="hero-glow-palette" id="heroGlowPalette" aria-hidden="true"></div>
         <div class="district-hero-shell">
           <button class="carousel-arrow prev" id="heroPrev" type="button" aria-label="Previous featured event">&#8249;</button>
@@ -50,8 +58,13 @@
               <h1 id="heroSlideTitle">Loading featured events...</h1>
               <p class="hero-subtitle" id="heroSlideSummary"></p>
               <div class="hero-slide-meta" id="heroSlideMeta"></div>
+              <form class="hero-floating-search" id="heroFloatingSearch" aria-label="Search for events">
+                <span class="hero-search-icon" aria-hidden="true">⌕</span>
+                <input id="heroFloatingSearchInput" type="search" placeholder="Search fests, workshops, creators, speakers" />
+                <button class="btn-primary hero-search-btn magnetic-target" data-magnetic type="submit">Discover</button>
+              </form>
               <div class="hero-cta">
-                <a class="btn-primary" id="heroPrimaryCta" href="explore.html">Book Pass</a>
+                <a class="btn-primary magnetic-target" data-magnetic id="heroPrimaryCta" href="explore.html">Book Pass</a>
                 <a class="btn-secondary" id="heroSecondaryCta" href="event.html">View Details</a>
               </div>
             </article>

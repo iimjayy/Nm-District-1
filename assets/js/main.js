@@ -57,6 +57,39 @@
     return `${base}${path.replace(/^\.?\//, "")}`;
   };
 
+  const buildImageCandidates = (path) => {
+    if (!path) {
+      return [];
+    }
+    const normalized = path.replace(/^\.?\//, "");
+    const base = window.location.pathname.replace(/[^/]*$/, "");
+    return Array.from(
+      new Set([
+        path,
+        `./${normalized}`,
+        `${base}${normalized}`,
+        `/${normalized}`
+      ])
+    );
+  };
+
+  const setImageFromCandidates = (imgElement, candidates) => {
+    if (!imgElement || !candidates.length) {
+      return;
+    }
+    let index = 0;
+    const tryNext = () => {
+      if (index >= candidates.length) {
+        return;
+      }
+      const candidate = candidates[index];
+      index += 1;
+      imgElement.onerror = tryNext;
+      imgElement.src = candidate;
+    };
+    tryNext();
+  };
+
   const createEventCardHTML = (event, options = {}) => {
     const showLive = options.showLive ?? false;
     const showType = options.showType ?? true;
@@ -839,13 +872,12 @@
         heroImage.classList.remove("fade-in");
         void heroImage.offsetWidth;
         heroImage.classList.add("fade-in");
-        const fallbackHero = resolveAssetPath("assets/images/4f7b4ae0986f4a7502e84ba08890af84.jpg");
-        heroImage.onerror = () => {
-          if (heroImage.src !== fallbackHero) {
-            heroImage.src = fallbackHero;
-          }
-        };
-        heroImage.src = resolveAssetPath(item.image) || fallbackHero;
+        const fallbackHero = "assets/images/4f7b4ae0986f4a7502e84ba08890af84.jpg";
+        const imageCandidates = [
+          ...buildImageCandidates(item.image),
+          ...buildImageCandidates(fallbackHero)
+        ];
+        setImageFromCandidates(heroImage, imageCandidates);
         heroImage.alt = item.title;
 
         if (heroType) {
