@@ -1544,12 +1544,17 @@
     const coreStage = document.getElementById("eventCoreStage");
     const lineNodes = Array.from(hero.querySelectorAll("[data-core-line]"));
     const iconNodes = Array.from(hero.querySelectorAll("[data-core-node]"));
-    const burstLayer = document.getElementById("heroBurstLayer");
     const floatingLayer = document.getElementById("heroFloatingElements");
 
-    if (!coreStage || !burstLayer || !floatingLayer) {
+    if (!coreStage || !floatingLayer) {
       return;
     }
+
+    hero.classList.remove("phase-entry", "phase-build", "phase-still", "phase-burst", "phase-floating", "is-bursting");
+    entryItems.forEach((item) => item.classList.remove("is-visible"));
+    lineNodes.forEach((line) => line.classList.remove("is-built"));
+    iconNodes.forEach((node) => node.classList.remove("is-built"));
+    coreStage.classList.remove("is-visible", "is-pulse", "is-burst");
 
     const featuredEvent = [...data.events].sort((a, b) => b.popularity - a.popularity)[0];
     if (featuredEvent && primaryCta instanceof HTMLAnchorElement) {
@@ -1578,21 +1583,36 @@
         '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M6.8 5.2l1.8 2.1M17.2 5.2l-1.8 2.1M4 11h3M17 11h3M7.3 17.8l1.8-2.1M16.7 17.8l-1.8-2.1M12 18v3"/></svg>'
     };
 
+    const easeOutCubic = (value) => 1 - Math.pow(1 - value, 3);
+    const cubicBezierPoint = (t, p0, p1, p2, p3) => {
+      const inv = 1 - t;
+      return (
+        inv * inv * inv * p0 +
+        3 * inv * inv * t * p1 +
+        3 * inv * t * t * p2 +
+        t * t * t * p3
+      );
+    };
+
     const iconKeys = Object.keys(ICON_MARKUP);
     const floatingItems = [];
     let animationId = 0;
+    let resizeTimer = 0;
     let mouseCurrentX = 0;
     let mouseCurrentY = 0;
     let mouseTargetX = 0;
     let mouseTargetY = 0;
 
-    const ENTRY_START = 120;
-    const ENTRY_STAGGER = 220;
-    const CORE_REVEAL = 760;
-    const BUILD_START = 1360;
+    const ENTRY_START = 80;
+    const ENTRY_STAGGER = 180;
+    const CORE_REVEAL = 860;
+    const BUILD_START = 1320;
     const LINE_STAGGER = 150;
-    const ICON_STAGGER = 175;
-    const BURST_START = 3900;
+    const ICON_STAGGER = 170;
+    const STILL_START = 3220;
+    const PULSE_START = 3740;
+    const BURST_START = 4300;
+    const FLOAT_START = 5400;
 
     const sequenceStart = performance.now();
     const timers = [];
@@ -1605,61 +1625,143 @@
       floatingLayer.innerHTML = "";
       floatingItems.length = 0;
 
-      const total = 36;
-      const sectors = 12;
+      const isMobile = window.matchMedia("(max-width: 760px)").matches;
+      const ringSlots = isMobile ? [8, 8, 9] : [10, 10, 12];
+      const ringRadius = isMobile ? [138, 198, 258] : [156, 228, 300];
+      const tau = Math.PI * 2;
 
-      for (let index = 0; index < total; index += 1) {
-        const ring = Math.floor(index / sectors);
-        const sector = index % sectors;
-        const baseAngle = (sector / sectors) * Math.PI * 2;
-        const angle = baseAngle + (Math.random() - 0.5) * ((Math.PI * 2) / sectors) * 0.68;
-        const baseRadius = 150 + ring * 78 + Math.random() * 42;
-        const tx = Math.cos(angle) * baseRadius;
-        const ty = Math.sin(angle) * baseRadius * 0.84;
+      ringSlots.forEach((slots, ringIndex) => {
+        for (let slot = 0; slot < slots; slot += 1) {
+          const baseAngle = (slot / slots) * tau;
+          const angle = baseAngle + (Math.random() - 0.5) * (tau / slots) * 0.5;
+          const radius = ringRadius[ringIndex] + (Math.random() - 0.5) * 30;
+          const tx = Math.cos(angle) * radius;
+          const ty = Math.sin(angle) * radius * 0.84;
 
-        const curveDirection = Math.random() > 0.5 ? 1 : -1;
-        const curveAngle = angle + curveDirection * (0.34 + Math.random() * 0.55);
-        const curveRadius = baseRadius * (0.3 + Math.random() * 0.24);
-        const cx = Math.cos(curveAngle) * curveRadius;
-        const cy = Math.sin(curveAngle) * curveRadius - 20;
+          const tangentX = -Math.sin(angle);
+          const tangentY = Math.cos(angle);
+          const curveAmplitude = 34 + Math.random() * 52;
+          const c1x = tx * 0.24 + tangentX * curveAmplitude;
+          const c1y = ty * 0.2 + tangentY * curveAmplitude - 22;
+          const c2x = tx * 0.7 - tangentX * (curveAmplitude * 0.36);
+          const c2y = ty * 0.72 - tangentY * (curveAmplitude * 0.22) - 10;
 
-        const depth = ring === 0 ? 0 : ring === 1 ? 1 : 2;
-        const size = depth === 0 ? 44 + Math.random() * 8 : depth === 1 ? 33 + Math.random() * 7 : 24 + Math.random() * 6;
-        const alpha = depth === 0 ? 0.9 : depth === 1 ? 0.72 : 0.54;
-        const scale = depth === 0 ? 1 : depth === 1 ? 0.86 : 0.74;
-        const blur = depth === 0 ? 0 : depth === 1 ? 0.6 : 1.8;
+          const depth = ringIndex;
+          const size = depth === 0 ? 43 + Math.random() * 8 : depth === 1 ? 34 + Math.random() * 7 : 25 + Math.random() * 6;
+          const alpha = depth === 0 ? 0.92 : depth === 1 ? 0.76 : 0.58;
+          const scale = depth === 0 ? 1 : depth === 1 ? 0.87 : 0.76;
 
-        const item = document.createElement("span");
-        item.className = `hero-floating-item depth-${depth}`;
-        item.style.setProperty("--size", `${size.toFixed(2)}px`);
-        const icon = iconKeys[index % iconKeys.length];
-        item.innerHTML = ICON_MARKUP[icon];
-        floatingLayer.appendChild(item);
+          const item = document.createElement("span");
+          item.className = `hero-floating-item depth-${depth}`;
+          item.style.setProperty("--size", `${size.toFixed(2)}px`);
+          const icon = iconKeys[(ringIndex * 7 + slot) % iconKeys.length];
+          item.innerHTML = ICON_MARKUP[icon];
+          floatingLayer.appendChild(item);
 
-        floatingItems.push({
-          element: item,
-          tx,
-          ty,
-          cx,
-          cy,
-          alpha,
-          scale,
-          blur,
-          rotation: (Math.random() - 0.5) * 220,
-          burstDuration: 900 + Math.random() * 280,
-          releaseDelay: Math.random() * 220,
-          driftX: 10 + Math.random() * (depth === 0 ? 14 : 10),
-          driftY: 7 + Math.random() * (depth === 0 ? 12 : 8),
-          driftSpeed: 0.5 + Math.random() * 0.7,
-          phase: Math.random() * Math.PI * 2,
-          parallax: 15 - depth * 4
-        });
+          floatingItems.push({
+            element: item,
+            tx,
+            ty,
+            c1x,
+            c1y,
+            c2x,
+            c2y,
+            alpha,
+            scale,
+            rotation: (Math.random() - 0.5) * 220,
+            spinRange: 5 + Math.random() * 4,
+            burstDuration: 860 + Math.random() * 280,
+            releaseDelay: ringIndex * 56 + Math.random() * 210,
+            driftX: depth === 0 ? 12 + Math.random() * 13 : 9 + Math.random() * 10,
+            driftY: depth === 0 ? 10 + Math.random() * 11 : 7 + Math.random() * 9,
+            rise: depth === 0 ? 10 + Math.random() * 10 : 7 + Math.random() * 8,
+            driftSpeed: 0.34 + Math.random() * 0.45,
+            phase: Math.random() * tau,
+            sideBias: (Math.random() - 0.5) * 12,
+            parallax: depth === 0 ? 1.05 : depth === 1 ? 0.76 : 0.52
+          });
+        }
+      });
+    };
+
+    const placeFloatingItem = (item, x, y, rotation, opacity, parallaxX, parallaxY) => {
+      item.element.style.opacity = `${opacity.toFixed(3)}`;
+      item.element.style.transform = `translate3d(calc(-50% + ${(x + parallaxX).toFixed(2)}px), calc(-50% + ${(y + parallaxY).toFixed(2)}px), 0) rotate(${rotation.toFixed(2)}deg) scale(${item.scale.toFixed(3)})`;
+    };
+
+    const syncReducedMotionScroll = () => {
+      const heroRect = hero.getBoundingClientRect();
+      const scrollProgress = clamp((0 - heroRect.top) / Math.max(heroRect.height * 0.86, 1), 0, 1);
+      const scrollFade = clamp(1 - scrollProgress * 1.25, 0, 1);
+      hero.style.setProperty("--hero-scroll", scrollProgress.toFixed(4));
+      hero.style.setProperty("--hero-float-fade", `${scrollFade.toFixed(3)}`);
+    };
+
+    const handleResize = () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        createFloatingSystem();
+      }, 150);
+    };
+
+    const handleHeroMouseMove = (event) => {
+      const rect = hero.getBoundingClientRect();
+      const normalizedX = (event.clientX - rect.left) / rect.width - 0.5;
+      const normalizedY = (event.clientY - rect.top) / rect.height - 0.5;
+      mouseTargetX = normalizedX * 24;
+      mouseTargetY = normalizedY * 20;
+      hero.style.setProperty("--hero-pointer-x", `${((normalizedX + 0.5) * 100).toFixed(2)}%`);
+      hero.style.setProperty("--hero-pointer-y", `${((normalizedY + 0.5) * 100).toFixed(2)}%`);
+    };
+
+    const handleHeroMouseLeave = () => {
+      mouseTargetX = 0;
+      mouseTargetY = 0;
+      hero.style.setProperty("--hero-pointer-x", "50%");
+      hero.style.setProperty("--hero-pointer-y", "50%");
+    };
+
+    const handleCtaMove = (event) => {
+      if (!(primaryCta instanceof HTMLElement)) {
+        return;
+      }
+      const rect = primaryCta.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
+      primaryCta.style.setProperty("--cta-glow-x", `${x.toFixed(2)}%`);
+      primaryCta.style.setProperty("--cta-glow-y", `${y.toFixed(2)}%`);
+    };
+
+    const handleCtaLeave = () => {
+      if (!(primaryCta instanceof HTMLElement)) {
+        return;
+      }
+      primaryCta.style.setProperty("--cta-glow-x", "50%");
+      primaryCta.style.setProperty("--cta-glow-y", "50%");
+    };
+
+    const cleanup = () => {
+      timers.forEach((id) => window.clearTimeout(id));
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+      window.clearTimeout(resizeTimer);
+
+      hero.removeEventListener("mousemove", handleHeroMouseMove);
+      hero.removeEventListener("mouseleave", handleHeroMouseLeave);
+      window.removeEventListener("resize", handleResize);
+
+      if (primaryCta instanceof HTMLElement) {
+        primaryCta.removeEventListener("mousemove", handleCtaMove);
+        primaryCta.removeEventListener("mouseleave", handleCtaLeave);
       }
     };
 
     createFloatingSystem();
 
     const makeVisible = () => {
+      hero.classList.add("phase-entry");
+
       entryItems.forEach((item, index) => {
         queue(() => {
           item.classList.add("is-visible");
@@ -1668,11 +1770,11 @@
 
       queue(() => {
         coreStage.classList.add("is-visible");
-        hero.classList.add("phase-entry");
       }, CORE_REVEAL);
 
       queue(() => {
         hero.classList.add("phase-build");
+
         lineNodes.forEach((line, index) => {
           queue(() => {
             line.classList.add("is-built");
@@ -1687,22 +1789,28 @@
       }, BUILD_START);
 
       queue(() => {
-        coreStage.classList.add("is-pulse");
-      }, BURST_START - 620);
+        hero.classList.add("phase-still");
+      }, STILL_START);
 
       queue(() => {
+        coreStage.classList.add("is-pulse");
+      }, PULSE_START);
+
+      queue(() => {
+        hero.classList.remove("phase-still");
         hero.classList.add("is-bursting", "phase-burst");
         coreStage.classList.add("is-burst");
       }, BURST_START);
 
       queue(() => {
         coreStage.classList.remove("is-pulse");
-      }, BURST_START + 820);
+      }, PULSE_START + 900);
 
       queue(() => {
         hero.classList.add("phase-floating");
         hero.classList.remove("is-bursting", "phase-burst");
-      }, BURST_START + 1140);
+        coreStage.classList.remove("is-burst");
+      }, FLOAT_START);
     };
 
     const renderReducedMotion = () => {
@@ -1713,10 +1821,18 @@
       iconNodes.forEach((node) => node.classList.add("is-built"));
 
       floatingItems.forEach((item) => {
-        item.element.style.opacity = `${item.alpha}`;
-        item.element.style.filter = `blur(${item.blur}px)`;
-        item.element.style.transform = `translate3d(calc(-50% + ${item.tx.toFixed(2)}px), calc(-50% + ${item.ty.toFixed(2)}px), 0) rotate(${item.rotation.toFixed(2)}deg) scale(${item.scale.toFixed(3)})`;
+        placeFloatingItem(item, item.tx, item.ty, item.rotation, item.alpha, 0, 0);
       });
+
+      syncReducedMotionScroll();
+      window.addEventListener("scroll", syncReducedMotionScroll, { passive: true });
+      window.addEventListener(
+        "pagehide",
+        () => {
+          window.removeEventListener("scroll", syncReducedMotionScroll);
+        },
+        { once: true }
+      );
     };
 
     if (prefersReducedMotion) {
@@ -1726,22 +1842,14 @@
 
     makeVisible();
 
-    hero.addEventListener("mousemove", (event) => {
-      const rect = hero.getBoundingClientRect();
-      const normalizedX = (event.clientX - rect.left) / rect.width - 0.5;
-      const normalizedY = (event.clientY - rect.top) / rect.height - 0.5;
-      mouseTargetX = normalizedX * 26;
-      mouseTargetY = normalizedY * 21;
-      hero.style.setProperty("--hero-pointer-x", `${((normalizedX + 0.5) * 100).toFixed(2)}%`);
-      hero.style.setProperty("--hero-pointer-y", `${((normalizedY + 0.5) * 100).toFixed(2)}%`);
-    });
+    hero.addEventListener("mousemove", handleHeroMouseMove);
+    hero.addEventListener("mouseleave", handleHeroMouseLeave);
+    window.addEventListener("resize", handleResize, { passive: true });
 
-    hero.addEventListener("mouseleave", () => {
-      mouseTargetX = 0;
-      mouseTargetY = 0;
-      hero.style.setProperty("--hero-pointer-x", "50%");
-      hero.style.setProperty("--hero-pointer-y", "50%");
-    });
+    if (primaryCta instanceof HTMLElement) {
+      primaryCta.addEventListener("mousemove", handleCtaMove);
+      primaryCta.addEventListener("mouseleave", handleCtaLeave);
+    }
 
     const animate = (now) => {
       const elapsed = now - sequenceStart;
@@ -1749,12 +1857,12 @@
       mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.1;
 
       const heroRect = hero.getBoundingClientRect();
-      const scrollProgress = clamp((0 - heroRect.top) / Math.max(heroRect.height * 0.9, 1), 0, 1);
-      const scrollFade = clamp(1 - scrollProgress * 1.35, 0, 1);
+      const scrollProgress = clamp((0 - heroRect.top) / Math.max(heroRect.height * 0.86, 1), 0, 1);
+      const scrollFade = clamp(1 - scrollProgress * 1.28, 0, 1);
 
       hero.style.setProperty("--hero-scroll", scrollProgress.toFixed(4));
-      hero.style.setProperty("--hero-parallax-x", `${(mouseCurrentX * 0.65).toFixed(2)}px`);
-      hero.style.setProperty("--hero-parallax-y", `${(mouseCurrentY * 0.65).toFixed(2)}px`);
+      hero.style.setProperty("--hero-parallax-x", `${(mouseCurrentX * 0.62).toFixed(2)}px`);
+      hero.style.setProperty("--hero-parallax-y", `${(mouseCurrentY * 0.62).toFixed(2)}px`);
       hero.style.setProperty("--hero-float-fade", `${scrollFade.toFixed(3)}`);
 
       floatingItems.forEach((item) => {
@@ -1765,24 +1873,29 @@
         }
 
         const burstProgress = clamp(sinceBurst / item.burstDuration, 0, 1);
-        const oneMinus = 1 - burstProgress;
+        const eased = easeOutCubic(burstProgress);
 
-        let x = oneMinus * oneMinus * 0 + 2 * oneMinus * burstProgress * item.cx + burstProgress * burstProgress * item.tx;
-        let y = oneMinus * oneMinus * 0 + 2 * oneMinus * burstProgress * item.cy + burstProgress * burstProgress * item.ty;
-        let rotation = item.rotation * burstProgress;
+        let x = cubicBezierPoint(eased, 0, item.c1x, item.c2x, item.tx);
+        let y = cubicBezierPoint(eased, 0, item.c1y, item.c2y, item.ty);
+        let rotation = item.rotation * eased;
 
         if (burstProgress >= 1) {
           const ambientTime = (sinceBurst - item.burstDuration) / 1000;
-          x += Math.sin(ambientTime * item.driftSpeed + item.phase) * item.driftX;
-          y += Math.cos(ambientTime * item.driftSpeed * 0.84 + item.phase) * item.driftY;
-          rotation += Math.sin(ambientTime * 0.72 + item.phase) * 7;
+          const driftX = Math.sin(ambientTime * item.driftSpeed + item.phase) * item.driftX;
+          const driftY = Math.cos(ambientTime * (item.driftSpeed * 0.82) + item.phase) * item.driftY;
+          const rise = Math.sin(ambientTime * 0.2 + item.phase * 0.7) * item.rise - item.rise * 0.35;
+
+          x += driftX + item.sideBias * Math.sin(ambientTime * 0.14 + item.phase);
+          y += driftY - rise;
+          rotation += Math.sin(ambientTime * 0.66 + item.phase) * item.spinRange;
         }
 
-        const opacityRamp = burstProgress < 0.1 ? burstProgress / 0.1 : 1;
+        const opacityRamp = burstProgress < 0.11 ? burstProgress / 0.11 : 1;
         const opacity = item.alpha * opacityRamp * scrollFade;
+        const parallaxX = mouseCurrentX * item.parallax;
+        const parallaxY = mouseCurrentY * item.parallax * 0.82;
 
-        item.element.style.opacity = `${opacity.toFixed(3)}`;
-        item.element.style.transform = `translate3d(calc(-50% + ${(x + mouseCurrentX * item.parallax * 0.08).toFixed(2)}px), calc(-50% + ${(y + mouseCurrentY * item.parallax * 0.08).toFixed(2)}px), 0) rotate(${rotation.toFixed(2)}deg) scale(${item.scale.toFixed(3)})`;
+        placeFloatingItem(item, x, y, rotation, opacity, parallaxX, parallaxY);
       });
 
       animationId = requestAnimationFrame(animate);
@@ -1790,16 +1903,7 @@
 
     animationId = requestAnimationFrame(animate);
 
-    window.addEventListener(
-      "pagehide",
-      () => {
-        timers.forEach((id) => window.clearTimeout(id));
-        if (animationId) {
-          cancelAnimationFrame(animationId);
-        }
-      },
-      { once: true }
-    );
+    window.addEventListener("pagehide", cleanup, { once: true });
   };
 
   const getEventIdFromHref = (href) => {
