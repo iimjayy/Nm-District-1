@@ -4690,6 +4690,10 @@ img.media-loaded {
   animation: core-pulse-signature 0.86s var(--ease-spring);
 }
 
+.apple-event-hero.phase-still .event-core-stage.is-visible {
+  filter: drop-shadow(0 32px 56px rgba(179, 99, 158, 0.28));
+}
+
 .apple-event-hero .event-core-stage.is-burst {
   opacity: 0.2;
   transform: translate3d(calc(var(--hero-parallax-x) * 0.64), calc(var(--hero-parallax-y) * 0.64), 0) scale(0.72);
@@ -4745,6 +4749,25 @@ img.media-loaded {
   font-size: 24px;
   letter-spacing: 0.04em;
   fill: #ffffff;
+}
+
+.apple-event-hero .core-hub {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.apple-event-hero.phase-still .core-hub {
+  animation: core-still-breathe 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes core-still-breathe {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.022);
+  }
 }
 
 .apple-event-hero [data-core-line] {
