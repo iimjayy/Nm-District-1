@@ -97,57 +97,35 @@
 
   const createEventCardHTML = (event, options = {}) => {
     const showLive = options.showLive ?? false;
-    const showType = options.showType ?? true;
     const cardMode = options.mode || "grid";
 
-    const topBadge = showLive && event.isLive ? '<span class="pill pill-live">Live Now</span>' : `<span class="pill">${event.category}</span>`;
+    const topBadge = showLive && event.isLive ? "Live" : event.category;
     const saveActive = isSavedEvent(event.id) ? "active" : "";
-    const urgencyPool = ["Limited Seats", "Selling Fast", "Closing Tonight", "Invite Only"];
-    const urgency = urgencyPool[event.popularity % urgencyPool.length];
-    const clubTag = (event.club || "NM").split(" ").map((word) => word[0]).join("").slice(0, 3).toUpperCase();
-    const attendees = 180 + Math.floor(event.popularity * 2.4);
-    const seatsLeft = event.tickets?.reduce((sum, item) => sum + item.seats, 0) || 120;
-    const closesIn = Math.max(1, Math.ceil((new Date(event.registrationsClose).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
-    const premiumTag = event.price > 500 ? "Premium Passes" : event.price === 0 ? "Free Entry" : "Trending";
+    const eventDate = formatDate(event.date, { withWeekday: true });
+    const location = event.venue.length > 26 ? `${event.venue.slice(0, 25)}...` : event.venue;
+    const categorySlug = encodeURIComponent(event.category || "all");
 
     return `
       <article class="event-card motion-card ${cardMode === "list" ? "list" : ""}" data-event-id="${event.id}">
         <a class="event-media" data-event-link="${event.id}" href="event.html?id=${event.id}">
-          <span class="urgency-label">${urgency}</span>
-          <span class="premium-tag">${premiumTag}</span>
           <img src="${resolveAssetPath(event.image)}" alt="${event.title}" loading="lazy">
         </a>
         <div class="event-body">
-          <div class="item-head">
-            ${topBadge}
+          <div class="event-topline">
+            <span class="event-kind">${topBadge}</span>
             <button class="icon-btn save-toggle ${saveActive}" data-save-event="${event.id}" aria-label="Save event">
               ${isSavedEvent(event.id) ? "♥" : "♡"}
             </button>
           </div>
           <h3 class="event-title">${event.title}</h3>
-          <div class="event-organizer">By ${event.organizer}</div>
-          <div class="event-meta">
-            <span>${formatDateTime(event.date, event.time)}</span>
-            <span>${event.venue} · ${event.mode}</span>
-            ${showType ? `<span>${event.type}</span>` : ""}
+          <div class="event-meta-row">
+            <span>${eventDate}</span>
+            <span>${data.formatCurrency(event.price)}</span>
           </div>
-          <div class="event-footer">
-            <span class="price-tag">${data.formatCurrency(event.price)}</span>
-            <div class="card-actions">
-              <span class="club-mini-logo">${clubTag}</span>
-              <button class="icon-btn card-share" data-share-event="${event.id}" aria-label="Share event">↗</button>
-              <button class="icon-btn card-preview" data-preview-event="${event.id}" aria-label="Quick preview">◍</button>
-              <a class="btn-inline" data-event-link="${event.id}" href="event.html?id=${event.id}">View</a>
-              <a class="btn-inline btn-book-now" href="booking.html?id=${event.id}">Quick Book</a>
-            </div>
-          </div>
-          <div class="attendee-row">
-            <span class="attendee-avatars"><span></span><span></span><span></span><span></span></span>
-            <span>${attendees.toLocaleString("en-IN")} attending</span>
-          </div>
-          <div class="mini-stat-row">
-            <span>${seatsLeft} seats left</span>
-            <span>Closing in ${closesIn}d</span>
+          <div class="event-meta-subtle">${location}</div>
+          <div class="event-actions-minimal">
+            <a class="btn-inline" data-event-link="${event.id}" href="event.html?id=${event.id}">View Event</a>
+            <a class="btn-inline" href="explore.html?type=${categorySlug}">More ${event.category}</a>
           </div>
         </div>
       </article>
@@ -164,15 +142,12 @@
       utilityGroup.className = "nav-utility";
       utilityGroup.innerHTML = `
         <button class="campus-switcher" type="button" data-campus-trigger aria-label="Choose NM campus location">
-          <span class="campus-switcher-title">NM Campus</span>
           <span class="campus-switcher-label">Main Campus</span>
         </button>
-        <a class="icon-btn" href="explore.html" aria-label="Search events">⌕</a>
-        <a class="icon-btn" href="dashboard.html" aria-label="Wishlist">♥</a>
-        <button class="profile-chip" type="button" aria-label="Student profile">
-          <img class="nav-avatar" alt="Profile avatar" src="assets/images/385a26a34f594dbaa1d6890e70664f81.jpg" />
-          <span>Rhea M.</span>
-        </button>
+        <button class="profile-chip" type="button" aria-label="Student profile">Rhea M.</button>
+        <a class="icon-btn nav-discovery-shortcut" href="explore.html" aria-label="Jump to explore">
+          ⌕
+        </a>
       `;
       container.appendChild(utilityGroup);
     });

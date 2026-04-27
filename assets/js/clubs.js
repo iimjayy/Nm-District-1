@@ -53,17 +53,18 @@
     root.innerHTML = sorted
       .map(
         (club) => `
-          <article class="club-card reveal fade-in">
-            <div class="club-cover">
+          <article class="club-card club-card-minimal reveal fade-in">
+            <a class="club-cover" href="club.html?id=${club.id}">
               <img src="${club.coverImage}" alt="${club.name}">
               <div class="club-logo">${club.logo}</div>
-            </div>
+              <div class="club-hover-reveal">
+                <p>${club.tagline}</p>
+                <span>${club.followers.toLocaleString("en-IN")} followers · ${club.eventCount} events</span>
+              </div>
+            </a>
             <div class="club-body">
               <h3>${club.name}</h3>
-              <div class="club-meta">${club.followers.toLocaleString("en-IN")} followers · ${club.eventCount} events</div>
-              <p class="muted">${club.tagline}</p>
-              <p class="muted">${club.description}</p>
-              <a class="btn-inline" href="club.html?id=${club.id}">Open Profile</a>
+              <a class="btn-inline" href="club.html?id=${club.id}">View Club</a>
             </div>
           </article>
         `
