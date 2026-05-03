@@ -105,7 +105,7 @@
     }
   };
 
-  const renderTickets = (animateSelection = false) => {
+  const renderTickets = () => {
     refs.ticketOptions.innerHTML = currentEvent.tickets
       .map(
         (ticket, index) => `
@@ -119,13 +119,6 @@
         `
       )
       .join("");
-
-    if (animateSelection) {
-      const activeOption = refs.ticketOptions.querySelector(`[data-ticket-index="${state.ticketIndex}"]`);
-      if (activeOption) {
-        activeOption.classList.add("is-select-pop");
-      }
-    }
 
     const seatsLeft = currentEvent.tickets.reduce((sum, item) => sum + item.seats, 0);
     refs.availability.textContent = seatsLeft > 0 ? `${seatsLeft} seats left across all pass types` : "Sold out";
@@ -411,7 +404,7 @@
         return;
       }
       state.ticketIndex = Number(option.dataset.ticketIndex);
-      renderTickets(true);
+      renderTickets();
     });
 
     refs.qtyMinus.addEventListener("click", () => {

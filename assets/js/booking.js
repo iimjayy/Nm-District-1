@@ -116,7 +116,7 @@
     refs.subtotal.textContent = formatCurrency(selectedTicket.price * state.quantity);
   };
 
-  const renderPassOptions = (animateSelection = false) => {
+  const renderPassOptions = () => {
     refs.ticketOptions.innerHTML = eventItem.tickets
       .map(
         (ticket, index) => `
@@ -130,13 +130,6 @@
         `
       )
       .join("");
-
-    if (animateSelection) {
-      const activeOption = refs.ticketOptions.querySelector(`[data-ticket-index="${state.selectedTicketIndex}"]`);
-      if (activeOption) {
-        activeOption.classList.add("is-select-pop");
-      }
-    }
 
     updateSubtotal();
     window.NM_MOTION?.rehydrateDynamicContent(refs.ticketOptions);
@@ -416,7 +409,7 @@
         return;
       }
       state.selectedTicketIndex = Number(ticket.dataset.ticketIndex);
-      renderPassOptions(true);
+      renderPassOptions();
     });
 
     refs.qtyMinus.addEventListener("click", () => {
@@ -454,9 +447,6 @@
       button.addEventListener("click", () => {
         refs.paymentMethods.forEach((item) => item.classList.remove("active"));
         button.classList.add("active");
-        button.classList.remove("is-select-pop");
-        void button.offsetWidth;
-        button.classList.add("is-select-pop");
         state.payment = button.dataset.payment;
         updatePaymentConfidence();
       });

@@ -44,7 +44,6 @@
   const featuredBanner = document.getElementById("featuredExploreBanner");
   const mapToggleBtn = document.getElementById("mapToggleBtn");
   const mapPreview = document.getElementById("mapPreview");
-  const advancedFiltersPanel = document.querySelector(".layout-split > .filters-panel");
   const recommendedGrid = document.getElementById("recommendedGrid");
   const hoverPreview = document.getElementById("hoverPreview");
   const hoverPreviewImage = document.getElementById("hoverPreviewImage");
@@ -567,21 +566,8 @@
     mapToggleBtn?.addEventListener("click", toggleMapPreview);
 
     exploreMoreFiltersBtn?.addEventListener("click", () => {
-      if (!advancedFiltersPanel) {
-        controls.search.scrollIntoView({ behavior: "smooth", block: "center" });
-        controls.search.focus();
-        return;
-      }
-
-      const isOpen = advancedFiltersPanel.classList.toggle("is-open");
-      exploreMoreFiltersBtn.textContent = isOpen ? "Hide Filters" : "More Filters";
-
-      if (isOpen) {
-        advancedFiltersPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-        window.setTimeout(() => {
-          controls.search.focus();
-        }, 180);
-      }
+      controls.search.scrollIntoView({ behavior: "smooth", block: "center" });
+      controls.search.focus();
     });
 
     resultsRoot.addEventListener("mouseover", (event) => {
