@@ -1,70 +1,434 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clubs & Committees | NM District</title>
-    <meta name="description" content="Discover NM College clubs and committees with premium profile previews and event insights." />
-    <link rel="stylesheet" href="assets/css/style.css" />
-    <script defer src="assets/js/data.js"></script>
-    <script defer src="assets/js/main.js"></script>
-    <script defer src="assets/js/clubs.js"></script>
-  </head>
-  <body>
-    <div class="cursor-glow" id="cursorGlow"></div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clubs & Committees | NM District</title>
+  <meta name="description" content="Discover NM College clubs and committees with premium profile previews and event insights.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  
+  <!-- External Libraries -->
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.27/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  
+  <!-- Data -->
+  <script src="assets/js/data.js"></script>
+  
+  <!-- Main Script -->
+  <script src="assets/js/main.js"></script>
+</head>
+<body data-theme="dark">
 
-    <header class="floating-nav" id="floatingNav">
-      <div class="nav-inner">
-        <a class="brand" href="index.html" aria-label="NM District home">
-          <span class="brand-logo">NM</span>
-          <span>NM District</span>
-        </a>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a class="nav-link" data-nav-link href="index.html">Home</a>
-          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
-          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
-          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
-          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
-          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
-          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
-        </nav>
-        <div class="nav-actions">
-          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
-          <a class="btn-inline" href="explore.html">Find Events</a>
-        </div>
+  <!-- Custom Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand" aria-label="NM District home">
+        <div class="navbar__logo">NM</div>
+        <span>District</span>
+      </a>
+      
+      <div class="navbar__links">
+        <a href="index.html" class="navbar__link" data-nav-link>Home</a>
+        <a href="explore.html" class="navbar__link" data-nav-link>Explore</a>
+        <a href="clubs.html" class="navbar__link active" data-nav-link>Clubs</a>
+        <a href="dashboard.html" class="navbar__link" data-nav-link>Dashboard</a>
       </div>
-    </header>
+      
+      <div class="navbar__actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <span>🌙</span>
+        </button>
+      </div>
+    </div>
+  </nav>
 
     <main>
-      <section class="clubs-hero reveal">
-        <p class="eyebrow">Clubs & Committees Directory</p>
-        <h1 class="page-title" style="font-size: clamp(1.8rem, 5vw, 3rem)">The Communities Behind NM Culture</h1>
-        <p class="page-subtitle">
-          Explore official clubs, core committees, and their upcoming experiences with a premium profile-led browse flow.
-        </p>
-
-        <div class="glass-search" style="margin-top: 1rem">
-          <input id="clubSearch" type="search" placeholder="Search by club name, focus, or tagline" />
-          <select id="clubSort" class="filter-select" style="min-width: 180px">
-            <option value="followers">Sort: Most followers</option>
-            <option value="events">Sort: Most events</option>
-            <option value="name">Sort: Name A-Z</option>
-          </select>
-        </div>
-      </section>
-
-      <section class="section" style="padding-top: 1rem">
+    <!-- Clubs Hero Section -->
+    <section class="hero hero--clubs" data-reveal="up">
+      <div class="hero__content">
         <div class="container">
-          <div class="section-head reveal">
-            <div>
-              <h2 class="section-title">Club Directory</h2>
-              <p class="section-copy">Tap into each community's team, history, social links, and events.</p>
+          <div class="hero__badge">
+            <i data-lucide="users"></i>
+            <span>Clubs & Committees</span>
+          </div>
+          
+          <h1 class="display-hero">The Communities Behind <span class="text-gradient">NM Culture</span></h1>
+          <p class="hero__subtitle">
+            Explore official clubs, core committees, and their upcoming experiences with a premium profile-led browse flow
+          </p>
+          
+          <!-- Search Section -->
+          <div class="search-section">
+            <div class="search-bar">
+              <div class="search-bar__input-group">
+                <i data-lucide="search" class="search-bar__icon"></i>
+                <input type="text" class="search-bar__input" id="clubSearch" placeholder="Search clubs by name, focus, or tagline...">
+                <button class="search-bar__clear" id="searchClear" aria-label="Clear search">
+                  <i data-lucide="x"></i>
+                </button>
+              </div>
             </div>
-            <strong id="clubCount">0 clubs</strong>
+            
+            <div class="search-controls">
+              <select class="form-select" id="clubSort">
+                <option value="followers">Most Followers</option>
+                <option value="events">Most Events</option>
+                <option value="name">Name A-Z</option>
+                <option value="category">Category</option>
+              </select>
+              
+              <div class="category-filters">
+                <button class="chip active" data-category="all">All</button>
+                <button class="chip" data-category="Cultural">Cultural</button>
+                <button class="chip" data-category="Technical">Technical</button>
+                <button class="chip" data-category="Sports">Sports</button>
+                <button class="chip" data-category="Academic">Academic</button>
+                <button class="chip" data-category="Social">Social</button>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="clubs-directory-grid" id="clubsDirectory"></div>
-      </section>
-    </main>
-  </body>
+      </div>
+    </section>
+
+    <!-- Clubs Directory -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header" data-reveal="up">
+          <div class="section-header__content">
+            <h2 class="section-title">Club Directory</h2>
+            <p class="section-subtitle">Tap into each community's team, history, social links, and events</p>
+          </div>
+          <div class="section-header__count">
+            <span id="clubCount">0 clubs</span>
+          </div>
+        </div>
+        
+        <div class="clubs-grid" id="clubsGrid" data-stagger>
+          <!-- Clubs will be dynamically populated here -->
+        </div>
+        
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" hidden>
+          <div class="empty-state__icon">
+            <i data-lucide="search-x"></i>
+          </div>
+          <h3 class="empty-state__title">No clubs found</h3>
+          <p class="empty-state__description">Try adjusting your search or filters</p>
+          <button class="btn btn-primary" id="resetFilters">Reset Filters</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Clubs Section -->
+    <section class="section section--featured">
+      <div class="container">
+        <div class="section-header" data-reveal="up">
+          <div class="section-header__content">
+            <h2 class="section-title">Featured Communities</h2>
+            <p class="section-subtitle">Spotlight on clubs making waves this semester</p>
+          </div>
+        </div>
+        
+        <div class="featured-clubs" id="featuredClubs" data-stagger>
+          <!-- Featured clubs will be dynamically populated here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Join Community Section -->
+    <section class="section section--cta">
+      <div class="container">
+        <div class="cta-card" data-reveal="up">
+          <div class="cta-card__content">
+            <h2 class="section-title">Ready to Join?</h2>
+            <p class="section-subtitle">Become part of NM's vibrant campus community</p>
+            <div class="cta-card__actions">
+              <a href="dashboard.html" class="btn btn-primary btn-lg">My Applications</a>
+              <a href="explore.html" class="btn btn-secondary btn-lg">Browse Events</a>
+            </div>
+          </div>
+          <div class="cta-card__visual">
+            <div class="floating">
+              <div style="font-size: 4rem;">🎭</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Clubs Page Script -->
+  <script>
+    (() => {
+      const data = window.NMData;
+      if (!data) return;
+
+      // State
+      let currentFilter = {
+        search: '',
+        category: 'all',
+        sort: 'followers'
+      };
+      
+      let allClubs = [...data.clubs];
+
+      // Initialize
+      function init() {
+        setupEventListeners();
+        renderClubs();
+        renderFeaturedClubs();
+        updateClubCount();
+        
+        // Initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      // Setup Event Listeners
+      function setupEventListeners() {
+        // Search
+        const searchInput = document.getElementById('clubSearch');
+        const searchClear = document.getElementById('searchClear');
+        
+        searchInput?.addEventListener('input', (e) => {
+          currentFilter.search = e.target.value;
+          renderClubs();
+        });
+
+        searchClear?.addEventListener('click', () => {
+          searchInput.value = '';
+          currentFilter.search = '';
+          renderClubs();
+        });
+
+        // Sort
+        document.getElementById('clubSort')?.addEventListener('change', (e) => {
+          currentFilter.sort = e.target.value;
+          renderClubs();
+        });
+
+        // Category filters
+        document.querySelectorAll('.chip[data-category]').forEach(chip => {
+          chip.addEventListener('click', () => {
+            document.querySelectorAll('.chip[data-category]').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            currentFilter.category = chip.dataset.category;
+            renderClubs();
+          });
+        });
+
+        // Reset filters
+        document.getElementById('resetFilters')?.addEventListener('click', () => {
+          resetFilters();
+        });
+      }
+
+      // Filter Clubs
+      function filterClubs() {
+        return allClubs.filter(club => {
+          // Search filter
+          if (currentFilter.search) {
+            const searchLower = currentFilter.search.toLowerCase();
+            if (!club.name.toLowerCase().includes(searchLower) &&
+                !club.description.toLowerCase().includes(searchLower) &&
+                !club.category.toLowerCase().includes(searchLower)) {
+              return false;
+            }
+          }
+
+          // Category filter
+          if (currentFilter.category !== 'all' && club.category !== currentFilter.category) {
+            return false;
+          }
+
+          return true;
+        });
+      }
+
+      // Sort Clubs
+      function sortClubs(clubs) {
+        const sorted = [...clubs];
+        
+        switch (currentFilter.sort) {
+          case 'followers':
+            return sorted.sort((a, b) => b.members - a.members);
+          case 'events':
+            return sorted.sort((a, b) => b.events.length - a.events.length);
+          case 'name':
+            return sorted.sort((a, b) => a.name.localeCompare(b.name));
+          case 'category':
+            return sorted.sort((a, b) => a.category.localeCompare(b.category));
+          default:
+            return sorted;
+        }
+      }
+
+      // Render Clubs
+      function renderClubs() {
+        const container = document.getElementById('clubsGrid');
+        const emptyState = document.getElementById('emptyState');
+        
+        if (!container) return;
+
+        const filtered = filterClubs();
+        const sorted = sortClubs(filtered);
+
+        if (sorted.length === 0) {
+          container.innerHTML = '';
+          emptyState.hidden = false;
+        } else {
+          emptyState.hidden = true;
+          container.innerHTML = sorted.map(club => createClubCard(club)).join('');
+          
+          // Re-initialize Lucide icons for new content
+          if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+          }
+        }
+
+        updateClubCount();
+      }
+
+      // Create Club Card HTML
+      function createClubCard(club) {
+        return `
+          <article class="club-card" data-club-id="${club.id}">
+            <div class="club-card__header">
+              <img src="${club.logo}" alt="${club.name}" class="club-card__logo">
+              <div class="club-card__info">
+                <h3 class="club-card__name">${club.name}</h3>
+                <p class="club-card__category">${club.category}</p>
+              </div>
+              <div class="club-card__badge ${club.featured ? 'featured' : ''}">
+                ${club.featured ? 'Featured' : ''}
+              </div>
+            </div>
+            
+            <div class="club-card__content">
+              <p class="club-card__description">${club.description}</p>
+              
+              <div class="club-card__stats">
+                <div class="club-card__stat">
+                  <i data-lucide="users"></i>
+                  <span>${club.members.toLocaleString()} members</span>
+                </div>
+                <div class="club-card__stat">
+                  <i data-lucide="calendar"></i>
+                  <span>${club.events.length} events</span>
+                </div>
+              </div>
+              
+              <div class="club-card__social">
+                ${club.social.instagram ? `<a href="${club.social.instagram}" class="social-link" aria-label="Instagram">IG</a>` : ''}
+                ${club.social.linkedin ? `<a href="${club.social.linkedin}" class="social-link" aria-label="LinkedIn">IN</a>` : ''}
+                ${club.social.twitter ? `<a href="${club.social.twitter}" class="social-link" aria-label="Twitter">TW</a>` : ''}
+              </div>
+              
+              <div class="club-card__leadership">
+                <h4>Leadership</h4>
+                <div class="leadership-team">
+                  ${club.leadership.slice(0, 3).map(leader => `
+                    <div class="leader-item">
+                      <img src="${leader.avatar}" alt="${leader.name}" class="leader-item__avatar">
+                      <div class="leader-item__info">
+                        <div class="leader-item__name">${leader.name}</div>
+                        <div class="leader-item__role">${leader.role}</div>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+            
+            <div class="club-card__footer">
+              <a href="club.html?id=${club.id}" class="btn btn-primary btn-sm">View Profile</a>
+              <button class="btn btn-ghost btn-sm" data-follow-club="${club.id}">
+                <i data-lucide="user-plus"></i>
+                Follow
+              </button>
+            </div>
+          </article>
+        `;
+      }
+
+      // Render Featured Clubs
+      function renderFeaturedClubs() {
+        const container = document.getElementById('featuredClubs');
+        if (!container) return;
+
+        const featuredClubs = allClubs.filter(club => club.featured).slice(0, 3);
+        
+        container.innerHTML = featuredClubs.map(club => `
+          <div class="featured-club">
+            <div class="featured-club__visual">
+              <img src="${club.logo}" alt="${club.name}" class="featured-club__logo">
+            </div>
+            <div class="featured-club__content">
+              <h3 class="featured-club__name">${club.name}</h3>
+              <p class="featured-club__category">${club.category}</p>
+              <p class="featured-club__description">${club.description}</p>
+              <div class="featured-club__stats">
+                <span><i data-lucide="users"></i> ${club.members.toLocaleString()}</span>
+                <span><i data-lucide="calendar"></i> ${club.events.length} events</span>
+              </div>
+              <a href="club.html?id=${club.id}" class="btn btn-primary">Learn More</a>
+            </div>
+          </div>
+        `).join('');
+
+        // Re-initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      // Update Club Count
+      function updateClubCount() {
+        const count = document.querySelectorAll('.club-card').length;
+        document.getElementById('clubCount').textContent = `${count} clubs`;
+      }
+
+      // Reset Filters
+      function resetFilters() {
+        currentFilter = {
+          search: '',
+          category: 'all',
+          sort: 'followers'
+        };
+
+        // Reset UI
+        document.getElementById('clubSearch').value = '';
+        document.getElementById('clubSort').value = 'followers';
+        document.querySelectorAll('.chip[data-category]').forEach(c => c.classList.remove('active'));
+        document.querySelector('.chip[data-category="all"]')?.classList.add('active');
+
+        renderClubs();
+      }
+
+      // Initialize on DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
 </html>

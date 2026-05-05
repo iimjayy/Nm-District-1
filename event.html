@@ -1,157 +1,673 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Event Details | NM District</title>
-    <meta name="description" content="Premium event details and pass booking panel for NM College experiences." />
-    <link rel="stylesheet" href="assets/css/style.css" />
-    <script defer src="assets/js/data.js"></script>
-    <script defer src="assets/js/main.js"></script>
-    <script defer src="assets/js/event.js"></script>
-  </head>
-  <body>
-    <div class="cursor-glow" id="cursorGlow"></div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Details | NM District</title>
+  <meta name="description" content="Premium event details and pass booking panel for NM College experiences.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  
+  <!-- External Libraries -->
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.27/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  
+  <!-- Data -->
+  <script src="assets/js/data.js"></script>
+  
+  <!-- Main Script -->
+  <script src="assets/js/main.js"></script>
+</head>
+<body data-theme="dark">
 
-    <header class="floating-nav" id="floatingNav">
-      <div class="nav-inner">
-        <a class="brand" href="index.html" aria-label="NM District home">
-          <span class="brand-logo">NM</span>
-          <span>NM District</span>
-        </a>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a class="nav-link" data-nav-link href="index.html">Home</a>
-          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
-          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
-          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
-          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
-          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
-          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
-        </nav>
-        <div class="nav-actions">
-          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
-          <a class="btn-inline" href="booking.html">Checkout</a>
-        </div>
+  <!-- Custom Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand" aria-label="NM District home">
+        <div class="navbar__logo">NM</div>
+        <span>District</span>
+      </a>
+      
+      <div class="navbar__links">
+        <a href="index.html" class="navbar__link" data-nav-link>Home</a>
+        <a href="explore.html" class="navbar__link" data-nav-link>Explore</a>
+        <a href="clubs.html" class="navbar__link" data-nav-link>Clubs</a>
+        <a href="dashboard.html" class="navbar__link" data-nav-link>Dashboard</a>
       </div>
-    </header>
+      
+      <div class="navbar__actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <span>🌙</span>
+        </button>
+      </div>
+    </div>
+  </nav>
 
     <main>
-      <section class="hero hero-compact reveal transition-target" id="eventHero">
-        <div class="hero-media" id="eventHeroMedia"></div>
-        <div class="hero-content">
-          <p class="eyebrow" id="eventEyebrow">Category · Organizer</p>
-          <div class="badge-cloud" id="eventBadges"></div>
-          <h1 id="eventTitle">Loading event...</h1>
-          <p class="hero-subtitle" id="eventSubline"></p>
-          <div class="hero-cta">
-            <span class="pill" id="eventDatePill">Date</span>
-            <span class="pill" id="eventVenuePill">Venue</span>
-            <span class="pill" id="eventModePill">Mode</span>
+    <!-- Event Hero Section -->
+    <section class="hero hero--event" data-reveal="up">
+      <div class="hero__background" id="heroBackground"></div>
+      <div class="hero__parallax" id="heroParallax"></div>
+      
+      <div class="hero__content">
+        <div class="container">
+          <div class="hero__meta">
+            <span class="hero__category" id="eventCategory">Loading...</span>
+            <span class="hero__organizer" id="eventOrganizer">Loading...</span>
           </div>
+          
+          <h1 class="display-hero" id="eventTitle">Loading Event...</h1>
+          
+          <p class="hero__subtitle" id="eventSubtitle">Loading event details...</p>
+          
+          <div class="hero__info">
+            <div class="hero__info-item">
+              <i data-lucide="calendar"></i>
+              <span id="eventDate">Loading...</span>
+            </div>
+            <div class="hero__info-item">
+              <i data-lucide="clock"></i>
+              <span id="eventTime">Loading...</span>
+            </div>
+            <div class="hero__info-item">
+              <i data-lucide="map-pin"></i>
+              <span id="eventVenue">Loading...</span>
+            </div>
+            <div class="hero__info-item">
+              <i data-lucide="users"></i>
+              <span id="eventAttendees">Loading...</span>
+            </div>
+          </div>
+          
+          <div class="hero__tags" id="eventTags"></div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section class="section container">
-        <div class="detail-layout">
-          <div class="content-stack">
-            <article class="section-block reveal">
-              <h2>About</h2>
-              <p id="aboutText"></p>
-            </article>
-
-            <article class="section-block reveal">
-              <h2>Timeline / Agenda</h2>
-              <div class="agenda-grid" id="agendaGrid"></div>
-            </article>
-
-            <article class="section-block reveal">
-              <h2>Speakers / Guests</h2>
-              <div class="people-grid" id="peopleGrid"></div>
-            </article>
-
-            <article class="section-block reveal">
-              <h2>Who Is Attending</h2>
-              <div class="attending-row" id="attendingRow"></div>
-            </article>
-
-            <article class="section-block reveal">
-              <h2>FAQs</h2>
-              <div class="inline-list" id="faqList"></div>
-            </article>
-
-            <article class="section-block reveal">
-              <h2>Rules & Terms</h2>
-              <div class="rules-list" id="rulesList"></div>
-            </article>
-
-            <article class="section-block reveal">
-              <h2>Gallery</h2>
-              <div class="gallery-slider-shell">
-                <button class="carousel-arrow prev" id="galleryPrev" type="button">‹</button>
-                <div class="gallery-grid gallery-slider-track" id="galleryGrid"></div>
-                <button class="carousel-arrow next" id="galleryNext" type="button">›</button>
+    <!-- Event Details Section -->
+    <section class="section">
+      <div class="container">
+        <div class="event-layout">
+          <!-- Main Content -->
+          <div class="event-content" data-reveal="up">
+            <!-- About Section -->
+            <section class="event-section">
+              <h2 class="section-title">About This Event</h2>
+              <div class="event-description" id="eventDescription">
+                <p>Loading event description...</p>
               </div>
-            </article>
+            </section>
 
-            <article class="section-block reveal">
-              <h2>Venue Map</h2>
-              <div class="venue-map" id="venueMap"></div>
-            </article>
+            <!-- Timeline Section -->
+            <section class="event-section">
+              <h2 class="section-title">Event Timeline</h2>
+              <div class="timeline" id="eventTimeline">
+                <!-- Timeline items will be populated here -->
+              </div>
+            </section>
 
-            <article class="section-block reveal">
-              <h2>Reviews & Ratings</h2>
-              <div class="review-grid" id="reviewGrid"></div>
-            </article>
+            <!-- Speakers Section -->
+            <section class="event-section">
+              <h2 class="section-title">Speakers & Guests</h2>
+              <div class="speakers-grid" id="eventSpeakers">
+                <!-- Speakers will be populated here -->
+              </div>
+            </section>
 
-            <article class="section-block reveal">
-              <h2>Similar Events</h2>
-              <div class="similar-grid" id="similarEvents"></div>
-            </article>
+            <!-- Gallery Section -->
+            <section class="event-section">
+              <h2 class="section-title">Event Gallery</h2>
+              <div class="gallery" id="eventGallery">
+                <!-- Gallery items will be populated here -->
+              </div>
+            </section>
+
+            <!-- Rules Section -->
+            <section class="event-section">
+              <h2 class="section-title">Rules & Guidelines</h2>
+              <div class="rules-list" id="eventRules">
+                <!-- Rules will be populated here -->
+              </div>
+            </section>
+
+            <!-- Similar Events -->
+            <section class="event-section">
+              <h2 class="section-title">Similar Events</h2>
+              <div class="similar-events" id="similarEvents">
+                <!-- Similar events will be populated here -->
+              </div>
+            </section>
           </div>
 
-          <aside class="booking-panel reveal" id="eventBookingPanel">
-            <h3 style="margin: 0">Book Your Pass</h3>
-            <p class="muted" id="availabilityStatus">Checking availability...</p>
-
-            <div class="urgency-stack" id="urgencyStack">
-              <div class="urgency-pill" id="urgencyClose">Registration closes soon</div>
-              <div class="urgency-pill" id="urgencySeats">65 seats left</div>
-              <div class="urgency-pill" id="urgencyInterested">2,300 students interested</div>
+          <!-- Booking Panel -->
+          <aside class="booking-panel" data-reveal="right" data-sticky>
+            <div class="booking-panel__header">
+              <h3>Book Your Pass</h3>
+              <div class="booking-panel__status" id="bookingStatus">
+                <span class="status-indicator available"></span>
+                <span>Available</span>
+              </div>
             </div>
 
-            <div class="ticket-option-list" id="ticketOptions" style="margin-top: 0.8rem"></div>
-
-            <div class="quantity-selector">
-              <button class="qty-btn" id="qtyMinus" type="button">-</button>
-              <div class="qty-display" id="qtyDisplay">1</div>
-              <button class="qty-btn" id="qtyPlus" type="button">+</button>
+            <!-- Urgency Indicators -->
+            <div class="booking-panel__urgency">
+              <div class="urgency-item">
+                <i data-lucide="clock"></i>
+                <span id="urgencyTime">Registration closes soon</span>
+              </div>
+              <div class="urgency-item">
+                <i data-lucide="users"></i>
+                <span id="urgencySeats">Limited seats available</span>
+              </div>
+              <div class="urgency-item">
+                <i data-lucide="trending-up"></i>
+                <span id="urgencyInterested">High demand</span>
+              </div>
             </div>
 
-            <div class="summary-line total" style="margin-top: 0.8rem">
-              <span>Total</span>
-              <span id="ticketTotal">₹0</span>
+            <!-- Ticket Options -->
+            <div class="booking-panel__tickets">
+              <h4>Select Ticket Type</h4>
+              <div class="ticket-options" id="ticketOptions">
+                <!-- Ticket options will be populated here -->
+              </div>
             </div>
 
-            <div class="countdown" id="regCountdown">Registration closes soon.</div>
-
-            <div class="action-stack">
-              <a class="btn-primary" id="bookNowBtn" href="booking.html">Book Now</a>
+            <!-- Quantity Selector -->
+            <div class="booking-panel__quantity">
+              <label>Quantity</label>
+              <div class="quantity-selector">
+                <button class="quantity-btn" id="qtyDecrease" aria-label="Decrease quantity">
+                  <i data-lucide="minus"></i>
+                </button>
+                <input type="number" class="quantity-input" id="qtyInput" value="1" min="1" max="10">
+                <button class="quantity-btn" id="qtyIncrease" aria-label="Increase quantity">
+                  <i data-lucide="plus"></i>
+                </button>
+              </div>
             </div>
 
-            <div class="side-actions">
-              <button class="btn-inline" type="button" id="wishlistBtn">Save</button>
-              <button class="btn-inline" type="button" id="shareBtn">Share</button>
-              <button class="btn-inline" type="button" id="calendarBtn">Calendar</button>
+            <!-- Price Summary -->
+            <div class="booking-panel__summary">
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="subtotal">₹0</span>
+              </div>
+              <div class="summary-row">
+                <span>Processing Fee</span>
+                <span id="processingFee">₹0</span>
+              </div>
+              <div class="summary-row summary-row--total">
+                <span>Total</span>
+                <span id="totalPrice">₹0</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="booking-panel__actions">
+              <a href="booking.html" class="btn btn-primary btn-lg btn-block" id="bookNowBtn">
+                Book Now
+              </a>
+              
+              <div class="booking-panel__secondary">
+                <button class="btn btn-ghost" id="saveEventBtn">
+                  <i data-lucide="heart"></i>
+                  Save Event
+                </button>
+                <button class="btn btn-ghost" id="shareEventBtn">
+                  <i data-lucide="share-2"></i>
+                  Share
+                </button>
+              </div>
+            </div>
+
+            <!-- Event Info -->
+            <div class="booking-panel__info">
+              <div class="info-item">
+                <i data-lucide="calendar"></i>
+                <div>
+                  <strong>Date</strong>
+                  <span id="panelDate">Loading...</span>
+                </div>
+              </div>
+              <div class="info-item">
+                <i data-lucide="clock"></i>
+                <div>
+                  <strong>Time</strong>
+                  <span id="panelTime">Loading...</span>
+                </div>
+              </div>
+              <div class="info-item">
+                <i data-lucide="map-pin"></i>
+                <div>
+                  <strong>Venue</strong>
+                  <span id="panelVenue">Loading...</span>
+                </div>
+              </div>
             </div>
           </aside>
         </div>
-      </section>
-
-      <div class="mobile-action-bar" id="mobileActionBar">
-        <button class="btn-inline" type="button" id="mobileSave">Save</button>
-        <button class="btn-inline" type="button" id="mobileShare">Share</button>
-        <a class="btn-primary" id="mobileBook" href="booking.html">Book</a>
       </div>
-    </main>
-  </body>
+    </section>
+  </main>
+
+  <!-- Event Page Script -->
+  <script>
+    (() => {
+      const data = window.NMData;
+      if (!data) return;
+
+      // Get event ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const eventId = urlParams.get('id');
+      
+      if (!eventId) {
+        window.location.href = 'explore.html';
+        return;
+      }
+
+      // Find event
+      const event = data.events.find(e => e.id === eventId);
+      if (!event) {
+        window.location.href = 'explore.html';
+        return;
+      }
+
+      // State
+      let selectedTicket = null;
+      let quantity = 1;
+
+      // Initialize
+      function init() {
+        renderEvent();
+        setupEventListeners();
+        initializeParallax();
+        
+        // Initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      // Render Event Details
+      function renderEvent() {
+        // Update page title
+        document.title = `${event.title} | NM District`;
+
+        // Hero section
+        document.getElementById('eventCategory').textContent = event.category;
+        document.getElementById('eventOrganizer').textContent = event.hostedBy;
+        document.getElementById('eventTitle').textContent = event.title;
+        document.getElementById('eventSubtitle').textContent = event.description;
+        document.getElementById('eventDate').textContent = window.NMFormat.date(event.date);
+        document.getElementById('eventTime').textContent = `${event.time.start} - ${event.time.end}`;
+        document.getElementById('eventVenue').textContent = event.venue;
+        document.getElementById('eventAttendees').textContent = `${event.interested.toLocaleString()} interested`;
+
+        // Hero background
+        const heroBackground = document.getElementById('heroBackground');
+        if (heroBackground) {
+          heroBackground.style.backgroundImage = `url(${event.image})`;
+        }
+
+        // Tags
+        const tagsContainer = document.getElementById('eventTags');
+        if (tagsContainer) {
+          tagsContainer.innerHTML = event.tags.map(tag => 
+            `<span class="chip">${tag}</span>`
+          ).join('');
+        }
+
+        // Description
+        const descriptionContainer = document.getElementById('eventDescription');
+        if (descriptionContainer) {
+          descriptionContainer.innerHTML = `<p>${event.description}</p>`;
+        }
+
+        // Timeline
+        renderTimeline();
+
+        // Speakers
+        renderSpeakers();
+
+        // Gallery
+        renderGallery();
+
+        // Rules
+        renderRules();
+
+        // Similar events
+        renderSimilarEvents();
+
+        // Ticket options
+        renderTicketOptions();
+
+        // Booking panel info
+        updateBookingPanel();
+      }
+
+      // Render Timeline
+      function renderTimeline() {
+        const timelineContainer = document.getElementById('eventTimeline');
+        if (!timelineContainer) return;
+
+        timelineContainer.innerHTML = event.agenda.map((item, index) => `
+          <div class="timeline-item">
+            <div class="timeline-item__time">${item.time}</div>
+            <div class="timeline-item__content">
+              <h4>${item.title}</h4>
+              <p>${item.description}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Render Speakers
+      function renderSpeakers() {
+        const speakersContainer = document.getElementById('eventSpeakers');
+        if (!speakersContainer) return;
+
+        // Get speakers from data or use placeholders
+        const speakers = data.speakers.slice(0, 3);
+
+        speakersContainer.innerHTML = speakers.map(speaker => `
+          <div class="speaker-card">
+            <img src="${speaker.avatar}" alt="${speaker.name}" class="speaker-card__avatar">
+            <div class="speaker-card__content">
+              <h4 class="speaker-card__name">${speaker.name}</h4>
+              <p class="speaker-card__role">${speaker.role}</p>
+              <p class="speaker-card__bio">${speaker.bio}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Render Gallery
+      function renderGallery() {
+        const galleryContainer = document.getElementById('eventGallery');
+        if (!galleryContainer) return;
+
+        galleryContainer.innerHTML = event.gallery.map((image, index) => `
+          <div class="gallery-item">
+            <img src="${image}" alt="Event gallery ${index + 1}" class="gallery-item__image">
+          </div>
+        `).join('');
+      }
+
+      // Render Rules
+      function renderRules() {
+        const rulesContainer = document.getElementById('eventRules');
+        if (!rulesContainer) return;
+
+        rulesContainer.innerHTML = event.rules.map(rule => `
+          <div class="rule-item">
+            <i data-lucide="check-circle"></i>
+            <span>${rule}</span>
+          </div>
+        `).join('');
+
+        // Re-initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      // Render Similar Events
+      function renderSimilarEvents() {
+        const similarContainer = document.getElementById('similarEvents');
+        if (!similarContainer) return;
+
+        const similarEvents = data.events
+          .filter(e => e.id !== event.id && e.category === event.category)
+          .slice(0, 3);
+
+        similarContainer.innerHTML = similarEvents.map(similarEvent => `
+          <article class="event-card event-card--compact">
+            <img src="${similarEvent.image}" alt="${similarEvent.title}" class="event-card__image">
+            <div class="event-card__content">
+              <h4 class="event-card__title">${similarEvent.title}</h4>
+              <p class="event-card__meta">${window.NMFormat.date(similarEvent.date)} • ${similarEvent.venue}</p>
+              <div class="event-card__price">${window.NMFormat.currency(similarEvent.tiers[0]?.price)}</div>
+              <a href="event.html?id=${similarEvent.id}" class="btn btn-primary btn-sm">View Details</a>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      // Render Ticket Options
+      function renderTicketOptions() {
+        const ticketsContainer = document.getElementById('ticketOptions');
+        if (!ticketsContainer) return;
+
+        ticketsContainer.innerHTML = event.tiers.map((tier, index) => `
+          <div class="ticket-option ${index === 0 ? 'selected' : ''}" data-tier="${tier.name}">
+            <div class="ticket-option__header">
+              <h4 class="ticket-option__name">${tier.name}</h4>
+              <div class="ticket-option__price">${window.NMFormat.currency(tier.price)}</div>
+            </div>
+            <div class="ticket-option__perks">
+              ${tier.perks.map(perk => `
+                <div class="perk-item">
+                  <i data-lucide="check"></i>
+                  <span>${perk}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+
+        // Set default selection
+        selectedTicket = event.tiers[0];
+
+        // Re-initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      // Update Booking Panel
+      function updateBookingPanel() {
+        // Update info
+        document.getElementById('panelDate').textContent = window.NMFormat.date(event.date);
+        document.getElementById('panelTime').textContent = `${event.time.start} - ${event.time.end}`;
+        document.getElementById('panelVenue').textContent = event.venue;
+
+        // Update urgency
+        document.getElementById('urgencyTime').textContent = `${event.interested} students interested`;
+        document.getElementById('urgencySeats').textContent = 'Limited seats available';
+        document.getElementById('urgencyInterested').textContent = 'High demand';
+
+        // Update pricing
+        updatePricing();
+      }
+
+      // Update Pricing
+      function updatePricing() {
+        if (!selectedTicket) return;
+
+        const subtotal = selectedTicket.price * quantity;
+        const processingFee = subtotal > 0 ? Math.round(subtotal * 0.02) : 0;
+        const total = subtotal + processingFee;
+
+        document.getElementById('subtotal').textContent = window.NMFormat.currency(subtotal);
+        document.getElementById('processingFee').textContent = window.NMFormat.currency(processingFee);
+        document.getElementById('totalPrice').textContent = window.NMFormat.currency(total);
+      }
+
+      // Setup Event Listeners
+      function setupEventListeners() {
+        // Ticket selection
+        document.querySelectorAll('.ticket-option').forEach(option => {
+          option.addEventListener('click', () => {
+            document.querySelectorAll('.ticket-option').forEach(o => o.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            const tierName = option.dataset.tier;
+            selectedTicket = event.tiers.find(t => t.name === tierName);
+            updatePricing();
+          });
+        });
+
+        // Quantity controls
+        const qtyInput = document.getElementById('qtyInput');
+        const qtyDecrease = document.getElementById('qtyDecrease');
+        const qtyIncrease = document.getElementById('qtyIncrease');
+
+        qtyDecrease?.addEventListener('click', () => {
+          if (quantity > 1) {
+            quantity--;
+            qtyInput.value = quantity;
+            updatePricing();
+          }
+        });
+
+        qtyIncrease?.addEventListener('click', () => {
+          if (quantity < 10) {
+            quantity++;
+            qtyInput.value = quantity;
+            updatePricing();
+          }
+        });
+
+        qtyInput?.addEventListener('change', (e) => {
+          const newQuantity = parseInt(e.target.value);
+          if (newQuantity >= 1 && newQuantity <= 10) {
+            quantity = newQuantity;
+            updatePricing();
+          } else {
+            e.target.value = quantity;
+          }
+        });
+
+        // Save event
+        const saveBtn = document.getElementById('saveEventBtn');
+        saveBtn?.addEventListener('click', () => {
+          const isSaved = window.NMData.student.savedEvents.includes(event.id);
+          if (isSaved) {
+            // Remove from saved
+            const index = window.NMData.student.savedEvents.indexOf(event.id);
+            window.NMData.student.savedEvents.splice(index, 1);
+            window.NMToast('Event removed from saved');
+          } else {
+            // Add to saved
+            window.NMData.student.savedEvents.push(event.id);
+            window.NMToast('Event saved successfully');
+          }
+          
+          // Update button state
+          updateSaveButton();
+        });
+
+        // Share event
+        const shareBtn = document.getElementById('shareEventBtn');
+        shareBtn?.addEventListener('click', async () => {
+          const shareUrl = `${window.location.origin}${window.location.pathname}?id=${event.id}`;
+          
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: event.title,
+                text: event.description,
+                url: shareUrl
+              });
+            } catch (err) {
+              // Fallback to clipboard
+              copyToClipboard(shareUrl);
+            }
+          } else {
+            copyToClipboard(shareUrl);
+          }
+        });
+
+        // Book now button
+        const bookNowBtn = document.getElementById('bookNowBtn');
+        bookNowBtn?.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // Store booking data
+          const bookingData = {
+            eventId: event.id,
+            ticketTier: selectedTicket.name,
+            quantity: quantity,
+            totalPrice: selectedTicket.price * quantity
+          };
+          
+          localStorage.setItem('nm-booking-data', JSON.stringify(bookingData));
+          window.location.href = `booking.html?id=${event.id}`;
+        });
+
+        // Initialize save button state
+        updateSaveButton();
+      }
+
+      // Update Save Button
+      function updateSaveButton() {
+        const saveBtn = document.getElementById('saveEventBtn');
+        if (!saveBtn) return;
+
+        const isSaved = window.NMData.student.savedEvents.includes(event.id);
+        saveBtn.innerHTML = `
+          <i data-lucide="heart"></i>
+          ${isSaved ? 'Saved' : 'Save Event'}
+        `;
+        saveBtn.classList.toggle('saved', isSaved);
+
+        // Re-initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      // Copy to Clipboard
+      async function copyToClipboard(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          window.NMToast('Event link copied to clipboard');
+        } catch (err) {
+          window.NMToast('Failed to copy link');
+        }
+      }
+
+      // Initialize Parallax
+      function initializeParallax() {
+        if (typeof gsap === 'undefined') return;
+
+        const parallaxElement = document.getElementById('heroParallax');
+        if (!parallaxElement) return;
+
+        gsap.to(parallaxElement, {
+          yPercent: -50,
+          ease: "none",
+          scrollTrigger: {
+            trigger: parallaxElement,
+            start: "top top",
+            end: "bottom top",
+            scrub: true
+          }
+        });
+      }
+
+      // Initialize on DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
 </html>

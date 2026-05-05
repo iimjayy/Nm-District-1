@@ -1,336 +1,291 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NM District | Discover Every Campus Moment</title>
-    <meta name="description" content="NM District is the premium discovery and pass-booking platform for NM College events, festivals, workshops, and club experiences." />
-    <link rel="stylesheet" href="assets/css/style.css" />
-    <script defer src="assets/js/data.js"></script>
-    <script defer src="assets/js/main.js"></script>
-  </head>
-  <body>
-    <div class="cursor-glow" id="cursorGlow"></div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NM District | Discover Every Campus Moment</title>
+  <meta name="description" content="NM District is the premium discovery and pass-booking platform for NM College events, festivals, workshops, and club experiences.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  
+  <!-- External Libraries -->
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.27/dist/lenis.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
+  
+  <!-- Data -->
+  <script src="assets/js/data.js"></script>
+  
+  <!-- Main Script -->
+  <script src="assets/js/main.js" defer></script>
+</head>
+<body data-theme="dark">
 
-    <header class="floating-nav" id="floatingNav">
-      <div class="nav-inner">
-        <a class="brand" href="index.html" aria-label="NM District home">
-          <span class="brand-logo">NM</span>
-          <span>NM District</span>
-        </a>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a class="nav-link active" data-nav-link href="index.html">Home</a>
-          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
-          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
-          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
-          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
-          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
-          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
-        </nav>
-        <div class="nav-actions">
-          <a class="btn-inline nav-cta" href="dashboard.html">My Passes</a>
-          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
+  <!-- Custom Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Command Palette -->
+  <div class="cmd-palette" id="cmd-palette">
+    <div class="cmd-palette__panel">
+      <div class="cmd-palette__input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-3); flex-shrink: 0;">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" class="cmd-palette__input" id="cmd-input" placeholder="Search events, clubs, pages..." autocomplete="off">
+        <kbd class="cmd-trigger__key" style="flex-shrink: 0;">ESC</kbd>
+      </div>
+      <div class="cmd-palette__results" id="cmd-results"></div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar__brand" aria-label="NM District home">
+      <div class="navbar__logo">NM</div>
+      <span class="navbar__brand-text">District</span>
+    </a>
+    
+    <div class="navbar__links">
+      <a href="index.html" class="navbar__link active" data-nav-link>Home</a>
+      <a href="explore.html" class="navbar__link" data-nav-link>Explore</a>
+      <a href="clubs.html" class="navbar__link" data-nav-link>Clubs</a>
+      <a href="dashboard.html" class="navbar__link" data-nav-link>Dashboard</a>
+    </div>
+    
+    <div class="navbar__actions">
+      <button class="cmd-trigger" aria-label="Open search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <span>Search</span>
+        <span class="cmd-trigger__keys">
+          <kbd class="cmd-trigger__key">⌘</kbd>
+          <kbd class="cmd-trigger__key">K</kbd>
+        </span>
+      </button>
+      <button class="theme-toggle" aria-label="Toggle theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero__bg">
+        <div class="hero__bg-gradient"></div>
+        <div class="hero__bg-noise"></div>
+      </div>
+      
+      <div class="hero__content">
+        <div class="container">
+          <div class="hero__eyebrow">
+            <span class="hero__eyebrow-dot"></span>
+            <span>NM College Exclusive</span>
+          </div>
+          
+          <h1 class="text-display hero__title">
+            Discover Every<br><span class="text-gradient">Campus Moment</span>
+          </h1>
+          
+          <p class="hero__subtitle">
+            Festivals, music nights, networking circles, competitions, and workshops — all in one cinematic discovery layer built for the NM experience.
+          </p>
+          
+          <div class="hero__actions">
+            <a href="explore.html" class="btn btn-primary btn-lg btn-ripple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <span>Explore Events</span>
+            </a>
+            <a href="clubs.html" class="btn btn-secondary btn-lg btn-ripple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>Browse Clubs</span>
+            </a>
+          </div>
+          
+          <div class="hero__stats" data-stagger>
+            <div class="stat-card">
+              <div class="stat-card__value" data-counter="500" data-suffix="+">0+</div>
+              <div class="stat-card__label">Events</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__value" data-counter="50" data-suffix="+">0+</div>
+              <div class="stat-card__label">Clubs</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__value" data-counter="10000" data-suffix="+">0+</div>
+              <div class="stat-card__label">Students</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__value" data-counter="100" data-suffix="+">0+</div>
+              <div class="stat-card__label">Workshops</div>
+            </div>
+          </div>
         </div>
       </div>
-    </header>
+    </section>
 
-    <main class="story-main">
-      <section class="district-hero apple-event-hero reveal" id="districtHero">
-        <div class="hero-soft-canvas" aria-hidden="true"></div>
-        <div class="hero-light-ribbon" aria-hidden="true"></div>
-        <div class="hero-burst-layer" id="heroBurstLayer" aria-hidden="true"></div>
-        <div class="hero-floating-elements" id="heroFloatingElements" aria-hidden="true"></div>
-
-        <div class="district-hero-shell">
-          <article class="hero-story-copy" id="heroStoryCopy">
-            <p class="hero-story-eyebrow">NM District Experience</p>
-            <h1 class="hero-story-title hero-entry-item" id="heroStoryTitle">Discover Every Campus Moment</h1>
-            <p class="hero-story-subtext hero-entry-item" id="heroStorySubtext">
-              Festivals, music nights, networking circles, competitions, and workshops flowing together in one cinematic discovery layer.
-            </p>
-            <div class="hero-story-cta-wrap hero-entry-item">
-              <a class="btn-primary hero-main-cta magnetic-target" data-magnetic id="heroPrimaryCta" href="explore.html">Explore Events</a>
-            </div>
-          </article>
-
-          <div class="event-core-stage" id="eventCoreStage" aria-hidden="true">
-            <svg class="event-core-svg" id="eventCoreSvg" viewBox="0 0 420 420" role="img" aria-label="Animated event ecosystem composition">
-              <defs>
-                <linearGradient id="coreHubGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#ffb664" />
-                  <stop offset="52%" stop-color="#ff6992" />
-                  <stop offset="100%" stop-color="#a977ff" />
-                </linearGradient>
-                <linearGradient id="coreInnerGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#fff7cf" />
-                  <stop offset="100%" stop-color="#fff1de" />
-                </linearGradient>
-                <linearGradient id="coreLineGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#ffb35f" />
-                  <stop offset="45%" stop-color="#ff6f95" />
-                  <stop offset="100%" stop-color="#956fff" />
-                </linearGradient>
-              </defs>
-
-              <g class="core-rings">
-                <circle class="core-ring ring-outer" cx="210" cy="210" r="140"></circle>
-                <circle class="core-ring ring-mid" cx="210" cy="210" r="102"></circle>
-              </g>
-
-              <g class="core-links">
-                <path data-core-line pathLength="100" d="M210 210 Q156 158 97 130"></path>
-                <path data-core-line pathLength="100" d="M210 210 Q252 160 319 132"></path>
-                <path data-core-line pathLength="100" d="M210 210 Q143 232 108 291"></path>
-                <path data-core-line pathLength="100" d="M210 210 Q280 236 327 276"></path>
-                <path data-core-line pathLength="100" d="M210 210 Q212 288 210 332"></path>
-                <path data-core-line pathLength="100" d="M210 210 Q302 196 342 210"></path>
-              </g>
-
-              <g class="core-hub">
-                <circle class="hub-shell" cx="210" cy="210" r="64"></circle>
-                <circle class="hub-inner" cx="210" cy="210" r="34"></circle>
-                <text x="210" y="218" text-anchor="middle">NM</text>
-              </g>
-
-              <g class="core-node node-music" data-core-node style="--node-offset-x: -32px; --node-offset-y: 26px; --node-rot: -16deg" transform="translate(97 130)">
-                <circle cx="0" cy="0" r="30"></circle>
-                <path d="M7 -11v15.2a6 6 0 1 1-2.6-5V-9L-8 -6.2v14.4a6 6 0 1 1-2.6-5v-12L7 -13z"></path>
-              </g>
-
-              <g class="core-node node-mic" data-core-node style="--node-offset-x: 29px; --node-offset-y: 28px; --node-rot: 15deg" transform="translate(318 133)">
-                <circle cx="0" cy="0" r="30"></circle>
-                <path d="M0 -13v16M-5 -14a5 5 0 0 1 10 0v9a5 5 0 0 1-10 0zM-10 -3a10 10 0 0 0 20 0M0 8v5M-6 13h12"></path>
-              </g>
-
-              <g class="core-node node-trophy" data-core-node style="--node-offset-x: -30px; --node-offset-y: -18px; --node-rot: -14deg" transform="translate(108 290)">
-                <circle cx="0" cy="0" r="30"></circle>
-                <path d="M-8 -10h16v4a8 8 0 0 1-16 0zM-6 6h12M-4 11h8M-11 -9h-4a4 4 0 0 0 4 4M11 -9h4a4 4 0 0 1-4 4"></path>
-              </g>
-
-              <g class="core-node node-ticket" data-core-node style="--node-offset-x: 26px; --node-offset-y: -14px; --node-rot: 14deg" transform="translate(326 276)">
-                <circle cx="0" cy="0" r="30"></circle>
-                <path d="M-12 -8h24a2 2 0 0 1 2 2v2.2a3.3 3.3 0 0 0 0 6.5V5a2 2 0 0 1-2 2h-24a2 2 0 0 1-2-2V2.7a3.3 3.3 0 0 0 0-6.5V-6a2 2 0 0 1 2-2zM1 -8V8"></path>
-              </g>
-
-              <g class="core-node node-people" data-core-node style="--node-offset-x: 0px; --node-offset-y: -24px; --node-rot: -8deg" transform="translate(210 332)">
-                <circle cx="0" cy="0" r="30"></circle>
-                <path d="M-6 -3a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM8 -3a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4zM-14 9c1-4.1 4.2-6.5 8-6.5s7 2.4 8 6.5M2 9c.8-3.1 3.2-5 6.1-5 2.5 0 4.6 1.4 5.8 3.8"></path>
-              </g>
-
-              <g class="core-node node-workshop" data-core-node style="--node-offset-x: 24px; --node-offset-y: 4px; --node-rot: 10deg" transform="translate(343 210)">
-                <circle cx="0" cy="0" r="30"></circle>
-                <path d="M0 -13a7.6 7.6 0 0 1 4.3 13.9V4h-8.6V0.9A7.6 7.6 0 0 1 0 -13zM-4 9h8M-3 13h6"></path>
-              </g>
-            </svg>
+    <!-- Smart Greeting -->
+    <section class="section hidden" data-section="greeting" data-reveal="up">
+      <div class="container">
+        <div class="greeting-banner">
+          <div class="greeting-banner__text">
+            <h2 class="greeting-banner__title" data-greeting>Welcome back</h2>
+            <p class="greeting-banner__subtitle">Here is what is happening on campus today</p>
           </div>
+          <a href="dashboard.html" class="btn btn-secondary">Go to Dashboard →</a>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section class="section container">
-        <div class="section-head reveal">
+    <!-- Recommended for You (shown if user has history) -->
+    <section class="section hidden" data-section="recommended" data-reveal="up">
+      <div class="container">
+        <div class="section-header">
           <div>
-            <h2 class="section-title">Explore Categories</h2>
-            <p class="section-copy">Structured like District, refined for NM College event discovery.</p>
+            <div class="section-header__eyebrow">Personalized</div>
+            <h2 class="section-header__title">Recommended for You</h2>
+            <p class="section-header__subtitle">Based on your interests and activity</p>
           </div>
         </div>
-        <div class="category-rail" id="premiumCategoryRail"></div>
-      </section>
+        <div class="recommended-grid event-grid" data-stagger>
+          <!-- Populated by main.js -->
+        </div>
+      </div>
+    </section>
 
-      <section class="section container">
-        <div class="section-head reveal">
+    <!-- Featured Events -->
+    <section class="section" data-reveal="up">
+      <div class="container">
+        <div class="section-header">
           <div>
-            <h2 class="section-title">Artists, Speakers, and Guests</h2>
-            <p class="section-copy">Campus icons, judges, hosts, and invited talent.</p>
+            <div class="section-header__eyebrow">Curated</div>
+            <h2 class="section-header__title">Featured Events</h2>
+            <p class="section-header__subtitle">Handpicked experiences that define campus life</p>
           </div>
-          <a class="btn-inline" href="explore.html">View All &#8250;</a>
+          <a href="explore.html" class="btn btn-ghost">
+            View All
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
         </div>
-        <div class="featured-people-row" id="featuredPeopleRow"></div>
-      </section>
+        
+        <div class="event-grid" data-stagger>
+          <!-- Populated by main.js -->
+        </div>
+      </div>
+    </section>
 
-      <section class="section container" id="discoverySection">
-        <div class="section-head reveal">
+    <!-- Categories -->
+    <section class="section" data-reveal="up">
+      <div class="container">
+        <div class="section-header">
           <div>
-            <h2 class="section-title">Browse Events Fast</h2>
-            <p class="section-copy">Simple discoverability with premium visual polish.</p>
+            <div class="section-header__eyebrow">Browse</div>
+            <h2 class="section-header__title">Explore Categories</h2>
+            <p class="section-header__subtitle">Find events that match your interests</p>
           </div>
         </div>
-
-        <div class="discovery-filter-bar reveal" id="discoveryFilterBar">
-          <button class="filter-pill active" data-discovery-pill="all" type="button">All</button>
-          <button class="filter-pill" data-discovery-pill="today" type="button">Today</button>
-          <button class="filter-pill" data-discovery-pill="tomorrow" type="button">Tomorrow</button>
-          <button class="filter-pill" data-discovery-pill="thisweek" type="button">This Week</button>
-          <button class="filter-pill" data-discovery-pill="free" type="button">Free</button>
-          <button class="filter-pill" data-discovery-pill="paid" type="button">Paid</button>
-          <button class="filter-pill" data-discovery-pill="Sports" type="button">Sports</button>
-          <button class="filter-pill" data-discovery-pill="Music" type="button">Music</button>
-          <button class="filter-pill" data-discovery-pill="Workshops" type="button">Workshops</button>
-          <button class="filter-pill" data-discovery-pill="Cultural Events" type="button">Cultural</button>
-          <button class="filter-pill" data-discovery-pill="Networking" type="button">Networking</button>
-          <button class="btn-inline" id="discoveryMoreFiltersBtn" type="button">More Filters</button>
+        
+        <div class="category-grid" data-stagger>
+          <!-- Populated by main.js -->
         </div>
+      </div>
+    </section>
 
-        <div class="discovery-more-filters" id="discoveryMoreFiltersPanel" hidden>
-          <div class="filter-grid-row">
-            <label>
-              <span class="filter-label">Start Date</span>
-              <input class="form-input" id="discoveryDateStart" type="date" />
-            </label>
-            <label>
-              <span class="filter-label">End Date</span>
-              <input class="form-input" id="discoveryDateEnd" type="date" />
-            </label>
-            <label>
-              <span class="filter-label">Venue</span>
-              <select class="form-select" id="discoveryVenue">
-                <option value="all">All venues</option>
-              </select>
-            </label>
-            <label>
-              <span class="filter-label">Committee</span>
-              <select class="form-select" id="discoveryCommittee">
-                <option value="all">All committees</option>
-              </select>
-            </label>
-            <label>
-              <span class="filter-label">Pass Price</span>
-              <select class="form-select" id="discoveryPrice">
-                <option value="all">All</option>
-                <option value="free">Free</option>
-                <option value="paid">Paid</option>
-              </select>
-            </label>
-            <label>
-              <span class="filter-label">Mode</span>
-              <select class="form-select" id="discoveryMode">
-                <option value="all">All</option>
-                <option value="offline">Offline</option>
-                <option value="online">Online</option>
-                <option value="hybrid">Hybrid</option>
-              </select>
-            </label>
+    <!-- Featured Clubs -->
+    <section class="section" data-reveal="up">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <div class="section-header__eyebrow">Community</div>
+            <h2 class="section-header__title">Featured Clubs</h2>
+            <p class="section-header__subtitle">Join communities that shape your campus experience</p>
           </div>
-          <div class="filter-actions-row">
-            <button class="btn-primary" id="discoveryApplyFilters" type="button">Apply Filters</button>
-            <button class="btn-secondary" id="discoveryResetFilters" type="button">Clear All</button>
+          <a href="clubs.html" class="btn btn-ghost">
+            View All
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        </div>
+        
+        <div class="club-grid" data-stagger>
+          <!-- Populated by main.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section section--cta" data-reveal="up">
+      <div class="container">
+        <div class="cta-card">
+          <h2 class="text-display-sm" style="margin-bottom: 16px;">Ready to Discover?</h2>
+          <p class="section-header__subtitle" style="margin: 0 auto; max-width: 400px;">
+            Join thousands of students exploring campus life through NM District
+          </p>
+          <div class="cta-card__actions">
+            <a href="explore.html" class="btn btn-primary btn-lg btn-ripple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              Start Exploring
+            </a>
+            <a href="dashboard.html" class="btn btn-secondary btn-lg btn-ripple">My Dashboard</a>
           </div>
         </div>
+      </div>
+    </section>
+  </main>
 
-        <div class="active-filter-badges" id="discoveryActiveBadges"></div>
-
-        <div class="district-event-grid" id="districtEventGrid"></div>
-        <div class="empty-state" id="districtEmptyState" hidden>No events match these filters yet.</div>
-      </section>
-
-      <section class="section container">
-        <div class="floating-cta-row">
-          <article class="floating-cta-card">
-            <h3>Book Your Fest Pass</h3>
-            <p>Skip the queue and secure entry early.</p>
-            <a class="btn-inline" href="explore.html">Browse Fests</a>
-          </article>
-          <article class="floating-cta-card">
-            <h3>Explore Clubs</h3>
-            <p>Discover all NM committees and student communities.</p>
-            <a class="btn-inline" href="clubs.html">Open Club Directory</a>
-          </article>
-          <article class="floating-cta-card">
-            <h3>Join NM's Biggest Events</h3>
-            <p>Trending nights, workshops, and signature campus moments.</p>
-            <a class="btn-inline" href="event.html">See Highlights</a>
-          </article>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-particles" aria-hidden="true"></div>
-      <div class="container footer-grid-rich">
-        <div>
-          <h4>NM District</h4>
-          <p class="muted">
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <div class="footer__logo">
+            <div class="navbar__logo" style="width: 32px; height: 32px; font-size: 0.75rem;">NM</div>
+            <span class="footer__logo-text">District</span>
+          </div>
+          <p class="footer__description">
             A premium, NM College-exclusive event discovery and pass booking layer built for speed, structure, and cinematic polish.
           </p>
-          <p class="muted footer-contact">
-            Narsee Monjee College of Commerce and Economics<br />
-            Vile Parle West, Mumbai
-          </p>
         </div>
-        <div>
-          <h4>Quick Links</h4>
-          <a class="footer-link" href="explore.html">Explore Events</a>
-          <a class="footer-link" href="booking.html">Book Pass</a>
-          <a class="footer-link" href="dashboard.html">My Dashboard</a>
-          <a class="footer-link" href="clubs.html">Club Directory</a>
-        </div>
-        <div>
-          <h4>Support</h4>
-          <a class="footer-link" href="#">FAQs</a>
-          <a class="footer-link" href="#">Ticketing Help</a>
-          <a class="footer-link" href="#">Campus Guidelines</a>
-          <a class="footer-link" href="#">Contact Support</a>
-        </div>
-        <div>
-          <h4>Connect</h4>
-          <div class="footer-socials">
-            <a href="#" aria-label="Instagram">IG</a>
-            <a href="#" aria-label="LinkedIn">IN</a>
-            <a href="#" aria-label="YouTube">YT</a>
+        
+        <div class="footer__columns">
+          <div class="footer__column">
+            <h4 class="footer__column-title">Explore</h4>
+            <a href="explore.html" class="footer__link">Events</a>
+            <a href="clubs.html" class="footer__link">Clubs</a>
+            <a href="dashboard.html" class="footer__link">Dashboard</a>
           </div>
-          <form class="newsletter-form" id="newsletterForm">
-            <span class="newsletter-icon">&#9993;</span>
-            <input type="email" placeholder="you@nmcollege.in" aria-label="Email" required />
-            <button class="btn-primary" type="submit">Join</button>
-          </form>
-          <div class="muted" id="newsletterFeedback"></div>
-        </div>
-        <div class="footer-qr-block">
-          <h4>NM District App</h4>
-          <div class="footer-qr" aria-label="Future app QR code"></div>
-          <p class="muted">Scan to get early access when mobile app launches.</p>
+          
+          <div class="footer__column">
+            <h4 class="footer__column-title">Support</h4>
+            <a href="#" class="footer__link">FAQs</a>
+            <a href="#" class="footer__link">Ticketing Help</a>
+            <a href="#" class="footer__link">Campus Guidelines</a>
+          </div>
+          
+          <div class="footer__column">
+            <h4 class="footer__column-title">Connect</h4>
+            <div class="footer__social">
+              <a href="#" class="footer__social-link" aria-label="Instagram">IG</a>
+              <a href="#" class="footer__social-link" aria-label="LinkedIn">IN</a>
+              <a href="#" class="footer__social-link" aria-label="YouTube">YT</a>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="container footer-bottom">© 2026 NM District · Built for NM College students</div>
-    </footer>
-
-    <div class="campus-modal-backdrop" id="campusModal" hidden>
-      <div class="campus-modal" role="dialog" aria-modal="true" aria-labelledby="campusModalTitle">
-        <div class="campus-modal-head">
-          <h3 id="campusModalTitle">Choose Campus Location</h3>
-          <button class="icon-btn" id="campusModalClose" type="button" aria-label="Close campus selector">&#10005;</button>
-        </div>
-        <div class="campus-modal-controls">
-          <input class="form-input" id="campusSearchInput" type="search" placeholder="Search campus venues" />
-          <button class="btn-inline" id="useCurrentCampus" type="button">Use My Current Location on Campus</button>
-        </div>
-        <div class="campus-quick-lists">
-          <div>
-            <p class="filter-label">Recent Locations</p>
-            <div class="campus-pill-row" id="recentCampusList"></div>
-          </div>
-          <div>
-            <p class="filter-label">Popular Venues</p>
-            <div class="campus-pill-row" id="popularCampusList"></div>
-          </div>
-        </div>
-        <div class="campus-card-grid" id="campusCardGrid"></div>
+      
+      <div class="footer__bottom">
+        <p>© 2026 NM District · Built for NM College students</p>
+        <p class="footer__location">Narsee Monjee College of Commerce and Economics · Vile Parle West, Mumbai</p>
       </div>
     </div>
+  </footer>
 
-    <div class="preview-modal-backdrop" id="eventPreviewModal" hidden>
-      <div class="preview-modal" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
-        <button class="icon-btn preview-close" id="previewClose" type="button" aria-label="Close preview">&#10005;</button>
-        <img id="previewImage" src="" alt="Event preview" />
-        <div class="preview-content">
-          <p class="eyebrow" id="previewMeta">Event Preview</p>
-          <h3 id="previewTitle">Event</h3>
-          <p class="muted" id="previewAbout"></p>
-          <div class="hero-cta">
-            <a class="btn-primary" id="previewViewLink" href="event.html">View Details</a>
-            <a class="btn-secondary" id="previewBookLink" href="booking.html">Quick Book</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>
+</body>
 </html>

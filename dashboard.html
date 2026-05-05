@@ -1,155 +1,620 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Student Dashboard | NM District</title>
-    <meta name="description" content="Premium NM student dashboard for upcoming events, tickets, rewards, and payments." />
-    <link rel="stylesheet" href="assets/css/style.css" />
-    <script defer src="assets/js/data.js"></script>
-    <script defer src="assets/js/main.js"></script>
-    <script defer src="assets/js/dashboard.js"></script>
-  </head>
-  <body>
-    <div class="cursor-glow" id="cursorGlow"></div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | NM District</title>
+  <meta name="description" content="Your personal command center for NM College events, tickets, rewards, and activity.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="assets/css/style.css">
+  
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.27/dist/lenis.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
+  
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/main.js" defer></script>
+</head>
+<body data-theme="dark">
 
-    <header class="floating-nav" id="floatingNav">
-      <div class="nav-inner">
-        <a class="brand" href="index.html" aria-label="NM District home">
-          <span class="brand-logo">NM</span>
-          <span>NM District</span>
-        </a>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a class="nav-link" data-nav-link href="index.html">Home</a>
-          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
-          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
-          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
-          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
-          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
-          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
-        </nav>
-        <div class="nav-actions">
-          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
-          <a class="btn-inline" href="explore.html">Discover More</a>
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Command Palette -->
+  <div class="cmd-palette" id="cmd-palette">
+    <div class="cmd-palette__panel">
+      <div class="cmd-palette__input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-3); flex-shrink: 0;">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" class="cmd-palette__input" id="cmd-input" placeholder="Search events, clubs, pages..." autocomplete="off">
+        <kbd class="cmd-trigger__key" style="flex-shrink: 0;">ESC</kbd>
+      </div>
+      <div class="cmd-palette__results" id="cmd-results"></div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar__brand" aria-label="NM District home">
+      <div class="navbar__logo">NM</div>
+      <span class="navbar__brand-text">District</span>
+    </a>
+    
+    <div class="navbar__links">
+      <a href="index.html" class="navbar__link" data-nav-link>Home</a>
+      <a href="explore.html" class="navbar__link" data-nav-link>Explore</a>
+      <a href="clubs.html" class="navbar__link" data-nav-link>Clubs</a>
+      <a href="dashboard.html" class="navbar__link active" data-nav-link>Dashboard</a>
+    </div>
+    
+    <div class="navbar__actions">
+      <button class="cmd-trigger" aria-label="Open search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <span>Search</span>
+        <span class="cmd-trigger__keys">
+          <kbd class="cmd-trigger__key">⌘</kbd>
+          <kbd class="cmd-trigger__key">K</kbd>
+        </span>
+      </button>
+      <button class="theme-toggle" aria-label="Toggle theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Dashboard Hero -->
+    <section class="hero dashboard-hero">
+      <div class="hero__bg">
+        <div class="hero__bg-gradient"></div>
+      </div>
+      
+      <div class="hero__content">
+        <div class="container">
+          <div class="dashboard-hero__welcome" data-reveal="up">
+            <div>
+              <div class="hero__eyebrow">
+                <span class="hero__eyebrow-dot"></span>
+                <span>Your Command Center</span>
+              </div>
+              <h1 class="dashboard-hero__title" data-greeting>Welcome Back</h1>
+              <p class="dashboard-hero__subtitle">Track your events, passes, rewards, and activity</p>
+            </div>
+            <a href="explore.html" class="btn btn-primary btn-ripple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              Find Events
+            </a>
+          </div>
         </div>
       </div>
-    </header>
+    </section>
 
-    <main>
-      <section class="dashboard-hero reveal">
-        <p class="eyebrow">Student Command Center</p>
-        <h1 class="page-title" style="font-size: clamp(1.9rem, 5vw, 3rem)">Welcome back, NM Student</h1>
-        <p class="page-subtitle">Track your events, passes, rewards, and account settings in one polished experience.</p>
-      </section>
-
-      <section class="section" style="padding-top: 1rem">
-        <div class="container metric-grid reveal">
-          <article class="metric-tile">
-            <div class="analytics-label">Upcoming Events</div>
-            <div class="analytics-value" id="upcomingCount">0</div>
-          </article>
-          <article class="metric-tile">
-            <div class="analytics-label">Saved Events</div>
-            <div class="analytics-value" id="savedCount">0</div>
-          </article>
-          <article class="metric-tile">
-            <div class="analytics-label">Referral Rewards</div>
-            <div class="analytics-value" id="rewardCount">₹0</div>
-          </article>
-          <article class="metric-tile">
-            <div class="analytics-label">Profile Completion</div>
-            <div class="analytics-value" id="profileCompletionValue">0%</div>
-          </article>
-        </div>
-
-        <div class="dashboard-grid">
-          <article class="dashboard-card reveal">
-            <h2 class="card-title">My Events</h2>
-            <p class="card-subtitle">Upcoming and past registrations</p>
-            <div class="inline-tabs" id="eventTabs">
-              <button class="tab-btn active" data-tab="upcoming" type="button">Upcoming</button>
-              <button class="tab-btn" data-tab="past" type="button">Past</button>
+    <!-- Stats Overview -->
+    <section class="section" style="padding-top: 0;">
+      <div class="container">
+        <div class="dashboard-stats" data-stagger data-reveal="up">
+          <div class="dashboard-stat">
+            <div class="dashboard-stat__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
-            <div class="list-stack" id="dashboardEventList"></div>
-          </article>
+            <div>
+              <div class="dashboard-stat__value" id="upcomingEventsCount">0</div>
+              <div class="dashboard-stat__label">Upcoming</div>
+            </div>
+          </div>
+          
+          <div class="dashboard-stat">
+            <div class="dashboard-stat__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </div>
+            <div>
+              <div class="dashboard-stat__value" id="savedEventsCount">0</div>
+              <div class="dashboard-stat__label">Saved</div>
+            </div>
+          </div>
+          
+          <div class="dashboard-stat">
+            <div class="dashboard-stat__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            </div>
+            <div>
+              <div class="dashboard-stat__value" id="rewardsBalanceDisplay">₹0</div>
+              <div class="dashboard-stat__label">Rewards</div>
+            </div>
+          </div>
+          
+          <div class="dashboard-stat">
+            <div class="dashboard-stat__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div>
+              <div class="dashboard-stat__value" id="profileCompletion">0%</div>
+              <div class="dashboard-stat__label">Profile</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-          <article class="dashboard-card reveal">
-            <h2 class="card-title">Student Profile</h2>
-            <p class="card-subtitle">Linked credentials and profile quality</p>
-
-            <div class="profile-progress">
-              <div class="summary-line">
-                <span>Completion</span>
-                <span id="profileCompletionText">0%</span>
+    <!-- Main Dashboard Content -->
+    <section class="section" style="padding-top: 0;">
+      <div class="container">
+        <div class="dashboard-layout">
+          <!-- Left Column -->
+          <div class="dashboard-column">
+            <!-- My Events -->
+            <div class="dashboard-card" data-reveal="up">
+              <div class="dashboard-card__header">
+                <div>
+                  <h2 class="dashboard-card__title">My Events</h2>
+                  <p class="dashboard-card__subtitle">Upcoming and past registrations</p>
+                </div>
               </div>
-              <div class="progress-track">
-                <div class="progress-fill" id="profileProgressFill" style="width: 0%"></div>
+              
+              <div class="tabs">
+                <button class="tab active" data-tab="upcoming">Upcoming</button>
+                <button class="tab" data-tab="past">Past</button>
+              </div>
+              
+              <div class="events-list" id="myEventsList">
+                <!-- Events populated by JS -->
               </div>
             </div>
 
-            <div class="list-stack" style="margin-top: 0.85rem">
-              <div class="list-item">Linked Student ID: <strong id="linkedStudentId">NM-2026-2184</strong></div>
-              <div class="list-item">Program: <strong>B.Com · Semester IV</strong></div>
-              <div class="list-item">Preferred Interests: <strong>Fests, Finance, Networking</strong></div>
+            <!-- Saved Events -->
+            <div class="dashboard-card" data-reveal="up">
+              <div class="dashboard-card__header">
+                <div>
+                  <h2 class="dashboard-card__title">Saved Events</h2>
+                  <p class="dashboard-card__subtitle">Your curated watchlist</p>
+                </div>
+              </div>
+              
+              <div class="events-list" id="savedEventsList">
+                <!-- Saved events populated by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="dashboard-column">
+            <!-- Student Profile -->
+            <div class="dashboard-card" data-reveal="up">
+              <div class="dashboard-card__header">
+                <div>
+                  <h2 class="dashboard-card__title">Student Profile</h2>
+                  <p class="dashboard-card__subtitle">Your campus identity</p>
+                </div>
+              </div>
+              
+              <div class="profile-section">
+                <div class="profile-progress">
+                  <div class="profile-progress__header">
+                    <span>Completion</span>
+                    <span id="profilePercentage">75%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-bar__fill" id="profileProgressBar" style="width: 75%"></div>
+                  </div>
+                </div>
+                
+                <div class="profile-info">
+                  <div class="profile-info__item">
+                    <span class="profile-info__label">Student ID</span>
+                    <span class="profile-info__value" id="studentId">NM-2026-2184</span>
+                  </div>
+                  <div class="profile-info__item">
+                    <span class="profile-info__label">Program</span>
+                    <span class="profile-info__value">B.Com • Semester IV</span>
+                  </div>
+                  <div class="profile-info__item">
+                    <span class="profile-info__label">Interests</span>
+                    <span class="profile-info__value">Fests, Finance, Networking</span>
+                  </div>
+                </div>
+                
+                <div class="profile-settings">
+                  <h3>Quick Settings</h3>
+                  <div class="setting-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <div>
+                      <strong>Notifications</strong>
+                      <span>Instant Push + Email</span>
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                    <div>
+                      <strong>Theme</strong>
+                      <span>Synced with system</span>
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <div>
+                      <strong>Security</strong>
+                      <span>2-step verification enabled</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <h3 style="margin-top: 0.95rem">Settings</h3>
-            <div class="list-stack">
-              <div class="list-item">Notification Preference: <strong>Instant Push + Email</strong></div>
-              <div class="list-item">Theme: <strong>Synced with top-right toggle</strong></div>
-              <div class="list-item">Security: <strong>2-step verification enabled</strong></div>
+            <!-- Active Tickets -->
+            <div class="dashboard-card" data-reveal="up">
+              <div class="dashboard-card__header">
+                <div>
+                  <h2 class="dashboard-card__title">Active Tickets</h2>
+                  <p class="dashboard-card__subtitle">Access your QR passes</p>
+                </div>
+              </div>
+              
+              <div class="tickets-list" id="activeTicketsList">
+                <!-- Tickets populated by JS -->
+              </div>
             </div>
-          </article>
+          </div>
         </div>
+      </div>
+    </section>
 
-        <div class="dashboard-grid" style="margin-top: 1rem">
-          <article class="dashboard-card reveal">
-            <h2 class="card-title">Saved Events</h2>
-            <p class="card-subtitle">Your curated watchlist</p>
-            <div class="list-stack" id="savedEventsList"></div>
-          </article>
-
-          <article class="dashboard-card reveal">
-            <h2 class="card-title">Notifications</h2>
-            <p class="card-subtitle">Latest alerts and updates</p>
-            <div class="list-stack" id="notificationList"></div>
-          </article>
-        </div>
-
-        <div class="dashboard-grid" style="margin-top: 1rem">
-          <article class="dashboard-card reveal">
-            <h2 class="card-title">Payment History</h2>
-            <p class="card-subtitle">All booking transactions and statuses</p>
-            <div class="table-shell">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Booking</th>
-                    <th>Event</th>
-                    <th>Amount</th>
-                    <th>Payment</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-                <tbody id="paymentHistoryBody"></tbody>
-              </table>
+    <!-- Bottom Section -->
+    <section class="section" style="padding-top: 0;">
+      <div class="container">
+        <div class="dashboard-layout">
+          <!-- Payment History -->
+          <div class="dashboard-card" data-reveal="up">
+            <div class="dashboard-card__header">
+              <div>
+                <h2 class="dashboard-card__title">Payment History</h2>
+                <p class="dashboard-card__subtitle">All booking transactions</p>
+              </div>
             </div>
-          </article>
-
-          <article class="dashboard-card reveal">
-            <h2 class="card-title">Tickets & Downloads</h2>
-            <p class="card-subtitle">Access your active QR passes</p>
-            <div class="list-stack" id="downloadTicketsList"></div>
-
-            <h3 style="margin-top: 1rem">Referral Rewards</h3>
-            <div class="list-stack">
-              <div class="list-item">Reward Balance: <strong id="rewardBalance">₹0</strong></div>
-              <div class="list-item">Successful Referrals: <strong id="referralCount">0</strong></div>
-              <div class="list-item">Next Milestone: <strong>Refer 2 friends for ₹250 bonus</strong></div>
+            
+            <div class="payment-history">
+              <div class="payment-table">
+                <div class="payment-table__header">
+                  <div>Booking ID</div>
+                  <div>Event</div>
+                  <div>Amount</div>
+                  <div>Status</div>
+                  <div>Date</div>
+                </div>
+                <div class="payment-table__body" id="paymentHistoryBody">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
             </div>
-          </article>
+          </div>
+
+          <!-- Referral Rewards -->
+          <div class="dashboard-card" data-reveal="up">
+            <div class="dashboard-card__header">
+              <div>
+                <h2 class="dashboard-card__title">Referral Rewards</h2>
+                <p class="dashboard-card__subtitle">Earn by referring friends</p>
+              </div>
+            </div>
+            
+            <div class="rewards-section">
+              <div class="rewards-summary">
+                <div class="rewards-item">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                  <div>
+                    <strong id="rewardsBalance">₹0</strong>
+                    <span>Available</span>
+                  </div>
+                </div>
+                <div class="rewards-item">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  <div>
+                    <strong id="referralCount">0</strong>
+                    <span>Referrals</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="referral-milestone">
+                <h4>Next Milestone</h4>
+                <p>Refer 2 friends for ₹250 bonus</p>
+                <div class="milestone-progress">
+                  <div class="milestone-progress__fill" id="milestoneFill" style="width: 0%"></div>
+                </div>
+              </div>
+              
+              <button class="btn btn-primary btn-block btn-ripple" id="shareReferral">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Share Referral Link
+              </button>
+            </div>
+          </div>
         </div>
-      </section>
-    </main>
-  </body>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__bottom" style="border-top: none; margin-top: 0;">
+        <p>© 2026 NM District · Built for NM College students</p>
+        <p class="footer__location">Narsee Monjee College · Vile Parle West, Mumbai</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Dashboard Script -->
+  <script>
+    (() => {
+      const data = window.NMData;
+      if (!data) return;
+
+      // Safe format helpers (fallbacks if main.js not loaded)
+      const fmtDate = (d) => {
+        if (!d || isNaN(new Date(d).getTime())) return 'TBA';
+        return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      };
+      const fmtCurrency = (n) => {
+        if (n === undefined || n === null || isNaN(Number(n))) return 'Free';
+        if (Number(n) === 0) return 'Free';
+        return '₹' + Number(n).toLocaleString('en-IN');
+      };
+
+      function init() {
+        renderDashboard();
+        setupListeners();
+      }
+
+      function renderDashboard() {
+        updateStats();
+        renderMyEvents();
+        renderSavedEvents();
+        renderActiveTickets();
+        renderPaymentHistory();
+        updateProfile();
+        updateRewards();
+        updateGreeting();
+      }
+
+      function updateGreeting() {
+        const el = document.querySelector('[data-greeting]');
+        if (!el) return;
+        const hour = new Date().getHours();
+        let greeting = 'Welcome Back';
+        if (hour < 6) greeting = 'Still up? 🌙';
+        else if (hour < 12) greeting = 'Good Morning ☀️';
+        else if (hour < 17) greeting = 'Good Afternoon 👋';
+        else if (hour < 21) greeting = 'Good Evening 🌆';
+        else greeting = 'Night Owl 🦉';
+        el.textContent = greeting;
+      }
+
+      function updateStats() {
+        const student = data.student;
+        
+        const upcoming = student.bookings.filter(b => {
+          const ev = data.events.find(e => e.id === b.eventId);
+          return ev && new Date(ev.date) > new Date();
+        });
+        
+        const saved = student.savedEvents || [];
+        
+        document.getElementById('upcomingEventsCount').textContent = upcoming.length;
+        document.getElementById('savedEventsCount').textContent = saved.length;
+        document.getElementById('rewardsBalanceDisplay').textContent = '₹0';
+        document.getElementById('profileCompletion').textContent = '75%';
+      }
+
+      function renderMyEvents() {
+        const container = document.getElementById('myEventsList');
+        if (!container) return;
+
+        const student = data.student;
+        const upcoming = student.bookings.filter(b => {
+          const ev = data.events.find(e => e.id === b.eventId);
+          return ev && new Date(ev.date) > new Date();
+        });
+
+        if (upcoming.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <h3>No upcoming events</h3>
+              <p>Explore events and book your tickets</p>
+              <a href="explore.html" class="btn btn-primary btn-sm" style="margin-top: 16px;">Explore Events</a>
+            </div>
+          `;
+        } else {
+          container.innerHTML = upcoming.map(b => {
+            const ev = data.events.find(e => e.id === b.eventId);
+            return `
+              <div class="event-item">
+                <div class="event-item__image">
+                  <img src="${ev.image}" alt="${ev.title}">
+                </div>
+                <div class="event-item__content">
+                  <h4 class="event-item__title">${ev.title}</h4>
+                  <p class="event-item__meta">${fmtDate(ev.date)} • ${ev.venue}</p>
+                  <span class="event-item__status confirmed">● Confirmed</span>
+                </div>
+                <div class="event-item__actions">
+                  <a href="event.html?id=${ev.id}" class="btn btn-sm btn-ghost">View</a>
+                  <button class="btn btn-sm btn-primary" onclick="window.NMToast && window.NMToast('QR code coming soon', 'neutral')">QR</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      function renderSavedEvents() {
+        const container = document.getElementById('savedEventsList');
+        if (!container) return;
+
+        const savedIds = data.student.savedEvents || [];
+        const savedEvents = data.events.filter(e => savedIds.includes(e.id));
+
+        if (savedEvents.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <h3>No saved events</h3>
+              <p>Save events you are interested in</p>
+              <a href="explore.html" class="btn btn-primary btn-sm" style="margin-top: 16px;">Explore Events</a>
+            </div>
+          `;
+        } else {
+          container.innerHTML = savedEvents.map(ev => {
+            const price = ev.tiers?.[0]?.price;
+            return `
+              <div class="event-item">
+                <div class="event-item__image">
+                  <img src="${ev.image}" alt="${ev.title}">
+                </div>
+                <div class="event-item__content">
+                  <h4 class="event-item__title">${ev.title}</h4>
+                  <p class="event-item__meta">${fmtDate(ev.date)} • ${ev.venue}</p>
+                  <span style="font-size: 0.8125rem; color: var(--violet-400); font-weight: 500;">${fmtCurrency(price)}</span>
+                </div>
+                <div class="event-item__actions">
+                  <a href="event.html?id=${ev.id}" class="btn btn-sm btn-primary">View</a>
+                  <button class="btn btn-sm btn-ghost" data-remove-saved="${ev.id}">Remove</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      function renderActiveTickets() {
+        const container = document.getElementById('activeTicketsList');
+        if (!container) return;
+
+        const upcoming = data.student.bookings.filter(b => {
+          const ev = data.events.find(e => e.id === b.eventId);
+          return ev && new Date(ev.date) > new Date();
+        });
+
+        if (upcoming.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state" style="padding: 32px 0;">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 9a3 3 0 0 1 0-6v6z"/><path d="M22 9V3a3 3 0 0 1 0 6z"/><path d="M2 9v6a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V9"/><path d="M12 3v18"/></svg>
+              <h3 style="font-size: 1rem;">No active tickets</h3>
+              <p>Book events to get your passes</p>
+            </div>
+          `;
+        } else {
+          container.innerHTML = upcoming.slice(0, 3).map(b => {
+            const ev = data.events.find(e => e.id === b.eventId);
+            return `
+              <div class="ticket-card">
+                <div class="ticket-card__header">
+                  <h4 class="ticket-card__title">${ev.title}</h4>
+                  <span class="ticket-card__badge active">Active</span>
+                </div>
+                <div class="ticket-card__details">
+                  <div><strong style="color: var(--text-2);">Date:</strong> ${fmtDate(ev.date)}</div>
+                  <div><strong style="color: var(--text-2);">Time:</strong> ${ev.time?.start || 'TBA'}</div>
+                  <div><strong style="color: var(--text-2);">Venue:</strong> ${ev.venue}</div>
+                </div>
+                <div class="ticket-card__qr">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      function renderPaymentHistory() {
+        const container = document.getElementById('paymentHistoryBody');
+        if (!container) return;
+
+        const bookings = data.student.bookings || [];
+
+        if (bookings.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 32px; color: var(--text-3);">
+              <p>No payment history yet</p>
+            </div>
+          `;
+        } else {
+          container.innerHTML = bookings.map(b => {
+            const ev = data.events.find(e => e.id === b.eventId);
+            return `
+              <div class="payment-row">
+                <div class="payment-row__booking">${b.id}</div>
+                <div class="payment-row__event">${ev ? ev.title : 'Unknown'}</div>
+                <div class="payment-row__amount">${fmtCurrency(b.totalAmount)}</div>
+                <div><span class="payment-row__status confirmed">Paid</span></div>
+                <div style="color: var(--text-3);">${fmtDate(b.timestamp)}</div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      function updateProfile() {
+        const student = data.student;
+        document.getElementById('studentId').textContent = student.id || 'NM-2026-0000';
+        document.getElementById('profilePercentage').textContent = '75%';
+        document.getElementById('profileProgressBar').style.width = '75%';
+      }
+
+      function updateRewards() {
+        document.getElementById('rewardsBalance').textContent = '₹0';
+        document.getElementById('referralCount').textContent = '0';
+        document.getElementById('milestoneFill').style.width = '0%';
+      }
+
+      function setupListeners() {
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+          tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+          });
+        });
+
+        // Remove saved events
+        document.addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-remove-saved]');
+          if (!btn) return;
+          
+          const id = btn.dataset.removeSaved;
+          const idx = data.student.savedEvents.indexOf(id);
+          if (idx > -1) {
+            data.student.savedEvents.splice(idx, 1);
+            if (window.NMToast) window.NMToast('Event removed');
+            renderSavedEvents();
+            updateStats();
+          }
+        });
+
+        // Share referral
+        const shareBtn = document.getElementById('shareReferral');
+        if (shareBtn) {
+          shareBtn.addEventListener('click', () => {
+            if (window.NMToast) window.NMToast('Referral link copied! 🎉', 'success');
+            else alert('Referral link copied!');
+          });
+        }
+      }
+
+      // Initialize
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
 </html>

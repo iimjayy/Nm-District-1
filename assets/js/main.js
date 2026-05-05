@@ -1,2442 +1,902 @@
+/* ═══════════════════════════════════════════════════════════════
+   NM DISTRICT v3.0 — WORLD-CLASS INTERACTION ENGINE
+   ═══════════════════════════════════════════════════════════════ */
+
 (() => {
-  const data = window.NM_DATA;
+  const data = window.NMData;
   if (!data) {
+    console.error('NMData not found — data.js not loaded');
     return;
   }
 
-  const SAVE_KEY = "nm-saved-events";
-  const CAMPUS_KEY = "nm-selected-campus";
-  const CAMPUS_RECENT_KEY = "nm-recent-campuses";
-  const SHARED_EVENT_TRANSITION_KEY = "nm-shared-event-transition";
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let pushToast = () => {};
+  /* ─── STORAGE KEYS ─── */
+  const THEME_KEY     = 'nm-theme-v3';
+  const SAVED_KEY     = 'nm-saved-v3';
+  const RECENT_KEY    = 'nm-recent-v3';
+  const USER_KEY      = 'nm-user-v3';
+  const BOOKINGS_KEY  = 'nm-bookings-v3';
 
-  const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+  /* ─── STATE ─── */
+  let lenis       = null;
+  let cursorDot   = null;
+  let cursorRing  = null;
+  let toastQueue  = [];
+  let toastActive = false;
+  let scrollY     = 0;
+
+  /* ═══════════════════════════════════════
+     UTILITY: SAFE DATA ACCESS (NO NaN/Invalid Date)
+     ═══════════════════════════════════════ */
+
+  const isValidDate = (d) => d && !isNaN(new Date(d).getTime());
+  const isValidNum  = (n) => n !== undefined && n !== null && !isNaN(Number(n));
+
+  const safeFormatDate = (dateStr, opts = {}) => {
+    if (!isValidDate(dateStr)) return 'TBA';
+    const options = { day: 'numeric', month: 'short', year: 'numeric', ...opts };
+    try {
+      return new Date(dateStr).toLocaleDateString('en-IN', options);
+    } catch {
+      return 'TBA';
+    }
+  };
+
+  const safeFormatDateTime = (dateStr, opts = {}) => {
+    if (!isValidDate(dateStr)) return 'TBA';
+    const options = {
+      day: 'numeric', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', ...opts
+    };
+    try {
+      return new Date(dateStr).toLocaleDateString('en-IN', options);
+    } catch {
+      return 'TBA';
+    }
+  };
+
+  const safeFormatCurrency = (amount) => {
+    if (!isValidNum(amount)) return 'Free';
+    const n = Number(amount);
+    if (n === 0) return 'Free';
+    try {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency', currency: 'INR', minimumFractionDigits: 0
+      }).format(n);
+    } catch {
+      return '₹' + n;
+    }
+  };
+
+  const safeGetPrice = (event) => {
+    if (!event?.tiers || !Array.isArray(event.tiers) || event.tiers.length === 0) {
+      return 'Free';
+    }
+    const first = event.tiers[0];
+    if (!first || !isValidNum(first.price)) return 'Free';
+    return safeFormatCurrency(first.price);
+  };
+
+  const getEventTag = (event) => {
+    const now = new Date();
+    const eventDate = new Date(event?.date);
+    if (!isValidDate(event?.date)) return '';
+    
+    // Check if event is today
+    const isToday = eventDate.toDateString() === now.toDateString();
+    if (isToday) return `<span class="tag tag--live">Live Now</span>`;
+    
+    // Check if almost full
+    const totalSeats = event.tiers?.reduce((sum, t) => sum + (t.seats || 0), 0) || 0;
+    const remaining = event.tiers?.reduce((sum, t) => sum + (t.seatsLeft || 0), 0) || 0;
+    if (totalSeats > 0 && remaining / totalSeats < 0.2) {
+      return `<span class="tag tag--almost-full">Almost Full</span>`;
+    }
+    
+    // Check if hot (high interest)
+    if (event.interested > 1000) {
+      return `<span class="tag tag--hot">🔥 Trending</span>`;
+    }
+    
+    // Check if free
+    const price = event.tiers?.[0]?.price;
+    if (price === 0 || price === undefined) {
+      return `<span class="tag tag--free">Free Entry</span>`;
+    }
+    
+    return '';
+  };
+
+  /* ═══════════════════════════════════════
+     PERSONALIZATION ENGINE
+     ═══════════════════════════════════════ */
+
+  const getUserProfile = () => {
+    try {
+      return JSON.parse(localStorage.getItem(USER_KEY) || '{}');
+    } catch { return {}; }
+  };
+
+  const getRecentEvents = () => {
+    try {
+      return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+    } catch { return []; }
+  };
+
+  const addRecentEvent = (eventId) => {
+    const recent = getRecentEvents();
+    const updated = [eventId, ...recent.filter(id => id !== eventId)].slice(0, 20);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
+  };
+
+  const getRecommendedEvents = () => {
+    const recent = getRecentEvents();
+    const saved = getSavedEvents();
+    const recentCategories = recent
+      .map(id => data.events.find(e => e.id === id)?.category)
+      .filter(Boolean);
+    
+    // Score events by relevance
+    return data.events
+      .map(event => {
+        let score = 0;
+        if (saved.includes(event.id)) score -= 100; // Don't recommend saved
+        if (recent.includes(event.id)) score -= 50;
+        
+        // Boost by category match
+        if (recentCategories.includes(event.category)) score += 10;
+        
+        // Boost by trending
+        score += (event.interested || 0) / 100;
+        
+        // Boost featured
+        if (event.featured) score += 5;
+        
+        return { event, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 4)
+      .map(e => e.event);
+  };
+
+  const getSmartGreeting = () => {
+    const hour = new Date().getHours();
+    const user = getUserProfile();
+    const name = user.name || 'there';
+    
+    if (hour < 6)  return `Still up, ${name}? 🌙`;
+    if (hour < 12) return `Good morning, ${name} ☀️`;
+    if (hour < 17) return `Good afternoon, ${name} 👋`;
+    if (hour < 21) return `Good evening, ${name} 🌆`;
+    return `Night owl, ${name}? 🦉`;
+  };
+
+  /* ═══════════════════════════════════════
+     SAVED EVENTS
+     ═══════════════════════════════════════ */
 
   const getSavedEvents = () => {
     try {
-      return JSON.parse(localStorage.getItem(SAVE_KEY) || "[]");
-    } catch (error) {
-      return [];
-    }
+      return JSON.parse(localStorage.getItem(SAVED_KEY) || '[]');
+    } catch { return []; }
   };
 
-  const setSavedEvents = (items) => {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(items));
-    window.dispatchEvent(new CustomEvent("nm:saved-events-updated", { detail: items }));
+  const setSavedEvents = (events) => {
+    localStorage.setItem(SAVED_KEY, JSON.stringify(events));
+    window.dispatchEvent(new CustomEvent('nm:saved-updated', { detail: events }));
   };
 
-  const isSavedEvent = (eventId) => getSavedEvents().includes(eventId);
+  const isSaved = (eventId) => getSavedEvents().includes(eventId);
 
-  const toggleSavedEvent = (eventId) => {
+  const toggleSaved = (eventId) => {
     const saved = new Set(getSavedEvents());
-    if (saved.has(eventId)) {
+    const wasSaved = saved.has(eventId);
+    
+    if (wasSaved) {
       saved.delete(eventId);
+      pushToast('Event removed from saved', 'neutral');
     } else {
       saved.add(eventId);
+      pushToast('Event saved! 💜', 'success');
     }
+    
     setSavedEvents(Array.from(saved));
+    return !wasSaved;
   };
 
-  const formatDate = (dateValue, opts = {}) => {
-    const baseOptions = {
-      month: "short",
-      day: "numeric"
-    };
-    if (opts.withWeekday) {
-      baseOptions.weekday = "short";
-    }
-    return new Date(`${dateValue}T00:00:00`).toLocaleDateString("en-IN", baseOptions);
+  /* ═══════════════════════════════════════
+     TOAST SYSTEM — PREMIUM
+     ═══════════════════════════════════════ */
+
+  const pushToast = (message, type = 'neutral', duration = 3000) => {
+    toastQueue.push({ message, type, duration });
+    if (!toastActive) showNextToast();
   };
 
-  const formatDateTime = (dateValue, time) => `${formatDate(dateValue, { withWeekday: true })} · ${time}`;
-
-  const resolveAssetPath = (path) => {
-    if (!path) {
-      return "";
-    }
-    if (/^(https?:|data:|blob:|\/)/i.test(path)) {
-      return path;
-    }
-    const base = window.location.pathname.replace(/[^/]*$/, "");
-    return `${base}${path.replace(/^\.?\//, "")}`;
-  };
-
-  const buildImageCandidates = (path) => {
-    if (!path) {
-      return [];
-    }
-    const normalized = path.replace(/^\.?\//, "");
-    const base = window.location.pathname.replace(/[^/]*$/, "");
-    return Array.from(
-      new Set([
-        path,
-        `./${normalized}`,
-        `${base}${normalized}`,
-        `/${normalized}`
-      ])
-    );
-  };
-
-  const setImageFromCandidates = (imgElement, candidates) => {
-    if (!imgElement || !candidates.length) {
+  const showNextToast = () => {
+    if (toastQueue.length === 0) {
+      toastActive = false;
       return;
     }
-    let index = 0;
-    const tryNext = () => {
-      if (index >= candidates.length) {
-        return;
-      }
-      const candidate = candidates[index];
-      index += 1;
-      imgElement.onerror = tryNext;
-      imgElement.src = candidate;
+    
+    toastActive = true;
+    const { message, type, duration } = toastQueue.shift();
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    
+    const icons = {
+      success: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+      neutral: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`
     };
-    tryNext();
-  };
-
-  const createEventCardHTML = (event, options = {}) => {
-    const showLive = options.showLive ?? false;
-    const showType = options.showType ?? true;
-    const cardMode = options.mode || "grid";
-
-    const topBadge = showLive && event.isLive ? '<span class="pill pill-live">Live Now</span>' : `<span class="pill">${event.category}</span>`;
-    const saveActive = isSavedEvent(event.id) ? "active" : "";
-    const urgencyPool = ["Limited Seats", "Selling Fast", "Closing Tonight", "Invite Only"];
-    const urgency = urgencyPool[event.popularity % urgencyPool.length];
-    const clubTag = (event.club || "NM").split(" ").map((word) => word[0]).join("").slice(0, 3).toUpperCase();
-    const attendees = 180 + Math.floor(event.popularity * 2.4);
-    const seatsLeft = event.tickets?.reduce((sum, item) => sum + item.seats, 0) || 120;
-    const closesIn = Math.max(1, Math.ceil((new Date(event.registrationsClose).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
-    const premiumTag = event.price > 500 ? "Premium Passes" : event.price === 0 ? "Free Entry" : "Trending";
-
-    return `
-      <article class="event-card motion-card ${cardMode === "list" ? "list" : ""}" data-event-id="${event.id}">
-        <a class="event-media" data-event-link="${event.id}" href="event.html?id=${event.id}">
-          <span class="urgency-label">${urgency}</span>
-          <span class="premium-tag">${premiumTag}</span>
-          <img src="${resolveAssetPath(event.image)}" alt="${event.title}" loading="lazy">
-        </a>
-        <div class="event-body">
-          <div class="item-head">
-            ${topBadge}
-            <button class="icon-btn save-toggle ${saveActive}" data-save-event="${event.id}" aria-label="Save event">
-              ${isSavedEvent(event.id) ? "♥" : "♡"}
-            </button>
-          </div>
-          <h3 class="event-title">${event.title}</h3>
-          <div class="event-organizer">By ${event.organizer}</div>
-          <div class="event-meta">
-            <span>${formatDateTime(event.date, event.time)}</span>
-            <span>${event.venue} · ${event.mode}</span>
-            ${showType ? `<span>${event.type}</span>` : ""}
-          </div>
-          <div class="event-footer">
-            <span class="price-tag">${data.formatCurrency(event.price)}</span>
-            <div class="card-actions">
-              <span class="club-mini-logo">${clubTag}</span>
-              <button class="icon-btn card-share" data-share-event="${event.id}" aria-label="Share event">↗</button>
-              <button class="icon-btn card-preview" data-preview-event="${event.id}" aria-label="Quick preview">◍</button>
-              <a class="btn-inline" data-event-link="${event.id}" href="event.html?id=${event.id}">View</a>
-              <a class="btn-inline btn-book-now" href="booking.html?id=${event.id}">Quick Book</a>
-            </div>
-          </div>
-          <div class="attendee-row">
-            <span class="attendee-avatars"><span></span><span></span><span></span><span></span></span>
-            <span>${attendees.toLocaleString("en-IN")} attending</span>
-          </div>
-          <div class="mini-stat-row">
-            <span>${seatsLeft} seats left</span>
-            <span>Closing in ${closesIn}d</span>
-          </div>
-        </div>
-      </article>
+    
+    const iconClass = type === 'success' ? 'toast__icon--success' : type === 'error' ? 'toast__icon--error' : '';
+    
+    toast.innerHTML = `
+      <div class="toast__icon ${iconClass}">${icons[type] || icons.neutral}</div>
+      <span>${message}</span>
     `;
+    
+    document.body.appendChild(toast);
+    
+    requestAnimationFrame(() => toast.classList.add('show'));
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        toast.remove();
+        showNextToast();
+      }, 400);
+    }, duration);
   };
 
-  const initNavUtilities = () => {
-    document.querySelectorAll(".nav-actions").forEach((container) => {
-      if (container.querySelector(".nav-utility")) {
-        return;
+  /* ═══════════════════════════════════════
+     CURSOR — REFINED WITH HOVER STATES
+     ═══════════════════════════════════════ */
+
+  const initCursor = () => {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    
+    cursorDot = document.getElementById('cursor-dot');
+    cursorRing = document.getElementById('cursor-ring');
+    if (!cursorDot || !cursorRing) return;
+    
+    let mouseX = 0, mouseY = 0;
+    let dotX = 0, dotY = 0;
+    let ringX = 0, ringY = 0;
+    
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    }, { passive: true });
+    
+    // Detect hover on interactive elements
+    document.addEventListener('mouseover', (e) => {
+      const target = e.target.closest('a, button, .event-card, [data-tilt]');
+      if (target) {
+        cursorRing.classList.add('hovering');
+        cursorRing.style.width = '48px';
+        cursorRing.style.height = '48px';
       }
-
-      const utilityGroup = document.createElement("div");
-      utilityGroup.className = "nav-utility";
-      utilityGroup.innerHTML = `
-        <button class="campus-switcher" type="button" data-campus-trigger aria-label="Choose NM campus location">
-          <span class="campus-switcher-title">NM Campus</span>
-          <span class="campus-switcher-label">Main Campus</span>
-        </button>
-        <a class="icon-btn" href="explore.html" aria-label="Search events">⌕</a>
-        <a class="icon-btn" href="dashboard.html" aria-label="Wishlist">♥</a>
-        <button class="profile-chip" type="button" aria-label="Student profile">
-          <img class="nav-avatar" alt="Profile avatar" src="assets/images/385a26a34f594dbaa1d6890e70664f81.jpg" />
-          <span>Rhea M.</span>
-        </button>
-      `;
-      container.appendChild(utilityGroup);
-    });
-  };
-
-  const markActiveNav = () => {
-    const path = window.location.pathname.split("/").pop() || "index.html";
-    document.querySelectorAll("[data-nav-link]").forEach((link) => {
-      const href = link.getAttribute("href");
-      if (href === path || (href === "index.html" && path === "")) {
-        link.classList.add("active");
+    }, { passive: true });
+    
+    document.addEventListener('mouseout', (e) => {
+      const target = e.target.closest('a, button, .event-card, [data-tilt]');
+      if (target) {
+        cursorRing.classList.remove('hovering');
+        cursorRing.style.width = '32px';
+        cursorRing.style.height = '32px';
       }
-    });
+    }, { passive: true });
+    
+    const animate = () => {
+      dotX += (mouseX - dotX - 3) * 0.15;
+      dotY += (mouseY - dotY - 3) * 0.15;
+      ringX += (mouseX - ringX) * 0.08;
+      ringY += (mouseY - ringY) * 0.08;
+      
+      cursorDot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0)`;
+      cursorRing.style.transform = `translate3d(${ringX - (parseInt(cursorRing.style.width) || 32)/2}px, ${ringY - (parseInt(cursorRing.style.height) || 32)/2}px, 0)`;
+      
+      requestAnimationFrame(animate);
+    };
+    
+    animate();
   };
+
+  /* ═══════════════════════════════════════
+     NAVBAR — SCROLL EFFECTS
+     ═══════════════════════════════════════ */
+
+  const initNavbar = () => {
+    const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+    
+    let ticking = false;
+    
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const y = window.scrollY;
+          navbar.classList.toggle('scrolled', y > 50);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+  };
+
+  /* ═══════════════════════════════════════
+     THEME — WITH TRANSITION
+     ═══════════════════════════════════════ */
 
   const initTheme = () => {
-    const root = document.documentElement;
-    const toggle = document.getElementById("themeToggle");
-    const savedTheme = localStorage.getItem("nm-theme") || "dark";
-
-    root.setAttribute("data-theme", savedTheme);
-
-    const applyIcon = () => {
-      if (!toggle) {
-        return;
-      }
-      const currentTheme = root.getAttribute("data-theme") || "dark";
-      toggle.textContent = currentTheme === "light" ? "☼" : "◐";
-      toggle.setAttribute("aria-label", currentTheme === "light" ? "Switch to dark mode" : "Switch to light mode");
-    };
-
-    applyIcon();
-
-    if (toggle) {
-      toggle.addEventListener("click", () => {
-        const currentTheme = root.getAttribute("data-theme") || "dark";
-        const nextTheme = currentTheme === "dark" ? "light" : "dark";
-        root.setAttribute("data-theme", nextTheme);
-        localStorage.setItem("nm-theme", nextTheme);
-        applyIcon();
+    const toggle = document.querySelector('.theme-toggle');
+    if (!toggle) return;
+    
+    const savedTheme = localStorage.getItem(THEME_KEY);
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+    
+    document.documentElement.setAttribute('data-theme', theme);
+    updateThemeIcon(theme);
+    
+    toggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.style.transition = 'none';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem(THEME_KEY, next);
+      updateThemeIcon(next);
+      
+      // Re-apply transition after a tick
+      requestAnimationFrame(() => {
+        document.documentElement.style.transition = '';
       });
-    }
-  };
-
-  const initFloatingNav = () => {
-    const nav = document.getElementById("floatingNav");
-    if (!nav) {
-      return;
-    }
-
-    const sync = () => {
-      const scroll = window.scrollY;
-      const progress = clamp(scroll / 260, 0, 1);
-      nav.classList.toggle("scrolled", scroll > 8);
-      nav.style.setProperty("--nav-scale", `${(1 - progress * 0.035).toFixed(4)}`);
-      nav.style.setProperty("--nav-opacity", `${(0.58 + progress * 0.22).toFixed(3)}`);
-    };
-
-    sync();
-    window.addEventListener("scroll", sync, { passive: true });
-  };
-
-  const initCursorGlow = () => {
-    const glow = document.getElementById("cursorGlow");
-    if (!glow) {
-      return;
-    }
-
-    const interactiveSelector = "a, button, input, select, textarea, .event-card, .filter-pill, .quick-cat-chip, .category-tab-chip";
-
-    window.addEventListener("mousemove", (event) => {
-      glow.style.left = `${event.clientX}px`;
-      glow.style.top = `${event.clientY}px`;
     });
+  };
 
-    document.addEventListener("mouseover", (event) => {
-      const target = event.target;
-      if (target instanceof Element && target.closest(interactiveSelector)) {
-        glow.classList.add("interactive");
+  const updateThemeIcon = (theme) => {
+    const toggle = document.querySelector('.theme-toggle');
+    if (!toggle) return;
+    
+    const sun = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
+    const moon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+    
+    toggle.innerHTML = theme === 'dark' ? sun : moon;
+  };
+
+  /* ═══════════════════════════════════════
+     NAVIGATION ACTIVE STATE
+     ═══════════════════════════════════════ */
+
+  const initNavigation = () => {
+    const links = document.querySelectorAll('[data-nav-link]');
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    
+    links.forEach(link => {
+      const href = link.getAttribute('href');
+      if (href && currentPage.includes(href.replace('./', ''))) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
       }
     });
-
-    document.addEventListener("mouseout", (event) => {
-      const target = event.target;
-      if (target instanceof Element && target.closest(interactiveSelector)) {
-        glow.classList.remove("interactive");
-      }
-    });
-
-    document.addEventListener("mouseleave", () => {
-      glow.style.opacity = "0";
-    });
-
-    document.addEventListener("mouseenter", () => {
-      glow.style.opacity = "0.7";
-    });
   };
+
+  /* ═══════════════════════════════════════
+     SCROLL REVEAL — INTERSECTION OBSERVER
+     ═══════════════════════════════════════ */
 
   const initRevealAnimations = () => {
-    const targets = document.querySelectorAll(".reveal");
-    if (!targets.length) {
-      return;
-    }
-
-    if (prefersReducedMotion) {
-      targets.forEach((item) => {
-        item.classList.add("visible", "is-cinematic-visible");
-      });
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible", "is-cinematic-visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      {
-        rootMargin: "0px 0px -12% 0px",
-        threshold: 0.08
-      }
-    );
-
-    targets.forEach((item) => observer.observe(item));
-  };
-
-  const initCounters = () => {
-    const counterItems = document.querySelectorAll("[data-counter]");
-    if (!counterItems.length) {
-      return;
-    }
-
-    const animateCounter = (counter) => {
-      const targetValue = Number(counter.dataset.counter || "0");
-      const suffix = counter.dataset.suffix || "";
-      const duration = 1300;
-      const start = performance.now();
-
-      const update = (now) => {
-        const progress = Math.min((now - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        counter.textContent = `${Math.floor(targetValue * eased).toLocaleString("en-IN")}${suffix}`;
-        if (progress < 1) {
-          requestAnimationFrame(update);
+    const reveals = document.querySelectorAll('[data-reveal], [data-stagger]');
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          // Trigger counter animations if any
+          entry.target.querySelectorAll('[data-counter]').forEach(triggerCounter);
+          observer.unobserve(entry.target);
         }
-      };
+      });
+    }, {
+      threshold: 0.08,
+      rootMargin: '0px 0px -50px 0px'
+    });
+    
+    reveals.forEach(el => observer.observe(el));
+  };
 
-      requestAnimationFrame(update);
+  /* ═══════════════════════════════════════
+     RIPPLE EFFECT
+     ═══════════════════════════════════════ */
+
+  const initRipples = () => {
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-ripple');
+      if (!btn) return;
+      
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.className = 'btn-ripple__effect';
+      
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    });
+  };
+
+  /* ═══════════════════════════════════════
+     COUNTER ANIMATION
+     ═══════════════════════════════════════ */
+
+  const triggerCounter = (el) => {
+    if (el.dataset.counted) return;
+    el.dataset.counted = 'true';
+    
+    const target = parseInt(el.dataset.counter, 10);
+    const suffix = el.dataset.suffix || '';
+    if (!isValidNum(target)) return;
+    
+    let current = 0;
+    const duration = 1500;
+    const startTime = performance.now();
+    
+    const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+    
+    const update = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = easeOut(progress);
+      
+      current = Math.floor(eased * target);
+      el.textContent = current.toLocaleString() + suffix;
+      
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        el.textContent = target.toLocaleString() + suffix;
+      }
     };
+    
+    requestAnimationFrame(update);
+  };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+  /* ═══════════════════════════════════════
+     COMMAND PALETTE
+     ═══════════════════════════════════════ */
+
+  const initCommandPalette = () => {
+    const palette = document.getElementById('cmd-palette');
+    const input = document.getElementById('cmd-input');
+    const results = document.getElementById('cmd-results');
+    const trigger = document.querySelector('.cmd-trigger');
+    
+    if (!palette || !input) return;
+    
+    const openPalette = () => {
+      palette.classList.add('active');
+      input.focus();
+      renderResults('');
+    };
+    
+    const closePalette = () => {
+      palette.classList.remove('active');
+      input.value = '';
+    };
+    
+    // Open on click
+    trigger?.addEventListener('click', openPalette);
+    
+    // Open on Cmd+K / Ctrl+K
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        openPalette();
+      }
+      if (e.key === 'Escape' && palette.classList.contains('active')) {
+        closePalette();
+      }
+    });
+    
+    // Close on backdrop click
+    palette.addEventListener('click', (e) => {
+      if (e.target === palette) closePalette();
+    });
+    
+    // Search
+    input.addEventListener('input', (e) => renderResults(e.target.value));
+    
+    function renderResults(query) {
+      const q = query.toLowerCase().trim();
+      
+      const items = [
+        { type: 'page', title: 'Home', subtitle: 'Discover events and clubs', icon: '🏠', url: 'index.html' },
+        { type: 'page', title: 'Explore Events', subtitle: 'Browse all campus events', icon: '🔍', url: 'explore.html' },
+        { type: 'page', title: 'My Dashboard', subtitle: 'Tickets, saved events, rewards', icon: '📊', url: 'dashboard.html' },
+        { type: 'page', title: 'Clubs Directory', subtitle: 'Explore student clubs', icon: '🏛️', url: 'clubs.html' },
+        ...data.events.slice(0, 6).map(e => ({
+          type: 'event',
+          title: e.title,
+          subtitle: `${e.category} • ${safeFormatDate(e.date)}`,
+          icon: '🎫',
+          url: `event.html?id=${e.id}`
+        })),
+        ...data.clubs.slice(0, 4).map(c => ({
+          type: 'club',
+          title: c.name,
+          subtitle: `${c.category} • ${c.members?.toLocaleString() || 0} members`,
+          icon: '🏛️',
+          url: `club.html?id=${c.id}`
+        }))
+      ];
+      
+      const filtered = q
+        ? items.filter(item => item.title.toLowerCase().includes(q) || item.subtitle.toLowerCase().includes(q))
+        : items;
+      
+      const sections = {
+        page: filtered.filter(i => i.type === 'page'),
+        event: filtered.filter(i => i.type === 'event'),
+        club: filtered.filter(i => i.type === 'club')
+      };
+      
+      const sectionNames = { page: 'Pages', event: 'Events', club: 'Clubs' };
+      
+      results.innerHTML = Object.entries(sections)
+        .filter(([_, items]) => items.length > 0)
+        .map(([type, items]) => `
+          <div class="cmd-palette__section">
+            <div class="cmd-palette__section-title">${sectionNames[type]}</div>
+            ${items.map(item => `
+              <a class="cmd-palette__item" href="${item.url}" data-cmd-item>
+                <div class="cmd-palette__item-icon">${item.icon}</div>
+                <div class="cmd-palette__item-text">
+                  <div class="cmd-palette__item-title">${highlightMatch(item.title, q)}</div>
+                  <div class="cmd-palette__item-subtitle">${item.subtitle}</div>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        `).join('');
+      
+      // Navigate with Enter on first result
+      if (q && results.querySelector('.cmd-palette__item')) {
+        results.querySelector('.cmd-palette__item').classList.add('active');
+      }
+    }
+    
+    function highlightMatch(text, query) {
+      if (!query) return text;
+      const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+      return text.replace(regex, '<mark style="background: var(--violet-500); color: white; border-radius: 2px; padding: 0 2px;">$1</mark>');
+    }
+    
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    
+    // Keyboard navigation
+    input.addEventListener('keydown', (e) => {
+      const items = results.querySelectorAll('.cmd-palette__item');
+      const active = results.querySelector('.cmd-palette__item.active');
+      let index = active ? Array.from(items).indexOf(active) : -1;
+      
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        index = (index + 1) % items.length;
+        items.forEach(i => i.classList.remove('active'));
+        items[index]?.classList.add('active');
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        index = index <= 0 ? items.length - 1 : index - 1;
+        items.forEach(i => i.classList.remove('active'));
+        items[index]?.classList.add('active');
+      } else if (e.key === 'Enter') {
+        const active = results.querySelector('.cmd-palette__item.active');
+        if (active) {
+          active.click();
+          closePalette();
+        }
+      }
+    });
+    
+    // Click on results
+    results.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-cmd-item]');
+      if (item) closePalette();
+    });
+  };
+
+  /* ═══════════════════════════════════════
+     SKELETON LOADER
+     ═══════════════════════════════════════ */
+
+  const showSkeleton = (container, count = 3) => {
+    container.innerHTML = Array.from({ length: count }, () => `
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-card__image"></div>
+        <div class="skeleton-card__content">
+          <div class="skeleton skeleton-card__title"></div>
+          <div class="skeleton skeleton-card__meta" style="width: 60%"></div>
+        </div>
+      </div>
+    `).join('');
+  };
+
+  /* ═══════════════════════════════════════
+     EVENT CARD CREATION — PREMIUM
+     ═══════════════════════════════════════ */
+
+  const createEventCard = (event) => {
+    const saved = isSaved(event.id);
+    const price = safeGetPrice(event);
+    const tag = getEventTag(event);
+    
+    return `
+      <div class="event-card" data-event-id="${event.id}" data-tilt>
+        <div class="event-card__image-wrap">
+          <img src="${event.image}" alt="${event.title}" loading="lazy" onerror="this.parentElement.style.background='linear-gradient(135deg, var(--surface-2), var(--surface-3))'; this.style.display='none';">
+          ${tag ? `<div style="position: absolute; top: 12px; left: 12px; z-index: 2;">${tag}</div>` : ''}
+          <button class="event-card__save ${saved ? 'saved' : ''}" data-save-event="${event.id}" aria-label="${saved ? 'Remove from saved' : 'Save event'}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="${saved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="event-card__content">
+          <div class="event-card__category">${event.category}</div>
+          <h3 class="event-card__title">${event.title}</h3>
+          <p class="event-card__date">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            ${safeFormatDate(event.date)}
+          </p>
+          <p class="event-card__venue">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${event.venue || 'TBA'}
+          </p>
+          <div class="event-card__footer">
+            <span class="event-card__price">${price}</span>
+            <span class="event-card__interested">${(event.interested || 0).toLocaleString()} interested</span>
+          </div>
+        </div>
+        <a href="event.html?id=${event.id}" class="event-card__link" aria-label="View ${event.title}"></a>
+      </div>
+    `;
+  };
+
+  /* ═══════════════════════════════════════
+     HOMEPAGE POPULATION
+     ═══════════════════════════════════════ */
+
+  const populateHomepage = () => {
+    // Featured events
+    const eventGrid = document.querySelector('.event-grid');
+    if (eventGrid) {
+      const featured = data.events
+        .filter(e => e.featured)
+        .slice(0, 6);
+      
+      if (featured.length > 0) {
+        eventGrid.innerHTML = featured.map(createEventCard).join('');
+      }
+    }
+    
+    // Recommended for you (if user has history)
+    const recommendedGrid = document.querySelector('.recommended-grid');
+    if (recommendedGrid) {
+      const recommended = getRecommendedEvents();
+      if (recommended.length > 0) {
+        recommendedGrid.innerHTML = recommended.map(createEventCard).join('');
+        const section = recommendedGrid.closest('[data-section="recommended"]');
+        if (section) section.classList.remove('hidden');
+      }
+    }
+    
+    // Categories
+    const categoryGrid = document.querySelector('.category-grid');
+    if (categoryGrid) {
+      const categories = [
+        { icon: '🎵', title: 'Music', desc: 'Concerts, DJ nights, acoustic sessions', color: 'var(--violet-400)' },
+        { icon: '🎭', title: 'Cultural', desc: 'Festivals, drama, art exhibitions', color: 'var(--gold)' },
+        { icon: '🏆', title: 'Sports', desc: 'Tournaments, matches, fitness', color: 'var(--success)' },
+        { icon: '💼', title: 'Workshop', desc: 'Skill building, career dev', color: 'var(--indigo-400)' },
+        { icon: '🤖', title: 'Tech', desc: 'Hackathons, coding, AI/ML', color: '#3b82f6' },
+        { icon: '🎨', title: 'Arts', desc: 'Creative workshops, showcases', color: '#ec4899' }
+      ];
+      
+      categoryGrid.innerHTML = categories.map(cat => `
+        <a href="explore.html?category=${encodeURIComponent(cat.title)}" class="category-card" style="--cat-color: ${cat.color}">
+          <div class="category-card__icon">${cat.icon}</div>
+          <h3 class="category-card__title">${cat.title}</h3>
+          <p class="category-card__description">${cat.desc}</p>
+        </a>
+      `).join('');
+    }
+    
+    // Featured clubs
+    const clubGrid = document.querySelector('.club-grid');
+    if (clubGrid) {
+      const featuredClubs = data.clubs.slice(0, 4);
+      clubGrid.innerHTML = featuredClubs.map(club => `
+        <a href="club.html?id=${club.id}" class="club-card">
+          <div class="club-card__banner">
+            <img src="${club.banner}" alt="${club.name}" loading="lazy">
+          </div>
+          <div class="club-card__body">
+            <div class="club-card__logo">
+              <img src="${club.logo}" alt="">
+            </div>
+            <h3 class="club-card__name">${club.name}</h3>
+            <p class="club-card__category">${club.category}</p>
+            <div class="club-card__stats">
+              <span>${club.members?.toLocaleString() || 0} members</span>
+              <span>•</span>
+              <span>Est. ${club.founded || 'N/A'}</span>
+            </div>
+          </div>
+        </a>
+      `).join('');
+    }
+    
+    // Smart greeting — show if user has profile or activity
+    const greetingSection = document.querySelector('[data-section="greeting"]');
+    const greetingEl = document.querySelector('[data-greeting]');
+    if (greetingEl && greetingSection) {
+      const hasActivity = getRecentEvents().length > 0 || getSavedEvents().length > 0;
+      const hasProfile = Object.keys(getUserProfile()).length > 0;
+      
+      if (hasActivity || hasProfile) {
+        greetingSection.classList.remove('hidden');
+        greetingEl.textContent = getSmartGreeting();
+      }
+    }
+    
+    // Counters
+    document.querySelectorAll('[data-counter]').forEach(el => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
-            animateCounter(entry.target);
+            triggerCounter(entry.target);
             observer.unobserve(entry.target);
           }
         });
-      },
-      { threshold: 0.5 }
-    );
-
-    counterItems.forEach((item) => observer.observe(item));
+      }, { threshold: 0.5 });
+      observer.observe(el);
+    });
+    
+    // Init tilt effects after cards are rendered
+    initTiltEffects();
   };
 
-  const syncSaveButtonStates = () => {
-    const saved = new Set(getSavedEvents());
-    document.querySelectorAll("[data-save-event]").forEach((button) => {
-      const id = button.getAttribute("data-save-event");
-      const active = saved.has(id);
-      button.classList.toggle("active", active);
-      button.textContent = active ? "♥" : "♡";
+  /* ═══════════════════════════════════════
+     3D TILT EFFECT
+     ═══════════════════════════════════════ */
+
+  const initTiltEffects = () => {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    
+    document.querySelectorAll('[data-tilt]').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateX = ((y - centerY) / centerY) * -5;
+        const rotateY = ((x - centerX) / centerX) * 5;
+        
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+      }, { passive: true });
+      
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      }, { passive: true });
     });
   };
 
-  const getSelectedCampus = () => localStorage.getItem(CAMPUS_KEY) || "Main Campus";
-
-  const getRecentCampuses = () => {
-    try {
-      return JSON.parse(localStorage.getItem(CAMPUS_RECENT_KEY) || "[]");
-    } catch (error) {
-      return [];
-    }
-  };
-
-  const setRecentCampuses = (items) => {
-    localStorage.setItem(CAMPUS_RECENT_KEY, JSON.stringify(items.slice(0, 5)));
-  };
-
-  const syncCampusLabels = () => {
-    const selectedCampus = getSelectedCampus();
-    document.querySelectorAll(".campus-switcher-label").forEach((item) => {
-      item.textContent = selectedCampus;
-    });
-  };
-
-  const initCampusSelector = () => {
-    const modal = document.getElementById("campusModal");
-    const closeBtn = document.getElementById("campusModalClose");
-    const searchInput = document.getElementById("campusSearchInput");
-    const cardGrid = document.getElementById("campusCardGrid");
-    const recentRoot = document.getElementById("recentCampusList");
-    const popularRoot = document.getElementById("popularCampusList");
-    const useCurrentBtn = document.getElementById("useCurrentCampus");
-
-    const campuses = [
-      { name: "Main Campus", icon: "⌂", note: "Core NM academic and event spaces" },
-      { name: "NM Auditorium", icon: "◌", note: "Guest lectures and flagship showcases" },
-      { name: "Sports Ground", icon: "◎", note: "Leagues, tournaments, and open play" },
-      { name: "Seminar Hall", icon: "▣", note: "Case competitions and workshops" },
-      { name: "Classroom Wing", icon: "□", note: "Small-format sessions and club events" },
-      { name: "Cultural Hall", icon: "♫", note: "Open mics, theatre, and dance events" },
-      { name: "Off-Campus Venues", icon: "↗", note: "Partner spaces and external nights" }
-    ];
-
-    const openModal = () => {
-      if (!modal) {
-        return;
-      }
-      modal.hidden = false;
-      modal.classList.add("open");
-      searchInput?.focus();
-      renderCampusCards(searchInput?.value.trim().toLowerCase() || "");
-      renderCampusQuickLists();
-    };
-
-    const closeModal = () => {
-      if (!modal) {
-        return;
-      }
-      modal.classList.remove("open");
-      window.setTimeout(() => {
-        modal.hidden = true;
-      }, 140);
-    };
-
-    const selectCampus = (campusName) => {
-      localStorage.setItem(CAMPUS_KEY, campusName);
-      const existing = getRecentCampuses();
-      const next = [campusName, ...existing.filter((item) => item !== campusName)];
-      setRecentCampuses(next);
-      syncCampusLabels();
-      closeModal();
-    };
-
-    const renderCampusCards = (searchText) => {
-      if (!cardGrid) {
-        return;
-      }
-
-      const filtered = campuses.filter((campus) => campus.name.toLowerCase().includes(searchText));
-      cardGrid.innerHTML = filtered
-        .map(
-          (campus) => `
-            <button class="campus-card" type="button" data-campus-choice="${campus.name}">
-              <span class="campus-icon">${campus.icon}</span>
-              <span class="campus-name">${campus.name}</span>
-              <small>${campus.note}</small>
-            </button>
-          `
-        )
-        .join("");
-    };
-
-    const renderCampusQuickLists = () => {
-      if (recentRoot) {
-        const recent = getRecentCampuses();
-        recentRoot.innerHTML = recent.length
-          ? recent.map((item) => `<button class="campus-pill" type="button" data-campus-choice="${item}">${item}</button>`).join("")
-          : '<span class="muted">No recent locations yet</span>';
-      }
-
-      if (popularRoot) {
-        const popular = ["Main Campus", "NM Auditorium", "Seminar Hall", "Sports Ground"];
-        popularRoot.innerHTML = popular
-          .map((item) => `<button class="campus-pill" type="button" data-campus-choice="${item}">${item}</button>`)
-          .join("");
-      }
-    };
-
-    document.querySelectorAll("[data-campus-trigger]").forEach((trigger) => {
-      trigger.addEventListener("click", openModal);
-    });
-
-    closeBtn?.addEventListener("click", closeModal);
-
-    modal?.addEventListener("click", (event) => {
-      if (event.target === modal) {
-        closeModal();
-      }
-      const choice = event.target.closest("[data-campus-choice]");
-      if (choice) {
-        selectCampus(choice.getAttribute("data-campus-choice"));
-      }
-    });
-
-    searchInput?.addEventListener("input", () => {
-      renderCampusCards(searchInput.value.trim().toLowerCase());
-    });
-
-    useCurrentBtn?.addEventListener("click", () => {
-      selectCampus("Main Campus");
-    });
-
-    syncCampusLabels();
-  };
-
-  const openEventPreview = (eventId) => {
-    const modal = document.getElementById("eventPreviewModal");
-    const eventItem = data.events.find((item) => item.id === eventId);
-    if (!eventItem) {
-      return;
-    }
-
-    if (!modal) {
-      window.location.href = `event.html?id=${eventId}`;
-      return;
-    }
-
-    const image = document.getElementById("previewImage");
-    const title = document.getElementById("previewTitle");
-    const meta = document.getElementById("previewMeta");
-    const about = document.getElementById("previewAbout");
-    const viewLink = document.getElementById("previewViewLink");
-    const bookLink = document.getElementById("previewBookLink");
-
-    if (image) {
-      image.src = eventItem.image;
-      image.alt = eventItem.title;
-    }
-    if (title) {
-      title.textContent = eventItem.title;
-    }
-    if (meta) {
-      meta.textContent = `${eventItem.category} · ${formatDateTime(eventItem.date, eventItem.time)} · ${eventItem.venue}`;
-    }
-    if (about) {
-      about.textContent = eventItem.about;
-    }
-    if (viewLink) {
-      viewLink.href = `event.html?id=${eventItem.id}`;
-    }
-    if (bookLink) {
-      bookLink.href = `booking.html?id=${eventItem.id}`;
-    }
-
-    modal.hidden = false;
-    modal.classList.add("open");
-  };
-
-  const closeEventPreview = () => {
-    const modal = document.getElementById("eventPreviewModal");
-    if (!modal) {
-      return;
-    }
-    modal.classList.remove("open");
-    window.setTimeout(() => {
-      modal.hidden = true;
-    }, 130);
-  };
+  /* ═══════════════════════════════════════
+     SAVE BUTTON HANDLER
+     ═══════════════════════════════════════ */
 
   const initSaveButtons = () => {
-    document.addEventListener("click", (event) => {
-      const previewBtn = event.target.closest("[data-preview-event]");
-      if (previewBtn) {
-        openEventPreview(previewBtn.getAttribute("data-preview-event"));
-        return;
-      }
-
-      const saveBtn = event.target.closest("[data-save-event]");
-      if (saveBtn) {
-        const eventId = saveBtn.getAttribute("data-save-event");
-        toggleSavedEvent(eventId);
-        syncSaveButtonStates();
-        const isSaved = isSavedEvent(eventId);
-        pushToast(isSaved ? "Added to your saved events" : "Removed from your saved events");
-        saveBtn.classList.add("heart-pop");
-        window.setTimeout(() => {
-          saveBtn.classList.remove("heart-pop");
-        }, 360);
-        return;
-      }
-
-      const shareBtn = event.target.closest("[data-share-event]");
-      if (!shareBtn) {
-        return;
-      }
-
-      const eventId = shareBtn.getAttribute("data-share-event");
-      const eventItem = data.events.find((item) => item.id === eventId);
-      const shareUrl = `${window.location.origin}${window.location.pathname.replace(/[^/]*$/, "")}event.html?id=${eventId}`;
-
-      const fallback = async () => {
-        if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-          await navigator.clipboard.writeText(shareUrl);
-          shareBtn.textContent = "✓";
-          pushToast("Event link copied to clipboard");
-          window.setTimeout(() => {
-            shareBtn.textContent = "↗";
-          }, 1000);
-        }
-      };
-
-      if (navigator.share) {
-        navigator
-          .share({
-            title: eventItem?.title || "NM Event",
-            text: `Check out ${eventItem?.title || "this event"} on NM District`,
-            url: shareUrl
-          })
-          .catch(() => fallback());
-      } else {
-        fallback();
-      }
-    });
-
-    document.getElementById("previewClose")?.addEventListener("click", closeEventPreview);
-    document.getElementById("eventPreviewModal")?.addEventListener("click", (event) => {
-      if (event.target.id === "eventPreviewModal") {
-        closeEventPreview();
-      }
-    });
-
-    window.addEventListener("nm:saved-events-updated", syncSaveButtonStates);
-    syncSaveButtonStates();
-  };
-
-  const initHeroSearch = () => {
-    const form = document.getElementById("heroSearch");
-    if (!form) {
-      return;
-    }
-    const input = form.querySelector("input");
-    const suggestionRoot = document.getElementById("heroSearchSuggestions");
-    const recentRoot = document.getElementById("recentSearches");
-    const quickAccess = document.getElementById("heroQuickAccess");
-    const heroWord = document.getElementById("heroWord");
-
-    const RECENT_KEY = "nm-recent-searches";
-
-    const getRecentSearches = () => {
-      try {
-        return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
-      } catch (error) {
-        return [];
-      }
-    };
-
-    const setRecentSearches = (items) => {
-      localStorage.setItem(RECENT_KEY, JSON.stringify(items.slice(0, 6)));
-    };
-
-    const renderRecentSearches = () => {
-      if (!recentRoot) {
-        return;
-      }
-      const recents = getRecentSearches();
-      if (!recents.length) {
-        recentRoot.innerHTML = "";
-        return;
-      }
-      recentRoot.innerHTML = recents
-        .map((term) => `<button class=\"trend-chip\" type=\"button\" data-recent-term=\"${term}\">${term}</button>`)
-        .join("");
-    };
-
-    const placeholders = [
-      "Search Velocity passes, workshops, and after-hours sessions...",
-      "Try: finance competitions this week",
-      "Find networking events and guest lectures..."
-    ];
-
-    let cursor = 0;
-    const rotatePlaceholder = () => {
-      if (!input) {
-        return;
-      }
-      input.setAttribute("placeholder", placeholders[cursor % placeholders.length]);
-      cursor += 1;
-    };
-
-    rotatePlaceholder();
-    window.setInterval(rotatePlaceholder, 3200);
-
-    const words = ["Fests", "Workshops", "Competitions", "Concerts", "Networking"];
-    if (heroWord) {
-      let wordIndex = 0;
-      window.setInterval(() => {
-        wordIndex = (wordIndex + 1) % words.length;
-        heroWord.textContent = words[wordIndex];
-      }, 1700);
-    }
-
-    if (input && suggestionRoot) {
-      input.addEventListener("input", () => {
-        const value = input.value.trim().toLowerCase();
-        if (!value) {
-          suggestionRoot.hidden = true;
-          suggestionRoot.innerHTML = "";
-          return;
-        }
-
-        const matched = data.events
-          .filter((eventItem) => `${eventItem.title} ${eventItem.club} ${eventItem.category}`.toLowerCase().includes(value))
-          .slice(0, 4);
-
-        if (!matched.length) {
-          suggestionRoot.hidden = true;
-          suggestionRoot.innerHTML = "";
-          return;
-        }
-
-        suggestionRoot.innerHTML = matched
-          .map(
-            (eventItem) =>
-              `<div class=\"suggestion-item\" data-suggest=\"${eventItem.title}\"><strong>AI pick:</strong> ${eventItem.title}</div>`
-          )
-          .join("");
-        suggestionRoot.hidden = false;
-      });
-
-      suggestionRoot.addEventListener("click", (event) => {
-        const target = event.target.closest("[data-suggest]");
-        if (!target) {
-          return;
-        }
-        input.value = target.dataset.suggest;
-        suggestionRoot.hidden = true;
-      });
-    }
-
-    recentRoot?.addEventListener("click", (event) => {
-      const target = event.target.closest("[data-recent-term]");
-      if (!target || !input) {
-        return;
-      }
-      input.value = target.dataset.recentTerm;
-      form.dispatchEvent(new Event("submit", { cancelable: true }));
-    });
-
-    const trendingRow = document.getElementById("trendingChips");
-    if (input && trendingRow) {
-      trendingRow.addEventListener("click", (event) => {
-        const chip = event.target.closest(".trend-chip");
-        if (!chip) {
-          return;
-        }
-        input.value = chip.textContent?.trim() || "";
-        form.dispatchEvent(new Event("submit", { cancelable: true }));
-      });
-    }
-
-    quickAccess?.addEventListener("click", (event) => {
-      const chip = event.target.closest(".quick-access-chip");
-      if (!chip || !input) {
-        return;
-      }
-      const text = chip.textContent?.trim() || "";
-      input.value = text;
-      form.dispatchEvent(new Event("submit", { cancelable: true }));
-    });
-
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const value = form.querySelector("input")?.value.trim() || "";
-      if (value) {
-        const recents = getRecentSearches();
-        const next = [value, ...recents.filter((item) => item.toLowerCase() !== value.toLowerCase())];
-        setRecentSearches(next);
-        renderRecentSearches();
-      }
-      const params = new URLSearchParams();
-      if (value) {
-        params.set("q", value);
-      }
-      window.location.href = `explore.html${params.toString() ? `?${params.toString()}` : ""}`;
-    });
-
-    renderRecentSearches();
-  };
-
-  const initHeroParallax = () => {
-    const hero = document.getElementById("heroSpotlight");
-    if (!hero) {
-      return;
-    }
-    const mouseGlow = document.getElementById("heroMouseGlow");
-    const sideCards = Array.from(hero.querySelectorAll(".hero-preview-card"));
-
-    const update = () => {
-      const rect = hero.getBoundingClientRect();
-      const shift = Math.max(-26, Math.min(26, -rect.top * 0.08));
-      hero.style.setProperty("--hero-shift", `${shift}px`);
-    };
-
-    hero.addEventListener("mousemove", (event) => {
-      const rect = hero.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      const xPercent = x / rect.width - 0.5;
-      const yPercent = y / rect.height - 0.5;
-
-      if (mouseGlow) {
-        mouseGlow.style.left = `${x}px`;
-        mouseGlow.style.top = `${y}px`;
-      }
-
-      sideCards.forEach((card, index) => {
-        const strength = (index + 1) * 2.2;
-        card.style.transform = `translate3d(${xPercent * -strength}px, ${yPercent * -strength}px, 0)`;
-      });
-    });
-
-    update();
-    window.addEventListener("scroll", update);
-  };
-
-  const initFeaturedCarousel = () => {
-    const track = document.getElementById("featuredTrack");
-    if (!track) {
-      return;
-    }
-    const prev = document.getElementById("featuredPrev");
-    const next = document.getElementById("featuredNext");
-    const progress = document.getElementById("featuredProgress");
-
-    const syncActive = () => {
-      const cards = Array.from(track.querySelectorAll(".event-card"));
-      if (!cards.length) {
-        return;
-      }
-      const center = track.scrollLeft + track.clientWidth / 2;
-      let activeIndex = 0;
-      let minDistance = Number.POSITIVE_INFINITY;
-
-      cards.forEach((card, index) => {
-        const cardCenter = card.offsetLeft + card.clientWidth / 2;
-        const distance = Math.abs(center - cardCenter);
-        if (distance < minDistance) {
-          minDistance = distance;
-          activeIndex = index;
-        }
-      });
-
-      cards.forEach((card, index) => card.classList.toggle("carousel-active", index === activeIndex));
-      if (progress) {
-        const progressValue = ((activeIndex + 1) / cards.length) * 100;
-        progress.style.setProperty("--carousel-progress", `${progressValue}%`);
-      }
-    };
-
-    const moveByCard = (direction) => {
-      const card = track.querySelector(".event-card");
-      if (!card) {
-        return;
-      }
-      track.scrollBy({ left: card.clientWidth * direction, behavior: "smooth" });
-    };
-
-    prev?.addEventListener("click", () => moveByCard(-1));
-    next?.addEventListener("click", () => moveByCard(1));
-    track.addEventListener("scroll", syncActive, { passive: true });
-    syncActive();
-  };
-
-  const initTestimonialCarousel = () => {
-    const track = document.getElementById("testimonialGrid");
-    if (!track) {
-      return;
-    }
-    const prev = document.getElementById("testimonialPrev");
-    const next = document.getElementById("testimonialNext");
-
-    const move = (direction) => {
-      const card = track.querySelector(".testimonial-card");
-      if (!card) {
-        return;
-      }
-      track.scrollBy({ left: card.clientWidth * direction, behavior: "smooth" });
-    };
-
-    prev?.addEventListener("click", () => move(-1));
-    next?.addEventListener("click", () => move(1));
-  };
-
-  const initHomepage = () => {
-    const heroImage = document.getElementById("heroSlideImage");
-    const heroTitle = document.getElementById("heroSlideTitle");
-    const heroType = document.getElementById("heroSlideType");
-    const heroSummary = document.getElementById("heroSlideSummary");
-    const heroMeta = document.getElementById("heroSlideMeta");
-    const heroPrimaryCta = document.getElementById("heroPrimaryCta");
-    const heroSecondaryCta = document.getElementById("heroSecondaryCta");
-    const heroDots = document.getElementById("heroDots");
-    const heroGlowPalette = document.getElementById("heroGlowPalette");
-    const heroPrev = document.getElementById("heroPrev");
-    const heroNext = document.getElementById("heroNext");
-
-    const categoryRail = document.getElementById("premiumCategoryRail");
-    const featuredPeopleRow = document.getElementById("featuredPeopleRow");
-    const eventGrid = document.getElementById("districtEventGrid");
-
-    if (!heroImage && !categoryRail && !featuredPeopleRow && !eventGrid) {
-      return;
-    }
-
-    const featuredEvents = [...data.events].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
-    const glowByCategory = {
-      Fests: "radial-gradient(circle at 15% 35%, rgba(151, 107, 255, 0.5), transparent 50%), radial-gradient(circle at 80% 20%, rgba(243, 203, 131, 0.32), transparent 48%)",
-      Workshops: "radial-gradient(circle at 15% 35%, rgba(75, 168, 255, 0.5), transparent 50%), radial-gradient(circle at 80% 20%, rgba(98, 229, 195, 0.3), transparent 48%)",
-      Networking: "radial-gradient(circle at 15% 35%, rgba(100, 205, 255, 0.48), transparent 50%), radial-gradient(circle at 80% 20%, rgba(113, 138, 255, 0.3), transparent 48%)",
-      Sports: "radial-gradient(circle at 15% 35%, rgba(98, 229, 195, 0.5), transparent 50%), radial-gradient(circle at 80% 20%, rgba(75, 168, 255, 0.28), transparent 48%)"
-    };
-
-    if (heroImage && featuredEvents.length) {
-      let heroIndex = 0;
-      let heroTimer = null;
-
-      const renderHeroDots = () => {
-        if (!heroDots) {
-          return;
-        }
-        heroDots.innerHTML = featuredEvents
-          .map((_, index) => `<button class="hero-dot ${index === heroIndex ? "active" : ""}" type="button" data-hero-dot="${index}" aria-label="Slide ${index + 1}"></button>`)
-          .join("");
-      };
-
-      const renderHeroSlide = () => {
-        const item = featuredEvents[heroIndex];
-        if (!item) {
-          return;
-        }
-
-        heroImage.classList.remove("fade-in");
-        void heroImage.offsetWidth;
-        heroImage.classList.add("fade-in");
-        const fallbackHero = "assets/images/4f7b4ae0986f4a7502e84ba08890af84.jpg";
-        const imageCandidates = [
-          ...buildImageCandidates(item.image),
-          ...buildImageCandidates(fallbackHero)
-        ];
-        setImageFromCandidates(heroImage, imageCandidates);
-        heroImage.alt = item.title;
-
-        if (heroType) {
-          heroType.textContent = `${item.category} · ${item.type}`;
-        }
-        if (heroTitle) {
-          heroTitle.textContent = item.title;
-        }
-        if (heroSummary) {
-          heroSummary.textContent = item.about;
-        }
-        if (heroMeta) {
-          heroMeta.innerHTML = `
-            <span class="meta-pill">${formatDateTime(item.date, item.time)}</span>
-            <span class="meta-pill">${item.venue}</span>
-            <span class="meta-pill">${data.formatCurrency(item.price)}</span>
-          `;
-        }
-        if (heroPrimaryCta) {
-          heroPrimaryCta.href = `booking.html?id=${item.id}`;
-        }
-        if (heroSecondaryCta) {
-          heroSecondaryCta.href = `event.html?id=${item.id}`;
-        }
-        if (heroGlowPalette) {
-          heroGlowPalette.style.background = glowByCategory[item.category] || glowByCategory.Workshops;
-        }
-        renderHeroDots();
-      };
-
-      const moveHero = (direction) => {
-        heroIndex = (heroIndex + direction + featuredEvents.length) % featuredEvents.length;
-        renderHeroSlide();
-      };
-
-      const startHeroAuto = () => {
-        if (heroTimer) {
-          window.clearInterval(heroTimer);
-        }
-        heroTimer = window.setInterval(() => moveHero(1), 5200);
-      };
-
-      heroPrev?.addEventListener("click", () => {
-        moveHero(-1);
-        startHeroAuto();
-      });
-
-      heroNext?.addEventListener("click", () => {
-        moveHero(1);
-        startHeroAuto();
-      });
-
-      heroDots?.addEventListener("click", (event) => {
-        const dot = event.target.closest("[data-hero-dot]");
-        if (!dot) {
-          return;
-        }
-        heroIndex = Number(dot.getAttribute("data-hero-dot"));
-        renderHeroSlide();
-        startHeroAuto();
-      });
-
-      renderHeroSlide();
-      startHeroAuto();
-    }
-
-    if (categoryRail) {
-      const districtCategories = [
-        { name: "Music", targetType: "Cultural Events", icon: "♫", vibe: "Electric nights and live sessions", tone: "tone-a" },
-        { name: "Workshops", targetType: "Workshops", icon: "◌", vibe: "Hands-on learning formats", tone: "tone-b" },
-        { name: "Competitions", targetType: "Competitions", icon: "⚡", vibe: "Case battles and challenge rounds", tone: "tone-c" },
-        { name: "Sports", targetType: "Sports", icon: "◎", vibe: "Leagues and campus tournaments", tone: "tone-d" },
-        { name: "Guest Lectures", targetType: "Guest Lectures", icon: "▣", vibe: "Leaders and industry voices", tone: "tone-e" },
-        { name: "Fests", targetType: "Fests", icon: "✦", vibe: "Signature NM celebrations", tone: "tone-f" },
-        { name: "Open Mics", targetType: "Cultural Events", icon: "◍", vibe: "Poetry, music, and expression", tone: "tone-g" },
-        { name: "Networking", targetType: "Networking", icon: "↗", vibe: "Founders and peer circles", tone: "tone-h" },
-        { name: "Committee Events", targetType: "Committees", icon: "□", vibe: "Campus leadership moments", tone: "tone-i" },
-        { name: "Cultural Events", targetType: "Cultural Events", icon: "◈", vibe: "Performances and showcases", tone: "tone-j" }
-      ];
-
-      categoryRail.innerHTML = districtCategories
-        .map(
-          (category) => `
-            <a class="rail-category-card ${category.tone}" href="explore.html?type=${encodeURIComponent(category.targetType)}">
-              <span class="rail-category-icon">${category.icon}</span>
-              <h3>${category.name}</h3>
-              <p>${category.vibe}</p>
-            </a>
-          `
-        )
-        .join("");
-
-      rehydrateDynamicContent(categoryRail);
-    }
-
-    if (featuredPeopleRow) {
-      const peopleSeed = data.events
-        .flatMap((item) => (item.speakers || []).map((speaker) => ({ ...speaker, event: item.title })))
-        .filter((item, index, list) => list.findIndex((candidate) => candidate.name === item.name) === index)
-        .slice(0, 8);
-
-      featuredPeopleRow.innerHTML = peopleSeed
-        .map(
-          (person) => `
-            <article class="featured-person-card">
-              <img src="${resolveAssetPath(person.image)}" alt="${person.name}" />
-              <h4>${person.name}</h4>
-              <p>${person.role}</p>
-            </article>
-          `
-        )
-        .join("");
-
-      rehydrateDynamicContent(featuredPeopleRow);
-    }
-
-    if (eventGrid) {
-      const filterPills = Array.from(document.querySelectorAll("[data-discovery-pill]"));
-      const moreFiltersBtn = document.getElementById("discoveryMoreFiltersBtn");
-      const moreFiltersPanel = document.getElementById("discoveryMoreFiltersPanel");
-      const badgesRoot = document.getElementById("discoveryActiveBadges");
-      const emptyState = document.getElementById("districtEmptyState");
-
-      const venueSelect = document.getElementById("discoveryVenue");
-      const committeeSelect = document.getElementById("discoveryCommittee");
-      const priceSelect = document.getElementById("discoveryPrice");
-      const modeSelect = document.getElementById("discoveryMode");
-      const dateStart = document.getElementById("discoveryDateStart");
-      const dateEnd = document.getElementById("discoveryDateEnd");
-      const applyBtn = document.getElementById("discoveryApplyFilters");
-      const resetBtn = document.getElementById("discoveryResetFilters");
-
-      const uniqueVenues = [...new Set(data.events.map((item) => item.venue))].sort();
-      const uniqueCommittees = [...new Set(data.events.map((item) => item.club))].sort();
-
-      if (venueSelect) {
-        venueSelect.innerHTML = [`<option value="all">All venues</option>`, ...uniqueVenues.map((value) => `<option value="${value}">${value}</option>`)].join("");
-      }
-      if (committeeSelect) {
-        committeeSelect.innerHTML = [`<option value="all">All committees</option>`, ...uniqueCommittees.map((value) => `<option value="${value}">${value}</option>`)].join("");
-      }
-
-      const state = {
-        pill: "all",
-        dateStart: "",
-        dateEnd: "",
-        venue: "all",
-        committee: "all",
-        price: "all",
-        mode: "all"
-      };
-
-      const categoryAliases = {
-        Music: ["Cultural Events", "Fests"],
-        Cultural: ["Cultural Events", "Fests"]
-      };
-
-      const getDateOnly = (value) => new Date(`${value}T00:00:00`);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-      const weekLimit = new Date(today);
-      weekLimit.setDate(today.getDate() + 7);
-
-      const matchesPill = (eventItem) => {
-        if (state.pill === "all") {
-          return true;
-        }
-        const eventDate = getDateOnly(eventItem.date);
-
-        if (state.pill === "today") {
-          return eventDate.getTime() === today.getTime();
-        }
-        if (state.pill === "tomorrow") {
-          return eventDate.getTime() === tomorrow.getTime();
-        }
-        if (state.pill === "thisweek") {
-          return eventDate >= today && eventDate <= weekLimit;
-        }
-        if (state.pill === "free") {
-          return eventItem.price === 0;
-        }
-        if (state.pill === "paid") {
-          return eventItem.price > 0;
-        }
-
-        const aliases = categoryAliases[state.pill] || [state.pill];
-        return aliases.includes(eventItem.category);
-      };
-
-      const matchesAdvanced = (eventItem) => {
-        const eventDate = getDateOnly(eventItem.date);
-        const startOk = !state.dateStart || eventDate >= getDateOnly(state.dateStart);
-        const endOk = !state.dateEnd || eventDate <= getDateOnly(state.dateEnd);
-        const venueOk = state.venue === "all" || eventItem.venue === state.venue;
-        const committeeOk = state.committee === "all" || eventItem.club === state.committee;
-        const priceOk = state.price === "all" || (state.price === "free" ? eventItem.price === 0 : eventItem.price > 0);
-        const modeOk = state.mode === "all" || eventItem.mode === state.mode;
-
-        return startOk && endOk && venueOk && committeeOk && priceOk && modeOk;
-      };
-
-      const renderActiveBadges = () => {
-        if (!badgesRoot) {
-          return;
-        }
-        const badges = [];
-        if (state.pill !== "all") badges.push(state.pill);
-        if (state.dateStart) badges.push(`From ${state.dateStart}`);
-        if (state.dateEnd) badges.push(`Until ${state.dateEnd}`);
-        if (state.venue !== "all") badges.push(state.venue);
-        if (state.committee !== "all") badges.push(state.committee);
-        if (state.price !== "all") badges.push(state.price === "free" ? "Free" : "Paid");
-        if (state.mode !== "all") badges.push(state.mode);
-
-        badgesRoot.innerHTML = badges
-          .map((badge) => `<span class="filter-chip">${badge}</span>`)
-          .join("");
-      };
-
-      const renderEventGrid = () => {
-        const filtered = data.events
-          .filter((eventItem) => matchesPill(eventItem) && matchesAdvanced(eventItem))
-          .sort((a, b) => b.popularity - a.popularity);
-
-        eventGrid.innerHTML = filtered.map((eventItem) => createEventCardHTML(eventItem, { showLive: true })).join("");
-        if (emptyState) {
-          emptyState.hidden = filtered.length > 0;
-        }
-        renderActiveBadges();
-        rehydrateDynamicContent(eventGrid);
-      };
-
-      filterPills.forEach((button) => {
-        button.addEventListener("click", () => {
-          filterPills.forEach((item) => item.classList.remove("active"));
-          button.classList.add("active");
-          state.pill = button.getAttribute("data-discovery-pill") || "all";
-          renderEventGrid();
-        });
-      });
-
-      moreFiltersBtn?.addEventListener("click", () => {
-        const hidden = moreFiltersPanel?.hidden;
-        if (moreFiltersPanel) {
-          moreFiltersPanel.hidden = !hidden;
-        }
-      });
-
-      applyBtn?.addEventListener("click", () => {
-        state.dateStart = dateStart?.value || "";
-        state.dateEnd = dateEnd?.value || "";
-        state.venue = venueSelect?.value || "all";
-        state.committee = committeeSelect?.value || "all";
-        state.price = priceSelect?.value || "all";
-        state.mode = modeSelect?.value || "all";
-        renderEventGrid();
-      });
-
-      resetBtn?.addEventListener("click", () => {
-        state.pill = "all";
-        state.dateStart = "";
-        state.dateEnd = "";
-        state.venue = "all";
-        state.committee = "all";
-        state.price = "all";
-        state.mode = "all";
-
-        if (dateStart) dateStart.value = "";
-        if (dateEnd) dateEnd.value = "";
-        if (venueSelect) venueSelect.value = "all";
-        if (committeeSelect) committeeSelect.value = "all";
-        if (priceSelect) priceSelect.value = "all";
-        if (modeSelect) modeSelect.value = "all";
-
-        filterPills.forEach((item) => item.classList.remove("active"));
-        document.querySelector('[data-discovery-pill="all"]')?.classList.add("active");
-        renderEventGrid();
-      });
-
-      renderEventGrid();
-    }
-  };
-
-  const renderGrid = (elementId, events, options = {}) => {
-    const root = document.getElementById(elementId);
-    if (!root) {
-      return;
-    }
-    root.innerHTML = events.map((eventItem) => createEventCardHTML(eventItem, options)).join("");
-    rehydrateDynamicContent(root);
-  };
-
-  const autoScrollTrack = (track) => {
-    let direction = 1;
-    const speed = 1.6;
-
-    const tick = () => {
-      if (!document.body.contains(track)) {
-        return;
-      }
-
-      track.scrollLeft += speed * direction;
-      if (track.scrollLeft + track.clientWidth >= track.scrollWidth - 2) {
-        direction = -1;
-      }
-      if (track.scrollLeft <= 0) {
-        direction = 1;
-      }
-      requestAnimationFrame(tick);
-    };
-
-    requestAnimationFrame(tick);
-  };
-
-  const initNewsletterForm = () => {
-    const form = document.getElementById("newsletterForm");
-    if (!form) {
-      return;
-    }
-
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const email = form.querySelector("input")?.value.trim();
-      if (!email) {
-        return;
-      }
-      const message = document.getElementById("newsletterFeedback");
-      if (message) {
-        message.textContent = "Subscribed. You will receive NM premium event drops first.";
-      }
-      pushToast("You are on the priority drop list");
-      form.reset();
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-save-event]');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const eventId = btn.dataset.saveEvent;
+      const nowSaved = toggleSaved(eventId);
+      
+      // Animate
+      btn.classList.toggle('saved', nowSaved);
+      btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="${nowSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+      
+      // Pop animation
+      btn.style.transform = 'scale(1.3)';
+      setTimeout(() => btn.style.transform = '', 200);
     });
   };
 
-  const initRippleButtons = () => {
-    document.addEventListener("click", (event) => {
-      const button = event.target.closest(".btn, .btn-primary, .btn-secondary, .btn-inline");
-      if (!button) {
-        return;
-      }
-      const rect = button.getBoundingClientRect();
-      const ripple = document.createElement("span");
-      ripple.className = "ripple";
-      ripple.style.left = `${event.clientX - rect.left}px`;
-      ripple.style.top = `${event.clientY - rect.top}px`;
-      button.appendChild(ripple);
-      window.setTimeout(() => ripple.remove(), 520);
+  /* ═══════════════════════════════════════
+     SMOOTH SCROLL (LENIS)
+     ═══════════════════════════════════════ */
+
+  const initSmoothScroll = () => {
+    if (typeof Lenis === 'undefined') return;
+    
+    lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
     });
-  };
-
-  const collectElements = (scope, selector) => {
-    if (!(scope instanceof Element || scope instanceof Document)) {
-      return [];
+    
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
     }
-    const collected = Array.from(scope.querySelectorAll(selector));
-    if (scope instanceof Element && scope.matches(selector)) {
-      collected.unshift(scope);
-    }
-    return collected;
-  };
-
-  let observeNarrativeTargets = () => {};
-
-  const registerCinematicNodes = (scope = document) => {
-    const cinematicTargets = collectElements(
-      scope,
-      ".reveal, .event-card, .club-card, .featured-person-card, .floating-cta-card, .agenda-item, .person-card, .review-card, .ticket-option, .list-item, .analytics-tile, .metric-tile, .gallery-card, .suggestion-card, .rail-category-card"
-    );
-
-    cinematicTargets.forEach((item) => {
-      item.classList.add("cinematic-reveal");
-      if (!item.style.getPropertyValue("--reveal-delay")) {
-        item.style.setProperty("--reveal-delay", "0s");
-      }
-    });
-
-    collectElements(scope, ".section-head").forEach((head) => {
-      Array.from(head.children).forEach((child, index) => {
-        child.classList.add("cinematic-reveal");
-        if (!child.dataset.motionDelay) {
-          child.style.setProperty("--reveal-delay", `${(index * 0.08).toFixed(2)}s`);
-          child.dataset.motionDelay = "1";
-        }
+    requestAnimationFrame(raf);
+    
+    // Connect to GSAP ScrollTrigger if available
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add((time) => {
+        lenis.raf(time * 1000);
       });
-    });
-
-    const staggerGroups = collectElements(
-      scope,
-      ".district-event-grid, .events-view, .club-grid, .similar-grid, .people-grid, .agenda-grid, .review-grid, .featured-people-row, .floating-cta-row, .category-rail, .list-stack, .analytics-grid, .metric-grid, .ticket-option-list, .smart-suggestions, .clubs-directory-grid, .gallery-grid, .gallery-slider-track, .campus-card-grid"
-    );
-
-    staggerGroups.forEach((group) => {
-      const children = Array.from(
-        group.querySelectorAll(
-          ":scope > .event-card, :scope > .club-card, :scope > .featured-person-card, :scope > .floating-cta-card, :scope > .rail-category-card, :scope > .agenda-item, :scope > .person-card, :scope > .review-card, :scope > .ticket-option, :scope > .list-item, :scope > .analytics-tile, :scope > .metric-tile, :scope > .gallery-card, :scope > .suggestion-card, :scope > .campus-card"
-        )
-      );
-
-      children.forEach((item, index) => {
-        item.classList.add("cinematic-reveal");
-        if (!item.dataset.motionDelay) {
-          item.style.setProperty("--reveal-delay", `${(Math.min(index, 12) * 0.075).toFixed(3)}s`);
-          item.dataset.motionDelay = "1";
-        }
-      });
-    });
-  };
-
-  const initNarrativeMotion = () => {
-    registerCinematicNodes(document);
-
-    if (prefersReducedMotion) {
-      collectElements(document, ".cinematic-reveal").forEach((item) => {
-        item.classList.add("is-cinematic-visible", "visible");
-      });
-      observeNarrativeTargets = (scope = document) => {
-        registerCinematicNodes(scope);
-        collectElements(scope, ".cinematic-reveal").forEach((item) => {
-          item.classList.add("is-cinematic-visible", "visible");
-        });
-      };
-      return;
-    }
-
-    const seen = new WeakSet();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) {
-            return;
-          }
-          entry.target.classList.add("is-cinematic-visible", "visible");
-          observer.unobserve(entry.target);
-        });
-      },
-      {
-        rootMargin: "0px 0px -10% 0px",
-        threshold: 0.16
-      }
-    );
-
-    observeNarrativeTargets = (scope = document) => {
-      registerCinematicNodes(scope);
-      collectElements(scope, ".cinematic-reveal").forEach((item) => {
-        if (seen.has(item)) {
-          return;
-        }
-        seen.add(item);
-        observer.observe(item);
-      });
-    };
-
-    observeNarrativeTargets(document);
-  };
-
-  const initLazyMedia = (scope = document) => {
-    const images = collectElements(scope, "img");
-    images.forEach((img) => {
-      if (!(img instanceof HTMLImageElement) || img.dataset.mediaEnhanced) {
-        return;
-      }
-
-      img.dataset.mediaEnhanced = "1";
-
-      const isHeroCritical = Boolean(img.closest(".district-hero-media, .hero-slide-image-wrap, .hero-media, #eventHeroMedia"));
-      if (!isHeroCritical && !img.getAttribute("loading")) {
-        img.setAttribute("loading", "lazy");
-      }
-
-      const shell = img.closest(".event-media, .gallery-card, .featured-person-card, .club-cover, .hero-slide-image-wrap, .suggestion-card, .preview-modal");
-      shell?.classList.add("media-shell");
-
-      const markLoaded = () => {
-        img.classList.remove("media-pending");
-        img.classList.add("media-loaded");
-        shell?.classList.add("media-ready");
-      };
-
-      if (img.complete && img.naturalWidth > 0) {
-        markLoaded();
-        return;
-      }
-
-      img.classList.add("media-pending");
-      img.addEventListener("load", markLoaded, { once: true });
-      img.addEventListener("error", markLoaded, { once: true });
-    });
-  };
-
-  const bindMagneticTargets = (scope = document) => {
-    if (prefersReducedMotion) {
-      return;
-    }
-
-    const targets = collectElements(scope, ".btn-primary, .btn-secondary, [data-magnetic]");
-    targets.forEach((target) => {
-      if (!(target instanceof HTMLElement) || target.dataset.magneticBound) {
-        return;
-      }
-      target.dataset.magneticBound = "1";
-
-      const strength = target.hasAttribute("data-magnetic") ? 12 : 8;
-
-      target.addEventListener("mousemove", (event) => {
-        const rect = target.getBoundingClientRect();
-        const x = (event.clientX - rect.left - rect.width / 2) / rect.width;
-        const y = (event.clientY - rect.top - rect.height / 2) / rect.height;
-        target.style.transform = `translate3d(${(x * strength).toFixed(2)}px, ${(y * (strength * 0.85)).toFixed(2)}px, 0)`;
-      });
-
-      target.addEventListener("mouseleave", () => {
-        target.style.transform = "";
-      });
-    });
-  };
-
-  const initMagneticCTAs = () => {
-    bindMagneticTargets(document);
-  };
-
-  const bindTiltToCards = (scope = document) => {
-    if (prefersReducedMotion) {
-      return;
-    }
-
-    const cards = collectElements(scope, ".event-card, .hero-preview-card, .organizer-card, .rail-category-card");
-    cards.forEach((card) => {
-      if (!(card instanceof HTMLElement) || card.dataset.tiltBound) {
-        return;
-      }
-      card.dataset.tiltBound = "1";
-
-      card.addEventListener("mousemove", (event) => {
-        const rect = card.getBoundingClientRect();
-        const x = (event.clientX - rect.left) / rect.width - 0.5;
-        const y = (event.clientY - rect.top) / rect.height - 0.5;
-        card.style.transform = `rotateX(${(y * -4.8).toFixed(2)}deg) rotateY(${(x * 6).toFixed(2)}deg) translateY(-4px)`;
-      });
-
-      card.addEventListener("mouseleave", () => {
-        card.style.transform = "";
-      });
-    });
-  };
-
-  const initTiltCards = () => {
-    bindTiltToCards(document);
-  };
-
-  const rehydrateDynamicContent = (scope = document) => {
-    registerCinematicNodes(scope);
-    observeNarrativeTargets(scope);
-    initLazyMedia(scope);
-    bindMagneticTargets(scope);
-    bindTiltToCards(scope);
-  };
-
-  const initDynamicMotionObserver = () => {
-    if (!("MutationObserver" in window)) {
-      return;
-    }
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (!(node instanceof Element)) {
-            return;
-          }
-          rehydrateDynamicContent(node);
-        });
-      });
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-  };
-
-  const initHomeStorySnap = () => {
-    const storyMain = document.querySelector("main.story-main");
-    if (!storyMain) {
-      return;
-    }
-
-    document.documentElement.classList.add("home-story-scroll");
-    storyMain.querySelectorAll(":scope > section").forEach((section) => {
-      section.classList.add("story-snap-section");
-    });
-  };
-
-  const initSectionStoryState = () => {
-    const sections = Array.from(document.querySelectorAll("main > section"));
-    if (!sections.length) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          entry.target.classList.toggle("is-story-active", entry.isIntersecting);
-        });
-      },
-      {
-        threshold: 0.4
-      }
-    );
-
-    sections.forEach((section) => observer.observe(section));
-  };
-
-  const initDistrictHeroCinematics = () => {
-    const hero = document.getElementById("districtHero");
-    if (!hero || !hero.classList.contains("apple-event-hero")) {
-      return;
-    }
-
-    const entryItems = Array.from(hero.querySelectorAll(".hero-entry-item"));
-    const subtext = document.getElementById("heroStorySubtext");
-    const primaryCta = document.getElementById("heroPrimaryCta");
-    const coreStage = document.getElementById("eventCoreStage");
-    const lineNodes = Array.from(hero.querySelectorAll("[data-core-line]"));
-    const iconNodes = Array.from(hero.querySelectorAll("[data-core-node]"));
-    const floatingLayer = document.getElementById("heroFloatingElements");
-
-    if (!coreStage || !floatingLayer) {
-      return;
-    }
-
-    hero.classList.remove("phase-entry", "phase-build", "phase-still", "phase-burst", "phase-floating", "is-bursting");
-    entryItems.forEach((item) => item.classList.remove("is-visible"));
-    lineNodes.forEach((line) => line.classList.remove("is-built"));
-    iconNodes.forEach((node) => node.classList.remove("is-built"));
-    coreStage.classList.remove("is-visible", "is-pulse", "is-burst");
-
-    const featuredEvent = [...data.events].sort((a, b) => b.popularity - a.popularity)[0];
-    if (featuredEvent && primaryCta instanceof HTMLAnchorElement) {
-      primaryCta.href = `explore.html?q=${encodeURIComponent(featuredEvent.category)}`;
-    }
-
-    if (subtext) {
-      subtext.textContent =
-        "From college festivals and music events to networking, competitions, and workshops, discover every scene as one fluid campus story.";
-    }
-
-    const ICON_MARKUP = {
-      note:
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 4v10.8a4.2 4.2 0 1 1-2-3.6V7.2L7.4 9v8.2a4.2 4.2 0 1 1-2-3.6V7.4L16 4z"/></svg>',
-      mic:
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zM6 11a6 6 0 1 0 12 0M12 17v4M8 21h8"/></svg>',
-      trophy:
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v3a5 5 0 0 1-10 0zM9 13h6M10 17h4M5 5H3a3 3 0 0 0 3 3M19 5h2a3 3 0 0 1-3 3"/></svg>',
-      people:
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9a2.8 2.8 0 1 0 0.1 0M16.8 9.7a2.2 2.2 0 1 0 0.1 0M3.8 18c0.8-2.8 2.8-4.4 5.2-4.4 2.5 0 4.5 1.6 5.3 4.4M13.7 18c0.6-2 2.1-3.2 3.9-3.2 1.5 0 2.8 0.8 3.5 2.2"/></svg>',
-      ticket:
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.8h17a1.8 1.8 0 0 1 1.8 1.8v1a2.7 2.7 0 0 0 0 5.3v1a1.8 1.8 0 0 1-1.8 1.8h-17a1.8 1.8 0 0 1-1.8-1.8v-1a2.7 2.7 0 0 0 0-5.3v-1a1.8 1.8 0 0 1 1.8-1.8zM10.7 7.8v10.8"/></svg>',
-      spark:
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6a5.7 5.7 0 0 1 3.2 10.4v2.1H8.8V14A5.7 5.7 0 0 1 12 3.6zM9.3 19h5.4M10.1 21h3.8"/></svg>',
-      light:
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M6.8 5.2l1.8 2.1M17.2 5.2l-1.8 2.1M4 11h3M17 11h3M7.3 17.8l1.8-2.1M16.7 17.8l-1.8-2.1M12 18v3"/></svg>'
-    };
-
-    const easeOutCubic = (value) => 1 - Math.pow(1 - value, 3);
-    const cubicBezierPoint = (t, p0, p1, p2, p3) => {
-      const inv = 1 - t;
-      return (
-        inv * inv * inv * p0 +
-        3 * inv * inv * t * p1 +
-        3 * inv * t * t * p2 +
-        t * t * t * p3
-      );
-    };
-
-    const iconKeys = Object.keys(ICON_MARKUP);
-    const floatingItems = [];
-    let animationId = 0;
-    let resizeTimer = 0;
-    let mouseCurrentX = 0;
-    let mouseCurrentY = 0;
-    let mouseTargetX = 0;
-    let mouseTargetY = 0;
-
-    const ENTRY_START = 80;
-    const ENTRY_STAGGER = 180;
-    const CORE_REVEAL = 860;
-    const BUILD_START = 1320;
-    const LINE_STAGGER = 150;
-    const ICON_STAGGER = 170;
-    const STILL_START = 3220;
-    const PULSE_START = 3740;
-    const BURST_START = 4300;
-    const FLOAT_START = 5400;
-
-    const sequenceStart = performance.now();
-    const timers = [];
-    const queue = (callback, delay) => {
-      const id = window.setTimeout(callback, delay);
-      timers.push(id);
-    };
-
-    const createFloatingSystem = () => {
-      floatingLayer.innerHTML = "";
-      floatingItems.length = 0;
-
-      const isMobile = window.matchMedia("(max-width: 760px)").matches;
-      const ringSlots = isMobile ? [8, 8, 9] : [10, 10, 12];
-      const ringRadius = isMobile ? [138, 198, 258] : [156, 228, 300];
-      const tau = Math.PI * 2;
-
-      ringSlots.forEach((slots, ringIndex) => {
-        for (let slot = 0; slot < slots; slot += 1) {
-          const baseAngle = (slot / slots) * tau;
-          const angle = baseAngle + (Math.random() - 0.5) * (tau / slots) * 0.5;
-          const radius = ringRadius[ringIndex] + (Math.random() - 0.5) * 30;
-          const tx = Math.cos(angle) * radius;
-          const ty = Math.sin(angle) * radius * 0.84;
-
-          const tangentX = -Math.sin(angle);
-          const tangentY = Math.cos(angle);
-          const curveAmplitude = 34 + Math.random() * 52;
-          const c1x = tx * 0.24 + tangentX * curveAmplitude;
-          const c1y = ty * 0.2 + tangentY * curveAmplitude - 22;
-          const c2x = tx * 0.7 - tangentX * (curveAmplitude * 0.36);
-          const c2y = ty * 0.72 - tangentY * (curveAmplitude * 0.22) - 10;
-
-          const depth = ringIndex;
-          const size = depth === 0 ? 43 + Math.random() * 8 : depth === 1 ? 34 + Math.random() * 7 : 25 + Math.random() * 6;
-          const alpha = depth === 0 ? 0.92 : depth === 1 ? 0.76 : 0.58;
-          const scale = depth === 0 ? 1 : depth === 1 ? 0.87 : 0.76;
-
-          const item = document.createElement("span");
-          item.className = `hero-floating-item depth-${depth}`;
-          item.style.setProperty("--size", `${size.toFixed(2)}px`);
-          const icon = iconKeys[(ringIndex * 7 + slot) % iconKeys.length];
-          item.innerHTML = ICON_MARKUP[icon];
-          floatingLayer.appendChild(item);
-
-          floatingItems.push({
-            element: item,
-            tx,
-            ty,
-            c1x,
-            c1y,
-            c2x,
-            c2y,
-            alpha,
-            scale,
-            rotation: (Math.random() - 0.5) * 220,
-            spinRange: 5 + Math.random() * 4,
-            burstDuration: 860 + Math.random() * 280,
-            releaseDelay: ringIndex * 56 + Math.random() * 210,
-            driftX: depth === 0 ? 12 + Math.random() * 13 : 9 + Math.random() * 10,
-            driftY: depth === 0 ? 10 + Math.random() * 11 : 7 + Math.random() * 9,
-            rise: depth === 0 ? 10 + Math.random() * 10 : 7 + Math.random() * 8,
-            driftSpeed: 0.34 + Math.random() * 0.45,
-            phase: Math.random() * tau,
-            sideBias: (Math.random() - 0.5) * 12,
-            parallax: depth === 0 ? 1.05 : depth === 1 ? 0.76 : 0.52
-          });
-        }
-      });
-    };
-
-    const placeFloatingItem = (item, x, y, rotation, opacity, parallaxX, parallaxY) => {
-      item.element.style.opacity = `${opacity.toFixed(3)}`;
-      item.element.style.transform = `translate3d(calc(-50% + ${(x + parallaxX).toFixed(2)}px), calc(-50% + ${(y + parallaxY).toFixed(2)}px), 0) rotate(${rotation.toFixed(2)}deg) scale(${item.scale.toFixed(3)})`;
-    };
-
-    const syncReducedMotionScroll = () => {
-      const heroRect = hero.getBoundingClientRect();
-      const scrollProgress = clamp((0 - heroRect.top) / Math.max(heroRect.height * 0.86, 1), 0, 1);
-      const scrollFade = clamp(1 - scrollProgress * 1.25, 0, 1);
-      hero.style.setProperty("--hero-scroll", scrollProgress.toFixed(4));
-      hero.style.setProperty("--hero-float-fade", `${scrollFade.toFixed(3)}`);
-    };
-
-    const handleResize = () => {
-      window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(() => {
-        createFloatingSystem();
-      }, 150);
-    };
-
-    const handleHeroMouseMove = (event) => {
-      const rect = hero.getBoundingClientRect();
-      const normalizedX = (event.clientX - rect.left) / rect.width - 0.5;
-      const normalizedY = (event.clientY - rect.top) / rect.height - 0.5;
-      mouseTargetX = normalizedX * 24;
-      mouseTargetY = normalizedY * 20;
-      hero.style.setProperty("--hero-pointer-x", `${((normalizedX + 0.5) * 100).toFixed(2)}%`);
-      hero.style.setProperty("--hero-pointer-y", `${((normalizedY + 0.5) * 100).toFixed(2)}%`);
-    };
-
-    const handleHeroMouseLeave = () => {
-      mouseTargetX = 0;
-      mouseTargetY = 0;
-      hero.style.setProperty("--hero-pointer-x", "50%");
-      hero.style.setProperty("--hero-pointer-y", "50%");
-    };
-
-    const handleCtaMove = (event) => {
-      if (!(primaryCta instanceof HTMLElement)) {
-        return;
-      }
-      const rect = primaryCta.getBoundingClientRect();
-      const x = ((event.clientX - rect.left) / rect.width) * 100;
-      const y = ((event.clientY - rect.top) / rect.height) * 100;
-      primaryCta.style.setProperty("--cta-glow-x", `${x.toFixed(2)}%`);
-      primaryCta.style.setProperty("--cta-glow-y", `${y.toFixed(2)}%`);
-    };
-
-    const handleCtaLeave = () => {
-      if (!(primaryCta instanceof HTMLElement)) {
-        return;
-      }
-      primaryCta.style.setProperty("--cta-glow-x", "50%");
-      primaryCta.style.setProperty("--cta-glow-y", "50%");
-    };
-
-    const cleanup = () => {
-      timers.forEach((id) => window.clearTimeout(id));
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
-      window.clearTimeout(resizeTimer);
-
-      hero.removeEventListener("mousemove", handleHeroMouseMove);
-      hero.removeEventListener("mouseleave", handleHeroMouseLeave);
-      window.removeEventListener("resize", handleResize);
-
-      if (primaryCta instanceof HTMLElement) {
-        primaryCta.removeEventListener("mousemove", handleCtaMove);
-        primaryCta.removeEventListener("mouseleave", handleCtaLeave);
-      }
-    };
-
-    createFloatingSystem();
-
-    const makeVisible = () => {
-      hero.classList.add("phase-entry");
-
-      entryItems.forEach((item, index) => {
-        queue(() => {
-          item.classList.add("is-visible");
-        }, ENTRY_START + index * ENTRY_STAGGER);
-      });
-
-      queue(() => {
-        coreStage.classList.add("is-visible");
-      }, CORE_REVEAL);
-
-      queue(() => {
-        hero.classList.add("phase-build");
-
-        lineNodes.forEach((line, index) => {
-          queue(() => {
-            line.classList.add("is-built");
-          }, index * LINE_STAGGER);
-        });
-
-        iconNodes.forEach((node, index) => {
-          queue(() => {
-            node.classList.add("is-built");
-          }, 380 + index * ICON_STAGGER);
-        });
-      }, BUILD_START);
-
-      queue(() => {
-        hero.classList.add("phase-still");
-      }, STILL_START);
-
-      queue(() => {
-        coreStage.classList.add("is-pulse");
-      }, PULSE_START);
-
-      queue(() => {
-        hero.classList.remove("phase-still");
-        hero.classList.add("is-bursting", "phase-burst");
-        coreStage.classList.add("is-burst");
-      }, BURST_START);
-
-      queue(() => {
-        coreStage.classList.remove("is-pulse");
-      }, PULSE_START + 900);
-
-      queue(() => {
-        hero.classList.add("phase-floating");
-        hero.classList.remove("is-bursting", "phase-burst");
-        coreStage.classList.remove("is-burst");
-      }, FLOAT_START);
-    };
-
-    const renderReducedMotion = () => {
-      hero.classList.add("phase-entry", "phase-build", "phase-floating");
-      entryItems.forEach((item) => item.classList.add("is-visible"));
-      coreStage.classList.add("is-visible");
-      lineNodes.forEach((line) => line.classList.add("is-built"));
-      iconNodes.forEach((node) => node.classList.add("is-built"));
-
-      floatingItems.forEach((item) => {
-        placeFloatingItem(item, item.tx, item.ty, item.rotation, item.alpha, 0, 0);
-      });
-
-      syncReducedMotionScroll();
-      window.addEventListener("scroll", syncReducedMotionScroll, { passive: true });
-      window.addEventListener(
-        "pagehide",
-        () => {
-          window.removeEventListener("scroll", syncReducedMotionScroll);
-        },
-        { once: true }
-      );
-    };
-
-    if (prefersReducedMotion) {
-      renderReducedMotion();
-      return;
-    }
-
-    makeVisible();
-
-    hero.addEventListener("mousemove", handleHeroMouseMove);
-    hero.addEventListener("mouseleave", handleHeroMouseLeave);
-    window.addEventListener("resize", handleResize, { passive: true });
-
-    if (primaryCta instanceof HTMLElement) {
-      primaryCta.addEventListener("mousemove", handleCtaMove);
-      primaryCta.addEventListener("mouseleave", handleCtaLeave);
-    }
-
-    const animate = (now) => {
-      const elapsed = now - sequenceStart;
-      mouseCurrentX += (mouseTargetX - mouseCurrentX) * 0.1;
-      mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.1;
-
-      const heroRect = hero.getBoundingClientRect();
-      const scrollProgress = clamp((0 - heroRect.top) / Math.max(heroRect.height * 0.86, 1), 0, 1);
-      const scrollFade = clamp(1 - scrollProgress * 1.28, 0, 1);
-
-      hero.style.setProperty("--hero-scroll", scrollProgress.toFixed(4));
-      hero.style.setProperty("--hero-parallax-x", `${(mouseCurrentX * 0.62).toFixed(2)}px`);
-      hero.style.setProperty("--hero-parallax-y", `${(mouseCurrentY * 0.62).toFixed(2)}px`);
-      hero.style.setProperty("--hero-float-fade", `${scrollFade.toFixed(3)}`);
-
-      floatingItems.forEach((item) => {
-        const sinceBurst = elapsed - BURST_START - item.releaseDelay;
-        if (sinceBurst <= 0) {
-          item.element.style.opacity = "0";
-          return;
-        }
-
-        const burstProgress = clamp(sinceBurst / item.burstDuration, 0, 1);
-        const eased = easeOutCubic(burstProgress);
-
-        let x = cubicBezierPoint(eased, 0, item.c1x, item.c2x, item.tx);
-        let y = cubicBezierPoint(eased, 0, item.c1y, item.c2y, item.ty);
-        let rotation = item.rotation * eased;
-
-        if (burstProgress >= 1) {
-          const ambientTime = (sinceBurst - item.burstDuration) / 1000;
-          const driftX = Math.sin(ambientTime * item.driftSpeed + item.phase) * item.driftX;
-          const driftY = Math.cos(ambientTime * (item.driftSpeed * 0.82) + item.phase) * item.driftY;
-          const rise = Math.sin(ambientTime * 0.2 + item.phase * 0.7) * item.rise - item.rise * 0.35;
-
-          x += driftX + item.sideBias * Math.sin(ambientTime * 0.14 + item.phase);
-          y += driftY - rise;
-          rotation += Math.sin(ambientTime * 0.66 + item.phase) * item.spinRange;
-        }
-
-        const opacityRamp = burstProgress < 0.11 ? burstProgress / 0.11 : 1;
-        const opacity = item.alpha * opacityRamp * scrollFade;
-        const parallaxX = mouseCurrentX * item.parallax;
-        const parallaxY = mouseCurrentY * item.parallax * 0.82;
-
-        placeFloatingItem(item, x, y, rotation, opacity, parallaxX, parallaxY);
-      });
-
-      animationId = requestAnimationFrame(animate);
-    };
-
-    animationId = requestAnimationFrame(animate);
-
-    window.addEventListener("pagehide", cleanup, { once: true });
-  };
-
-  const getEventIdFromHref = (href) => {
-    try {
-      const url = new URL(href, window.location.href);
-      return url.searchParams.get("id");
-    } catch (error) {
-      return null;
+      gsap.ticker.lagSmoothing(0);
     }
   };
 
-  const initCardToEventTransitions = () => {
-    document.addEventListener("click", (event) => {
-      const link = event.target.closest("a[href*='event.html']");
-      if (!link) {
-        return;
-      }
+  /* ═══════════════════════════════════════
+     INIT ALL SYSTEMS
+     ═══════════════════════════════════════ */
 
-      if (
-        event.defaultPrevented ||
-        event.button !== 0 ||
-        link.target === "_blank" ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey
-      ) {
-        return;
-      }
-
-      const href = link.getAttribute("href");
-      if (!href || !href.includes("event.html")) {
-        return;
-      }
-
-      const card = link.closest(".event-card");
-      if (!card) {
-        return;
-      }
-
-      const image = card.querySelector(".event-media img");
-      const source = image || card;
-      const rect = source.getBoundingClientRect();
-
-      const payload = {
-        eventId: getEventIdFromHref(href) || link.getAttribute("data-event-link") || card.getAttribute("data-event-id"),
-        image: image?.currentSrc || image?.src || "",
-        x: rect.left,
-        y: rect.top,
-        width: rect.width,
-        height: rect.height,
-        radius: parseFloat(window.getComputedStyle(source).borderRadius) || 16,
-        timestamp: Date.now()
-      };
-
-      sessionStorage.setItem(SHARED_EVENT_TRANSITION_KEY, JSON.stringify(payload));
-
-      if (prefersReducedMotion) {
-        return;
-      }
-
-      event.preventDefault();
-      const curtain = document.createElement("div");
-      curtain.className = "page-transition-curtain";
-      document.body.appendChild(curtain);
-      requestAnimationFrame(() => {
-        curtain.classList.add("active");
-      });
-      document.body.classList.add("page-transition-out");
-      window.setTimeout(() => {
-        window.location.href = href;
-      }, 150);
-    });
-  };
-
-  const initSharedEventEntranceTransition = () => {
-    const path = window.location.pathname.split("/").pop();
-    if (path !== "event.html") {
-      return;
-    }
-
-    const raw = sessionStorage.getItem(SHARED_EVENT_TRANSITION_KEY);
-    if (!raw) {
-      return;
-    }
-    sessionStorage.removeItem(SHARED_EVENT_TRANSITION_KEY);
-
-    let payload;
-    try {
-      payload = JSON.parse(raw);
-    } catch (error) {
-      return;
-    }
-
-    if (!payload || Date.now() - Number(payload.timestamp || 0) > 8000) {
-      return;
-    }
-
-    const pageEventId = new URLSearchParams(window.location.search).get("id");
-    if (payload.eventId && pageEventId && payload.eventId !== pageEventId) {
-      return;
-    }
-
-    let attempts = 0;
-
-    const tryPlay = () => {
-      const mediaTarget = document.querySelector("#eventHeroMedia img, #eventHeroMedia video");
-      const heroTarget = document.getElementById("eventHero");
-      if (!mediaTarget || !heroTarget) {
-        attempts += 1;
-        if (attempts < 24) {
-          requestAnimationFrame(tryPlay);
-        }
-        return;
-      }
-
-      const targetRect = heroTarget.getBoundingClientRect();
-      if (!targetRect.width || !targetRect.height) {
-        return;
-      }
-
-      const mediaSource =
-        mediaTarget instanceof HTMLVideoElement
-          ? mediaTarget.poster || ""
-          : mediaTarget instanceof HTMLImageElement
-            ? mediaTarget.currentSrc || mediaTarget.src
-            : "";
-
-      if (!payload.image && !mediaSource) {
-        return;
-      }
-
-      const dim = document.createElement("div");
-      dim.className = "shared-element-dim";
-
-      const flyover = document.createElement("img");
-      flyover.className = "shared-element-flyover";
-      flyover.src = payload.image || mediaSource;
-      flyover.alt = "";
-      flyover.style.left = `${payload.x}px`;
-      flyover.style.top = `${payload.y}px`;
-      flyover.style.width = `${payload.width}px`;
-      flyover.style.height = `${payload.height}px`;
-      flyover.style.borderRadius = `${payload.radius || 16}px`;
-
-      document.body.appendChild(dim);
-      document.body.appendChild(flyover);
-
-      if (prefersReducedMotion) {
-        flyover.remove();
-        dim.remove();
-        return;
-      }
-
-      document.body.classList.add("page-transition-in");
-      requestAnimationFrame(() => {
-        flyover.style.left = `${targetRect.left}px`;
-        flyover.style.top = `${targetRect.top}px`;
-        flyover.style.width = `${targetRect.width}px`;
-        flyover.style.height = `${targetRect.height}px`;
-        flyover.style.borderRadius = `${parseFloat(window.getComputedStyle(heroTarget).borderRadius) || 28}px`;
-        dim.style.opacity = "0";
-      });
-
-      window.setTimeout(() => {
-        flyover.remove();
-        dim.remove();
-        document.body.classList.remove("page-transition-in");
-      }, 640);
+  const init = () => {
+    initTheme();
+    initNavbar();
+    initNavigation();
+    initCursor();
+    initCommandPalette();
+    initRipples();
+    initSaveButtons();
+    initRevealAnimations();
+    initSmoothScroll();
+    populateHomepage();
+    
+    // Global APIs
+    window.NMToast = pushToast;
+    window.NMFormat = {
+      date: safeFormatDate,
+      dateTime: safeFormatDateTime,
+      currency: safeFormatCurrency,
+      getPrice: safeGetPrice
     };
-
-    requestAnimationFrame(tryPlay);
-  };
-
-  const initGlobalParallax = () => {
-    if (prefersReducedMotion) {
-      return;
-    }
-
-    const layers = Array.from(document.querySelectorAll(".featured-banner, .floating-cta-card, .dashboard-hero, .admin-hero, .clubs-hero"));
-    if (!layers.length) {
-      return;
-    }
-
-    const update = () => {
-      const viewport = window.innerHeight || 1;
-      layers.forEach((layer, index) => {
-        const rect = layer.getBoundingClientRect();
-        if (rect.bottom < -120 || rect.top > viewport + 120) {
-          return;
-        }
-        const depth = 4 + (index % 3) * 2;
-        const centerShift = (rect.top + rect.height / 2 - viewport / 2) / viewport;
-        layer.style.setProperty("--parallax-y", `${(centerShift * -depth).toFixed(2)}px`);
-      });
+    window.NMUtils = {
+      getSavedEvents,
+      setSavedEvents,
+      isSaved,
+      toggleSaved,
+      createEventCard,
+      getRecommendedEvents,
+      getSmartGreeting,
+      showSkeleton,
+      addRecentEvent
     };
-
-    let ticking = false;
-    const queueUpdate = () => {
-      if (ticking) {
-        return;
-      }
-      ticking = true;
-      requestAnimationFrame(() => {
-        update();
-        ticking = false;
-      });
-    };
-
-    update();
-    window.addEventListener("scroll", queueUpdate, { passive: true });
-    window.addEventListener("resize", queueUpdate);
+    
+    // Page load complete
+    document.body.classList.add('is-loaded');
   };
 
-  const initAccessibilityScaffold = () => {
-    const main = document.querySelector("main");
-    if (main && !main.id) {
-      main.id = "mainContent";
-    }
-
-    if (main && !document.querySelector(".skip-to-content")) {
-      const skip = document.createElement("a");
-      skip.className = "skip-to-content";
-      skip.href = `#${main.id}`;
-      skip.textContent = "Skip to content";
-      document.body.prepend(skip);
-    }
-
-    const activeLink = document.querySelector("[data-nav-link].active");
-    if (activeLink) {
-      activeLink.setAttribute("aria-current", "page");
-    }
-  };
-
-  const initGlobalToastSystem = () => {
-    const container = document.createElement("div");
-    container.className = "global-toast-stack";
-    container.setAttribute("aria-live", "polite");
-    container.setAttribute("aria-atomic", "true");
-    document.body.appendChild(container);
-
-    pushToast = (message, duration = 2200) => {
-      if (!message) {
-        return;
-      }
-
-      const toast = document.createElement("div");
-      toast.className = "global-toast";
-      toast.textContent = message;
-      container.appendChild(toast);
-
-      requestAnimationFrame(() => {
-        toast.classList.add("visible");
-      });
-
-      window.setTimeout(() => {
-        toast.classList.remove("visible");
-        window.setTimeout(() => {
-          toast.remove();
-        }, 260);
-      }, duration);
-    };
-  };
-
-  const initScrollProgressBar = () => {
-    const line = document.createElement("div");
-    line.className = "scroll-progress-line";
-    document.body.appendChild(line);
-
-    const update = () => {
-      const doc = document.documentElement;
-      const total = Math.max(1, doc.scrollHeight - doc.clientHeight);
-      const progress = clamp(window.scrollY / total, 0, 1);
-      line.style.setProperty("--progress", progress.toFixed(4));
-    };
-
-    let ticking = false;
-    const queue = () => {
-      if (ticking) {
-        return;
-      }
-      ticking = true;
-      requestAnimationFrame(() => {
-        update();
-        ticking = false;
-      });
-    };
-
-    update();
-    window.addEventListener("scroll", queue, { passive: true });
-    window.addEventListener("resize", queue);
-  };
-
-  const initBackToTopControl = () => {
-    const button = document.createElement("button");
-    button.className = "back-to-top-btn";
-    button.type = "button";
-    button.textContent = "↑";
-    button.setAttribute("aria-label", "Back to top");
-    document.body.appendChild(button);
-
-    const update = () => {
-      button.classList.toggle("visible", window.scrollY > 540);
-    };
-
-    button.addEventListener("click", () => {
-      window.scrollTo({
-        top: 0,
-        behavior: prefersReducedMotion ? "auto" : "smooth"
-      });
-    });
-
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-  };
-
-  const initMobileNavigationDrawer = () => {
-    const nav = document.getElementById("floatingNav");
-    const navRoot = nav?.querySelector(".nav-links");
-    const navActions = nav?.querySelector(".nav-actions");
-    if (!navRoot || !navActions) {
-      return;
-    }
-
-    if (navActions.querySelector(".mobile-menu-toggle")) {
-      return;
-    }
-
-    const links = Array.from(navRoot.querySelectorAll("a"));
-    if (!links.length) {
-      return;
-    }
-
-    const toggle = document.createElement("button");
-    toggle.type = "button";
-    toggle.className = "icon-btn mobile-menu-toggle";
-    toggle.setAttribute("aria-label", "Open navigation menu");
-    toggle.setAttribute("aria-expanded", "false");
-    toggle.setAttribute("aria-controls", "mobileNavDrawer");
-    toggle.innerHTML = "☰";
-    navActions.appendChild(toggle);
-
-    const backdrop = document.createElement("div");
-    backdrop.className = "mobile-nav-drawer-backdrop";
-    backdrop.setAttribute("hidden", "");
-    backdrop.innerHTML = `
-      <aside class="mobile-nav-drawer" id="mobileNavDrawer" role="dialog" aria-modal="true" aria-label="Mobile navigation">
-        <div class="mobile-nav-head">
-          <a class="brand" href="index.html" aria-label="NM District home">
-            <span class="brand-logo">NM</span>
-            <span>NM District</span>
-          </a>
-          <button class="icon-btn mobile-nav-close" type="button" aria-label="Close navigation">✕</button>
-        </div>
-        <nav class="mobile-nav-links" aria-label="Mobile main navigation">
-          ${links
-            .map((link) => {
-              const active = link.classList.contains("active") ? "active" : "";
-              const href = link.getAttribute("href") || "#";
-              return `<a class="mobile-nav-link ${active}" href="${href}">${link.textContent?.trim() || "Link"}</a>`;
-            })
-            .join("")}
-        </nav>
-      </aside>
-    `;
-    document.body.appendChild(backdrop);
-
-    const closeBtn = backdrop.querySelector(".mobile-nav-close");
-    const drawer = backdrop.querySelector(".mobile-nav-drawer");
-
-    const open = () => {
-      backdrop.hidden = false;
-      requestAnimationFrame(() => {
-        backdrop.classList.add("open");
-      });
-      document.body.classList.add("menu-open");
-      toggle.setAttribute("aria-expanded", "true");
-    };
-
-    const close = () => {
-      backdrop.classList.remove("open");
-      document.body.classList.remove("menu-open");
-      toggle.setAttribute("aria-expanded", "false");
-      window.setTimeout(() => {
-        backdrop.hidden = true;
-      }, 180);
-    };
-
-    toggle.addEventListener("click", () => {
-      if (backdrop.classList.contains("open")) {
-        close();
-      } else {
-        open();
-      }
-    });
-
-    closeBtn?.addEventListener("click", close);
-
-    backdrop.addEventListener("click", (event) => {
-      if (event.target === backdrop) {
-        close();
-      }
-    });
-
-    drawer?.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", close);
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && backdrop.classList.contains("open")) {
-        close();
-      }
-    });
-  };
-
-  const initMobileBottomDock = () => {
-    if (document.querySelector(".mobile-bottom-dock")) {
-      return;
-    }
-
-    const path = window.location.pathname.split("/").pop() || "index.html";
-    const items = [
-      { href: "index.html", label: "Home", icon: "⌂" },
-      { href: "explore.html", label: "Explore", icon: "⌕" },
-      { href: "booking.html", label: "Book", icon: "◈" },
-      { href: "dashboard.html", label: "Dashboard", icon: "◎" },
-      { href: "clubs.html", label: "Clubs", icon: "◉" }
-    ];
-
-    const dock = document.createElement("nav");
-    dock.className = "mobile-bottom-dock";
-    dock.setAttribute("aria-label", "Quick mobile navigation");
-    dock.innerHTML = items
-      .map((item) => {
-        const active = path === item.href ? "active" : "";
-        return `
-          <a class="mobile-dock-link ${active}" href="${item.href}">
-            <span class="mobile-dock-icon" aria-hidden="true">${item.icon}</span>
-            <span>${item.label}</span>
-          </a>
-        `;
-      })
-      .join("");
-
-    document.body.appendChild(dock);
-    document.body.classList.add("has-mobile-dock");
-  };
-
-  const initKeyboardShortcuts = () => {
-    const isTypingTarget = (target) => {
-      if (!(target instanceof Element)) {
-        return false;
-      }
-      return Boolean(target.closest("input, textarea, [contenteditable='true'], select"));
-    };
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key !== "/") {
-        return;
-      }
-      if (isTypingTarget(event.target)) {
-        return;
-      }
-
-      const searchTarget = document.querySelector(
-        "#heroFloatingSearchInput, #searchFilter, #clubSearch, #campusSearchInput, input[type='search']"
-      );
-      if (!(searchTarget instanceof HTMLInputElement)) {
-        return;
-      }
-
-      event.preventDefault();
-      searchTarget.focus();
-      searchTarget.select();
-      pushToast("Search is focused. Start typing.", 1600);
-    });
-  };
-
-  window.NM_UTILS = {
-    ...window.NM_UTILS,
-    events: data.events,
-    clubs: data.clubs,
-    categories: data.categories,
-    getSavedEvents,
-    setSavedEvents,
-    isSavedEvent,
-    toggleSavedEvent,
-    formatDate,
-    formatDateTime,
-    formatCurrency: data.formatCurrency,
-    createEventCardHTML
-  };
-
-  window.NM_MOTION = {
-    rehydrateDynamicContent
-  };
-
-  markActiveNav();
-  initAccessibilityScaffold();
-  initGlobalToastSystem();
-  initScrollProgressBar();
-  initBackToTopControl();
-  initHomeStorySnap();
-  initNavUtilities();
-  initMobileNavigationDrawer();
-  initMobileBottomDock();
-  initCampusSelector();
-  initTheme();
-  initFloatingNav();
-  initCursorGlow();
-  initRevealAnimations();
-  initNarrativeMotion();
-  initSectionStoryState();
-  initCounters();
-  initSaveButtons();
-  initCardToEventTransitions();
-  initSharedEventEntranceTransition();
-  initHeroSearch();
-  initHeroParallax();
-  initDistrictHeroCinematics();
-  initHomepage();
-  initFeaturedCarousel();
-  initTestimonialCarousel();
-  initNewsletterForm();
-  initRippleButtons();
-  initMagneticCTAs();
-  initTiltCards();
-  initGlobalParallax();
-  initKeyboardShortcuts();
-  rehydrateDynamicContent(document);
-  initDynamicMotionObserver();
-
-  window.requestAnimationFrame(() => {
-    document.body.classList.add("is-ready");
-  });
+  // Boot
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

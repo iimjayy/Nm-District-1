@@ -1,208 +1,775 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Book Pass | NM District</title>
-    <meta name="description" content="Premium multi-step pass booking flow for NM College events." />
-    <link rel="stylesheet" href="assets/css/style.css" />
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script defer src="assets/js/data.js"></script>
-    <script defer src="assets/js/main.js"></script>
-    <script defer src="assets/js/booking.js"></script>
-  </head>
-  <body>
-    <div class="cursor-glow" id="cursorGlow"></div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Pass | NM District</title>
+  <meta name="description" content="Premium multi-step pass booking flow for NM College events.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- QR Code Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  
+  <!-- External Libraries -->
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.27/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  
+  <!-- Data -->
+  <script src="assets/js/data.js"></script>
+  
+  <!-- Main Script -->
+  <script src="assets/js/main.js"></script>
+</head>
+<body data-theme="dark">
 
-    <header class="floating-nav" id="floatingNav">
-      <div class="nav-inner">
-        <a class="brand" href="index.html" aria-label="NM District home">
-          <span class="brand-logo">NM</span>
-          <span>NM District</span>
-        </a>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a class="nav-link" data-nav-link href="index.html">Home</a>
-          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
-          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
-          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
-          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
-          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
-          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
-        </nav>
-        <div class="nav-actions">
-          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
-          <a class="btn-inline" href="dashboard.html">My Tickets</a>
-        </div>
+  <!-- Custom Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand" aria-label="NM District home">
+        <div class="navbar__logo">NM</div>
+        <span>District</span>
+      </a>
+      
+      <div class="navbar__links">
+        <a href="index.html" class="navbar__link" data-nav-link>Home</a>
+        <a href="explore.html" class="navbar__link" data-nav-link>Explore</a>
+        <a href="clubs.html" class="navbar__link" data-nav-link>Clubs</a>
+        <a href="dashboard.html" class="navbar__link" data-nav-link>Dashboard</a>
       </div>
-    </header>
+      
+      <div class="navbar__actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <span>🌙</span>
+        </button>
+      </div>
+    </div>
+  </nav>
 
     <main>
-      <section class="section booking-shell">
-        <div class="section-head reveal">
-          <div>
-            <p class="eyebrow">Secure Checkout · NM Student Access</p>
-            <h1 class="page-title" style="font-size: clamp(1.8rem, 5vw, 2.8rem)">Complete Your Booking</h1>
-            <p class="page-subtitle">Effortless premium booking designed for NM students.</p>
-            <div class="booking-confidence-strip" id="bookingConfidenceStrip">
-              <span class="confidence-pill">SSL Secured</span>
-              <span class="confidence-pill">Instant QR Delivery</span>
-              <span class="confidence-pill">Refund Support Enabled</span>
+    <!-- Booking Hero Section -->
+    <section class="hero hero--booking" data-reveal="up">
+      <div class="hero__content">
+        <div class="container">
+          <div class="hero__badge">
+            <i data-lucide="lock"></i>
+            <span>Secure Checkout</span>
+          </div>
+          
+          <h1 class="display-hero">Complete Your <span class="text-gradient">Event Booking</span></h1>
+          <p class="hero__subtitle">Effortless premium booking designed for NM students</p>
+          
+          <div class="booking-features">
+            <div class="booking-feature">
+              <i data-lucide="shield-check"></i>
+              <span>SSL Secured</span>
+            </div>
+            <div class="booking-feature">
+              <i data-lucide="qr-code"></i>
+              <span>Instant QR Delivery</span>
+            </div>
+            <div class="booking-feature">
+              <i data-lucide="refresh-cw"></i>
+              <span>Refund Support</span>
             </div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="stepper reveal" id="bookingSteps">
-          <div class="step active" data-step="1">Pass Selection</div>
-          <div class="step" data-step="2">Student Details</div>
-          <div class="step" data-step="3">Payment</div>
-          <div class="step" data-step="4">Ticket</div>
+    <!-- Multi-Step Booking Form -->
+    <section class="section">
+      <div class="container">
+        <!-- Progress Steps -->
+        <div class="booking-steps" data-reveal="up">
+          <div class="step active" data-step="1">
+            <div class="step__number">1</div>
+            <div class="step__label">Select Pass</div>
+          </div>
+          <div class="step" data-step="2">
+            <div class="step__number">2</div>
+            <div class="step__label">Your Details</div>
+          </div>
+          <div class="step" data-step="3">
+            <div class="step__number">3</div>
+            <div class="step__label">Payment</div>
+          </div>
+          <div class="step" data-step="4">
+            <div class="step__number">4</div>
+            <div class="step__label">Confirmation</div>
+          </div>
         </div>
 
-        <section class="booking-stage active reveal" data-stage="1">
-          <article class="form-shell">
-            <h2 class="card-title" id="bookingEventTitle">Loading Event</h2>
-            <p class="card-subtitle" id="bookingEventMeta">Please wait while we prepare your booking journey.</p>
-
-            <div class="ticket-option-list" id="bookingTicketOptions" style="margin-top: 0.8rem"></div>
-
-            <div class="quantity-selector">
-              <button class="qty-btn" id="bookingQtyMinus" type="button">-</button>
-              <div class="qty-display" id="bookingQtyDisplay">1</div>
-              <button class="qty-btn" id="bookingQtyPlus" type="button">+</button>
-            </div>
-
-            <div class="summary-line total">
-              <span>Subtotal</span>
-              <span id="bookingSubtotal">₹0</span>
-            </div>
-
-            <div class="smart-suggestions" id="smartSuggestions"></div>
-
-            <div style="margin-top: 0.85rem; display: flex; gap: 0.6rem; flex-wrap: wrap">
-              <button class="btn-primary" id="toDetailsBtn" type="button">Continue to Student Details</button>
-              <a class="btn-secondary" href="explore.html">Back to Explore</a>
-            </div>
-          </article>
-        </section>
-
-        <section class="booking-stage reveal" data-stage="2">
-          <article class="form-shell">
-            <h2 class="card-title">Student Details</h2>
-            <p class="card-subtitle">Your details are used for entry verification and ticket assignment.</p>
-
-            <form class="form-grid" id="studentForm" novalidate>
-              <div>
-                <label class="filter-label" for="studentName">Full Name</label>
-                <input class="form-input" id="studentName" required />
+        <!-- Booking Stages -->
+        <div class="booking-container">
+          <!-- Step 1: Pass Selection -->
+          <div class="booking-stage active" data-stage="1">
+            <div class="booking-card" data-reveal="up">
+              <div class="booking-card__header">
+                <h2>Select Your Pass</h2>
+                <p id="eventInfo">Loading event information...</p>
               </div>
-              <div>
-                <label class="filter-label" for="studentEmail">College Email</label>
-                <input class="form-input" id="studentEmail" type="email" placeholder="name@nmcollege.in" required />
-              </div>
-              <div>
-                <label class="filter-label" for="studentPhone">Phone</label>
-                <input class="form-input" id="studentPhone" type="tel" required />
-              </div>
-              <div>
-                <label class="filter-label" for="studentYear">Year</label>
-                <select class="form-select" id="studentYear" required>
-                  <option value="">Select year</option>
-                  <option value="FY">FY</option>
-                  <option value="SY">SY</option>
-                  <option value="TY">TY</option>
-                </select>
-              </div>
-              <div>
-                <label class="filter-label" for="studentId">Student ID</label>
-                <input class="form-input" id="studentId" placeholder="NM-2026-XXXX" required />
-              </div>
-              <div>
-                <label class="filter-label" for="refCode">Referral Code (Optional)</label>
-                <input class="form-input" id="refCode" placeholder="Enter code" />
-                <p class="referral-reward-note" id="refRewardNote">Add a referral code to unlock up to ₹220 discount.</p>
-              </div>
-              <div class="full">
-                <label class="filter-label" for="notes">Special Notes</label>
-                <textarea class="form-textarea" id="notes" placeholder="Accessibility, seating, or other requests"></textarea>
-              </div>
-            </form>
 
-            <div style="margin-top: 0.9rem; display: flex; gap: 0.6rem; flex-wrap: wrap">
-              <button class="btn-secondary" id="backToPassBtn" type="button">Back</button>
-              <button class="btn-primary" id="toPaymentBtn" type="button">Continue to Payment</button>
-            </div>
-          </article>
-        </section>
-
-        <section class="booking-stage reveal" data-stage="3">
-          <article class="order-summary">
-            <h2 class="card-title">Order Summary</h2>
-            <div class="summary-line"><span>Event</span><span id="summaryEvent">-</span></div>
-            <div class="summary-line"><span>Pass</span><span id="summaryPass">-</span></div>
-            <div class="summary-line"><span>Quantity</span><span id="summaryQty">1</span></div>
-            <div class="summary-line"><span>Student</span><span id="summaryStudent">-</span></div>
-            <div class="summary-line"><span>Base Total</span><span id="summaryBase">₹0</span></div>
-            <div class="summary-line"><span>Platform Fee</span><span id="summaryFee">₹0</span></div>
-            <div class="summary-line"><span>Referral Discount</span><span id="summaryDiscount">₹0</span></div>
-            <div class="summary-line total"><span>Payable</span><span id="summaryPayable">₹0</span></div>
-
-            <h3 style="margin-top: 0.8rem">Choose Payment Method</h3>
-            <div class="payment-grid" id="paymentMethods">
-              <button class="payment-choice active" data-payment="UPI" type="button">UPI</button>
-              <button class="payment-choice" data-payment="Card" type="button">Card</button>
-              <button class="payment-choice" data-payment="Wallet" type="button">Wallet</button>
-            </div>
-
-            <div class="payment-confidence" id="paymentConfidence">
-              <span>Bank-grade encryption</span>
-              <span>PCI-compliant checkout</span>
-              <span>Auto receipt in 5 sec</span>
-            </div>
-
-            <div style="margin-top: 0.9rem; display: flex; gap: 0.6rem; flex-wrap: wrap">
-              <button class="btn-secondary" id="backToDetailsBtn" type="button">Back</button>
-              <button class="btn-primary btn-gold" id="payNowBtn" type="button">Pay & Confirm</button>
-            </div>
-          </article>
-        </section>
-
-        <section class="booking-stage reveal" data-stage="4">
-          <article class="success-pane" id="bookingSuccessPane" style="position: relative">
-            <div class="confetti-zone" id="confettiZone"></div>
-            <p class="eyebrow">Booking Confirmed</p>
-            <h2 class="card-title">Your NM Pass is Ready</h2>
-            <p class="card-subtitle">Show this QR at the entry gate for seamless check-in.</p>
-
-            <div class="ticket-card" id="ticketCard" aria-live="polite">
-              <div class="ticket-head">
-                <div>
-                  <div class="pill">NM District Access</div>
-                  <h3 id="ticketEventTitle" style="margin: 0.5rem 0 0">Event Name</h3>
-                </div>
-                <div class="status-pill">Confirmed</div>
+              <div class="ticket-options" id="ticketOptions">
+                <!-- Ticket options will be populated here -->
               </div>
-              <div class="ticket-grid">
-                <div>
-                  <div class="ticket-field"><strong id="ticketHolder">Student Name</strong>Pass Holder</div>
-                  <div class="ticket-field"><strong id="ticketSeatInfo">Pass Type · Qty</strong>Ticket Configuration</div>
-                  <div class="ticket-field"><strong id="ticketTimeInfo">Date & Time</strong>Schedule</div>
-                  <div class="ticket-field"><strong id="ticketCode">NM-XXXX</strong>Booking Reference</div>
-                </div>
-                <div class="qr-frame">
-                  <div id="qrCode"></div>
+
+              <div class="quantity-selector">
+                <label>Quantity</label>
+                <div class="quantity-controls">
+                  <button class="quantity-btn" id="qtyDecrease" aria-label="Decrease quantity">
+                    <i data-lucide="minus"></i>
+                  </button>
+                  <input type="number" class="quantity-input" id="qtyInput" value="1" min="1" max="10">
+                  <button class="quantity-btn" id="qtyIncrease" aria-label="Increase quantity">
+                    <i data-lucide="plus"></i>
+                  </button>
                 </div>
               </div>
-            </div>
 
-            <div style="margin-top: 0.9rem; display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap">
-              <button class="btn-primary" id="downloadTicketBtn" type="button">Download Ticket</button>
-              <button class="btn-inline" id="addCalendarBtn" type="button">Add to Calendar</button>
-              <button class="btn-inline" id="shareTicketBtn" type="button">Share Ticket</button>
-              <a class="btn-secondary" href="dashboard.html">Go to Dashboard</a>
+              <div class="booking-summary">
+                <div class="summary-row">
+                  <span>Subtotal</span>
+                  <span id="subtotal">₹0</span>
+                </div>
+                <div class="summary-row">
+                  <span>Processing Fee</span>
+                  <span id="processingFee">₹0</span>
+                </div>
+                <div class="summary-row summary-row--total">
+                  <span>Total</span>
+                  <span id="total">₹0</span>
+                </div>
+              </div>
+
+              <div class="booking-actions">
+                <a href="explore.html" class="btn btn-secondary">Back to Explore</a>
+                <button class="btn btn-primary" id="continueToDetails">Continue to Details</button>
+              </div>
             </div>
-          </article>
-        </section>
-      </section>
-    </main>
-  </body>
+          </div>
+
+          <!-- Step 2: Student Details -->
+          <div class="booking-stage" data-stage="2">
+            <div class="booking-card" data-reveal="up">
+              <div class="booking-card__header">
+                <h2>Student Information</h2>
+                <p>Your details are used for entry verification and ticket assignment</p>
+              </div>
+
+              <form class="booking-form" id="studentForm">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="fullName">Full Name *</label>
+                    <input type="text" id="fullName" class="form-input" required>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="email">College Email *</label>
+                    <input type="email" id="email" class="form-input" placeholder="name@nmcollege.in" required>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" class="form-input" required>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="year">Academic Year *</label>
+                    <select id="year" class="form-select" required>
+                      <option value="">Select Year</option>
+                      <option value="FY">First Year (FY)</option>
+                      <option value="SY">Second Year (SY)</option>
+                      <option value="TY">Third Year (TY)</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="studentId">Student ID *</label>
+                    <input type="text" id="studentId" class="form-input" placeholder="NM-2026-XXXX" required>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="referralCode">Referral Code (Optional)</label>
+                    <input type="text" id="referralCode" class="form-input" placeholder="Enter code for discount">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="notes">Special Requests</label>
+                  <textarea id="notes" class="form-textarea" placeholder="Accessibility, seating, or other requests"></textarea>
+                </div>
+              </form>
+
+              <div class="booking-actions">
+                <button class="btn btn-secondary" id="backToPass">Back</button>
+                <button class="btn btn-primary" id="continueToPayment">Continue to Payment</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Payment -->
+          <div class="booking-stage" data-stage="3">
+            <div class="booking-card" data-reveal="up">
+              <div class="booking-card__header">
+                <h2>Payment Details</h2>
+                <p>Review your order and choose your payment method</p>
+              </div>
+
+              <div class="order-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-item">
+                  <span>Event</span>
+                  <span id="summaryEvent">-</span>
+                </div>
+                <div class="summary-item">
+                  <span>Pass Type</span>
+                  <span id="summaryPass">-</span>
+                </div>
+                <div class="summary-item">
+                  <span>Quantity</span>
+                  <span id="summaryQuantity">1</span>
+                </div>
+                <div class="summary-item">
+                  <span>Student Name</span>
+                  <span id="summaryStudent">-</span>
+                </div>
+                <div class="summary-item">
+                  <span>Base Price</span>
+                  <span id="summaryBase">₹0</span>
+                </div>
+                <div class="summary-item">
+                  <span>Platform Fee</span>
+                  <span id="summaryPlatformFee">₹0</span>
+                </div>
+                <div class="summary-item summary-item--total">
+                  <span>Total Amount</span>
+                  <span id="summaryTotal">₹0</span>
+                </div>
+              </div>
+
+              <div class="payment-methods">
+                <h3>Choose Payment Method</h3>
+                <div class="payment-options">
+                  <button class="payment-option active" data-method="UPI">
+                    <i data-lucide="smartphone"></i>
+                    <span>UPI</span>
+                  </button>
+                  <button class="payment-option" data-method="Card">
+                    <i data-lucide="credit-card"></i>
+                    <span>Credit/Debit Card</span>
+                  </button>
+                  <button class="payment-option" data-method="Wallet">
+                    <i data-lucide="wallet"></i>
+                    <span>Digital Wallet</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="payment-security">
+                <div class="security-item">
+                  <i data-lucide="shield"></i>
+                  <span>Bank-grade encryption</span>
+                </div>
+                <div class="security-item">
+                  <i data-lucide="check-circle"></i>
+                  <span>PCI-compliant checkout</span>
+                </div>
+                <div class="security-item">
+                  <i data-lucide="zap"></i>
+                  <span>Instant confirmation</span>
+                </div>
+              </div>
+
+              <div class="booking-actions">
+                <button class="btn btn-secondary" id="backToDetails">Back</button>
+                <button class="btn btn-primary btn-lg" id="processPayment">Pay Now</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Confirmation -->
+          <div class="booking-stage" data-stage="4">
+            <div class="booking-card booking-card--success" data-reveal="up">
+              <div class="success-animation" id="successAnimation">
+                <div class="success-icon">
+                  <i data-lucide="check-circle"></i>
+                </div>
+              </div>
+
+              <div class="booking-card__header">
+                <h2>Booking Confirmed!</h2>
+                <p>Your NM pass is ready. Show this QR code at the entry gate for seamless check-in.</p>
+              </div>
+
+              <div class="ticket-preview" id="ticketPreview">
+                <div class="ticket-header">
+                  <div class="ticket-info">
+                    <div class="ticket-badge">NM District Access</div>
+                    <h3 id="ticketEventName">Event Name</h3>
+                  </div>
+                  <div class="ticket-status confirmed">Confirmed</div>
+                </div>
+                
+                <div class="ticket-details">
+                  <div class="ticket-details-left">
+                    <div class="ticket-field">
+                      <strong id="ticketHolderName">Student Name</strong>
+                      <span>Pass Holder</span>
+                    </div>
+                    <div class="ticket-field">
+                      <strong id="ticketPassInfo">Pass Type</strong>
+                      <span>Ticket Configuration</span>
+                    </div>
+                    <div class="ticket-field">
+                      <strong id="ticketDateTime">Date & Time</strong>
+                      <span>Event Schedule</span>
+                    </div>
+                    <div class="ticket-field">
+                      <strong id="ticketReference">NM-XXXXX</strong>
+                      <span>Booking Reference</span>
+                    </div>
+                  </div>
+                  
+                  <div class="ticket-qr">
+                    <div id="qrCode"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="booking-actions">
+                <button class="btn btn-primary" id="downloadTicket">Download Ticket</button>
+                <button class="btn btn-secondary" id="addToCalendar">Add to Calendar</button>
+                <button class="btn btn-ghost" id="shareTicket">Share Ticket</button>
+                <a href="dashboard.html" class="btn btn-secondary">Go to Dashboard</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Booking Page Script -->
+  <script>
+    (() => {
+      const data = window.NMData;
+      if (!data) return;
+
+      // Get booking data from localStorage or URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const eventId = urlParams.get('id');
+      
+      // State
+      let currentStep = 1;
+      let bookingData = {
+        eventId: null,
+        event: null,
+        ticketTier: null,
+        quantity: 1,
+        studentDetails: {},
+        paymentMethod: 'UPI',
+        bookingId: null
+      };
+
+      // Initialize
+      function init() {
+        loadBookingData();
+        if (bookingData.eventId && !bookingData.event) {
+          loadEventData();
+        } else if (bookingData.event) {
+          renderEvent();
+        }
+        setupEventListeners();
+        
+        // Initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      // Load Booking Data
+      function loadBookingData() {
+        const savedData = localStorage.getItem('nm-booking-data');
+        if (savedData) {
+          bookingData = { ...bookingData, ...JSON.parse(savedData) };
+        }
+        
+        if (eventId) {
+          bookingData.eventId = eventId;
+        }
+      }
+
+      // Load Event Data
+      function loadEventData() {
+        const event = data.events.find(e => e.id === bookingData.eventId);
+        if (event) {
+          bookingData.event = event;
+          
+          // Set default ticket tier if not specified
+          if (!bookingData.ticketTier && event.tiers.length > 0) {
+            bookingData.ticketTier = event.tiers[0].name;
+          }
+          
+          renderEvent();
+        } else {
+          // Redirect to explore if event not found
+          window.location.href = 'explore.html';
+        }
+      }
+
+      // Render Event Information
+      function renderEvent() {
+        const event = bookingData.event;
+        if (!event) return;
+
+        // Update event info
+        document.getElementById('eventInfo').textContent = `${event.title} - ${window.NMFormat.date(event.date)}`;
+        
+        // Render ticket options
+        renderTicketOptions();
+        
+        // Update pricing
+        updatePricing();
+      }
+
+      // Render Ticket Options
+      function renderTicketOptions() {
+        const container = document.getElementById('ticketOptions');
+        if (!container || !bookingData.event) return;
+
+        container.innerHTML = bookingData.event.tiers.map((tier, index) => `
+          <div class="ticket-option ${bookingData.ticketTier === tier.name ? 'selected' : ''}" data-tier="${tier.name}">
+            <div class="ticket-option__header">
+              <h4 class="ticket-option__name">${tier.name}</h4>
+              <div class="ticket-option__price">${window.NMFormat.currency(tier.price)}</div>
+            </div>
+            <div class="ticket-option__perks">
+              ${tier.perks.map(perk => `
+                <div class="perk-item">
+                  <i data-lucide="check"></i>
+                  <span>${perk}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+
+        // Re-initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      // Update Pricing
+      function updatePricing() {
+        if (!bookingData.event || !bookingData.ticketTier) return;
+
+        const tier = bookingData.event.tiers.find(t => t.name === bookingData.ticketTier);
+        if (!tier) return;
+
+        const subtotal = tier.price * bookingData.quantity;
+        const processingFee = subtotal > 0 ? Math.round(subtotal * 0.02) : 0;
+        const total = subtotal + processingFee;
+
+        // Update pricing displays
+        const pricingElements = {
+          subtotal: document.getElementById('subtotal'),
+          processingFee: document.getElementById('processingFee'),
+          total: document.getElementById('total'),
+          summaryBase: document.getElementById('summaryBase'),
+          summaryPlatformFee: document.getElementById('summaryPlatformFee'),
+          summaryTotal: document.getElementById('summaryTotal')
+        };
+
+        Object.values(pricingElements).forEach(element => {
+          if (element) {
+            const value = element.id.includes('subtotal') || element.id.includes('Base') ? subtotal :
+                         element.id.includes('processingFee') || element.id.includes('PlatformFee') ? processingFee :
+                         total;
+            element.textContent = window.NMFormat.currency(value);
+          }
+        });
+      }
+
+      // Setup Event Listeners
+      function setupEventListeners() {
+        // Ticket selection
+        document.addEventListener('click', (e) => {
+          const ticketOption = e.target.closest('.ticket-option');
+          if (ticketOption) {
+            document.querySelectorAll('.ticket-option').forEach(o => o.classList.remove('selected'));
+            ticketOption.classList.add('selected');
+            bookingData.ticketTier = ticketOption.dataset.tier;
+            updatePricing();
+          }
+
+          // Payment method selection
+          const paymentOption = e.target.closest('.payment-option');
+          if (paymentOption) {
+            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('active'));
+            paymentOption.classList.add('active');
+            bookingData.paymentMethod = paymentOption.dataset.method;
+          }
+        });
+
+        // Quantity controls
+        const qtyInput = document.getElementById('qtyInput');
+        const qtyDecrease = document.getElementById('qtyDecrease');
+        const qtyIncrease = document.getElementById('qtyIncrease');
+
+        qtyDecrease?.addEventListener('click', () => {
+          if (bookingData.quantity > 1) {
+            bookingData.quantity--;
+            qtyInput.value = bookingData.quantity;
+            updatePricing();
+          }
+        });
+
+        qtyIncrease?.addEventListener('click', () => {
+          if (bookingData.quantity < 10) {
+            bookingData.quantity++;
+            qtyInput.value = bookingData.quantity;
+            updatePricing();
+          }
+        });
+
+        qtyInput?.addEventListener('change', (e) => {
+          const newQuantity = parseInt(e.target.value);
+          if (newQuantity >= 1 && newQuantity <= 10) {
+            bookingData.quantity = newQuantity;
+            updatePricing();
+          } else {
+            e.target.value = bookingData.quantity;
+          }
+        });
+
+        // Navigation buttons
+        document.getElementById('continueToDetails')?.addEventListener('click', () => {
+          if (validateStep1()) {
+            goToStep(2);
+          }
+        });
+
+        document.getElementById('continueToPayment')?.addEventListener('click', () => {
+          if (validateStep2()) {
+            updateOrderSummary();
+            goToStep(3);
+          }
+        });
+
+        document.getElementById('processPayment')?.addEventListener('click', () => {
+          processPayment();
+        });
+
+        document.getElementById('backToPass')?.addEventListener('click', () => goToStep(1));
+        document.getElementById('backToDetails')?.addEventListener('click', () => goToStep(2));
+
+        // Success actions
+        document.getElementById('downloadTicket')?.addEventListener('click', downloadTicket);
+        document.getElementById('addToCalendar')?.addEventListener('click', addToCalendar);
+        document.getElementById('shareTicket')?.addEventListener('click', shareTicket);
+      }
+
+      // Navigation
+      function goToStep(step) {
+        currentStep = step;
+        
+        // Update step indicators
+        document.querySelectorAll('.step').forEach((stepEl, index) => {
+          stepEl.classList.toggle('active', index + 1 === step);
+          stepEl.classList.toggle('completed', index + 1 < step);
+        });
+
+        // Update stages
+        document.querySelectorAll('.booking-stage').forEach(stage => {
+          stage.classList.toggle('active', parseInt(stage.dataset.stage) === step);
+        });
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Validation
+      function validateStep1() {
+        if (!bookingData.event || !bookingData.ticketTier) {
+          window.NMToast('Please select a ticket type');
+          return false;
+        }
+        return true;
+      }
+
+      function validateStep2() {
+        const form = document.getElementById('studentForm');
+        const requiredFields = ['fullName', 'email', 'phone', 'year', 'studentId'];
+        
+        for (const fieldId of requiredFields) {
+          const field = document.getElementById(fieldId);
+          if (!field || !field.value.trim()) {
+            window.NMToast(`Please fill in ${fieldId.replace(/([A-Z])/g, ' $1').trim()}`);
+            return false;
+          }
+        }
+
+        // Save student details
+        bookingData.studentDetails = {
+          fullName: document.getElementById('fullName').value,
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value,
+          year: document.getElementById('year').value,
+          studentId: document.getElementById('studentId').value,
+          referralCode: document.getElementById('referralCode').value,
+          notes: document.getElementById('notes').value
+        };
+
+        return true;
+      }
+
+      // Update Order Summary
+      function updateOrderSummary() {
+        if (!bookingData.event) return;
+
+        document.getElementById('summaryEvent').textContent = bookingData.event.title;
+        document.getElementById('summaryPass').textContent = bookingData.ticketTier;
+        document.getElementById('summaryQuantity').textContent = bookingData.quantity;
+        document.getElementById('summaryStudent').textContent = bookingData.studentDetails.fullName;
+      }
+
+      // Process Payment
+      function processPayment() {
+        // Simulate payment processing
+        window.NMToast('Processing payment...');
+        
+        setTimeout(() => {
+          // Generate booking ID
+          bookingData.bookingId = 'NM-' + Date.now().toString(36).toUpperCase();
+          
+          // Save booking
+          const booking = {
+            id: bookingData.bookingId,
+            eventId: bookingData.eventId,
+            ticketTier: bookingData.ticketTier,
+            quantity: bookingData.quantity,
+            studentDetails: bookingData.studentDetails,
+            paymentMethod: bookingData.paymentMethod,
+            totalAmount: calculateTotal(),
+            timestamp: new Date().toISOString(),
+            status: 'confirmed'
+          };
+
+          // Add to student's bookings
+          data.student.bookings.push(booking);
+          
+          // Save to localStorage
+          localStorage.setItem('nm-student-bookings', JSON.stringify(data.student.bookings));
+          
+          // Generate ticket
+          generateTicket();
+          
+          // Go to confirmation step
+          goToStep(4);
+          
+          window.NMToast('Payment successful! Your ticket is ready.');
+        }, 2000);
+      }
+
+      // Calculate Total
+      function calculateTotal() {
+        if (!bookingData.event || !bookingData.ticketTier) return 0;
+
+        const tier = bookingData.event.tiers.find(t => t.name === bookingData.ticketTier);
+        if (!tier) return 0;
+
+        const subtotal = tier.price * bookingData.quantity;
+        const processingFee = subtotal > 0 ? Math.round(subtotal * 0.02) : 0;
+        return subtotal + processingFee;
+      }
+
+      // Generate Ticket
+      function generateTicket() {
+        const event = bookingData.event;
+        const ticketData = {
+          bookingId: bookingData.bookingId,
+          event: event.title,
+          date: window.NMFormat.date(event.date),
+          time: `${event.time.start} - ${event.time.end}`,
+          venue: event.venue,
+          holder: bookingData.studentDetails.fullName,
+          passType: `${bookingData.ticketTier} × ${bookingData.quantity}`,
+          studentId: bookingData.studentDetails.studentId
+        };
+
+        // Update ticket preview
+        document.getElementById('ticketEventName').textContent = ticketData.event;
+        document.getElementById('ticketHolderName').textContent = ticketData.holder;
+        document.getElementById('ticketPassInfo').textContent = ticketData.passType;
+        document.getElementById('ticketDateTime').textContent = `${ticketData.date} • ${ticketData.time}`;
+        document.getElementById('ticketReference').textContent = ticketData.bookingId;
+
+        // Generate QR code
+        if (typeof QRCode !== 'undefined') {
+          const qrContainer = document.getElementById('qrCode');
+          qrContainer.innerHTML = '';
+          
+          new QRCode(qrContainer, {
+            text: JSON.stringify(ticketData),
+            width: 128,
+            height: 128,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+          });
+        }
+      }
+
+      // Ticket Actions
+      function downloadTicket() {
+        window.NMToast('Downloading ticket...');
+        // Implementation would generate PDF and download
+      }
+
+      function addToCalendar() {
+        const event = bookingData.event;
+        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${encodeURIComponent(event.date.replace(/-/g, ''))}/${encodeURIComponent(event.date.replace(/-/g, ''))}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.venue)}`;
+        window.open(calendarUrl, '_blank');
+      }
+
+      function shareTicket() {
+        const shareUrl = `${window.location.origin}${window.location.pathname}?booking=${bookingData.bookingId}`;
+        
+        if (navigator.share) {
+          navigator.share({
+            title: 'NM District Event Ticket',
+            text: `I'm attending ${bookingData.event.title}!`,
+            url: shareUrl
+          });
+        } else {
+          navigator.clipboard.writeText(shareUrl);
+          window.NMToast('Ticket link copied to clipboard');
+        }
+      }
+
+      // Initialize on DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
 </html>

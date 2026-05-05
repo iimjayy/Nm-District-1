@@ -1,195 +1,586 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Organizer Studio | NM District</title>
-    <meta name="description" content="Premium organizer dashboard for NM event operations, registrations, analytics, and QR scans." />
-    <link rel="stylesheet" href="assets/css/style.css" />
-    <script defer src="assets/js/data.js"></script>
-    <script defer src="assets/js/main.js"></script>
-    <script defer src="assets/js/admin.js"></script>
-  </head>
-  <body>
-    <div class="cursor-glow" id="cursorGlow"></div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organizer Studio | NM District</title>
+  <meta name="description" content="Premium organizer dashboard for NM event operations, registrations, analytics, and QR scans.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  
+  <!-- External Libraries -->
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.27/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  
+  <!-- Data -->
+  <script src="assets/js/data.js"></script>
+  
+  <!-- Main Script -->
+  <script src="assets/js/main.js"></script>
+</head>
+<body data-theme="dark">
 
-    <header class="floating-nav" id="floatingNav">
-      <div class="nav-inner">
-        <a class="brand" href="index.html" aria-label="NM District home">
-          <span class="brand-logo">NM</span>
-          <span>NM District</span>
-        </a>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a class="nav-link" data-nav-link href="index.html">Home</a>
-          <a class="nav-link" data-nav-link href="explore.html">Explore</a>
-          <a class="nav-link" data-nav-link href="event.html">Event Details</a>
-          <a class="nav-link" data-nav-link href="booking.html">Book Pass</a>
-          <a class="nav-link" data-nav-link href="dashboard.html">Dashboard</a>
-          <a class="nav-link" data-nav-link href="clubs.html">Clubs</a>
-          <a class="nav-link" data-nav-link href="admin.html">Organizer Studio</a>
-        </nav>
-        <div class="nav-actions">
-          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
-          <a class="btn-inline" href="explore.html">View Public Feed</a>
-        </div>
+  <!-- Custom Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand" aria-label="NM District home">
+        <div class="navbar__logo">NM</div>
+        <span>District</span>
+      </a>
+      
+      <div class="navbar__links">
+        <a href="index.html" class="navbar__link" data-nav-link>Home</a>
+        <a href="explore.html" class="navbar__link" data-nav-link>Explore</a>
+        <a href="clubs.html" class="navbar__link" data-nav-link>Clubs</a>
+        <a href="dashboard.html" class="navbar__link" data-nav-link>Dashboard</a>
       </div>
-    </header>
+      
+      <div class="navbar__actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <span>🌙</span>
+        </button>
+      </div>
+    </div>
+  </nav>
 
     <main>
-      <section class="admin-hero reveal">
-        <p class="eyebrow">Organizer Console · Premium Ops</p>
-        <h1 class="page-title" style="font-size: clamp(1.8rem, 5vw, 3rem)">NM Organizer Studio</h1>
-        <p class="page-subtitle">
-          Build, publish, and manage high-impact events with analytics, QR scanning, and attendee operations.
-        </p>
-      </section>
-
-      <section class="section" style="padding-top: 1rem">
-        <div class="container reveal">
-          <div class="analytics-grid" id="analyticsGrid">
-            <article class="analytics-tile">
-              <div class="analytics-label">Active Events</div>
-              <div class="analytics-value" id="activeEventsCount">0</div>
-            </article>
-            <article class="analytics-tile">
-              <div class="analytics-label">Total Registrations</div>
-              <div class="analytics-value" id="totalRegistrationsCount">0</div>
-            </article>
-            <article class="analytics-tile">
-              <div class="analytics-label">Revenue</div>
-              <div class="analytics-value" id="totalRevenueCount">₹0</div>
-            </article>
-            <article class="analytics-tile">
-              <div class="analytics-label">Engagement Rate</div>
-              <div class="analytics-value" id="engagementRateCount">0%</div>
-            </article>
+    <!-- Admin Hero Section -->
+    <section class="hero hero--admin" data-reveal="up">
+      <div class="hero__content">
+        <div class="container">
+          <div class="hero__badge">
+            <i data-lucide="settings"></i>
+            <span>Organizer Console</span>
           </div>
+          
+          <h1 class="display-hero">NM <span class="text-gradient">Organizer Studio</span></h1>
+          <p class="hero__subtitle">
+            Build, publish, and manage high-impact events with analytics, QR scanning, and attendee operations
+          </p>
+        </div>
+      </div>
+    </section>
 
-          <div class="admin-panel" style="margin-top: 1rem">
-            <h2 class="card-title">Weekly Engagement Pulse</h2>
-            <p class="card-subtitle">Audience interactions across the last 7 days</p>
-            <div class="bar-chart" id="engagementChart"></div>
+    <!-- Analytics Dashboard -->
+    <section class="section">
+      <div class="container">
+        <div class="analytics-grid" data-reveal="up">
+          <div class="analytics-card">
+            <div class="analytics-card__icon">
+              <i data-lucide="calendar"></i>
+            </div>
+            <div class="analytics-card__content">
+              <div class="analytics-card__number" id="activeEventsCount">0</div>
+              <div class="analytics-card__label">Active Events</div>
+            </div>
+          </div>
+          
+          <div class="analytics-card">
+            <div class="analytics-card__icon">
+              <i data-lucide="users"></i>
+            </div>
+            <div class="analytics-card__content">
+              <div class="analytics-card__number" id="totalRegistrationsCount">0</div>
+              <div class="analytics-card__label">Total Registrations</div>
+            </div>
+          </div>
+          
+          <div class="analytics-card">
+            <div class="analytics-card__icon">
+              <i data-lucide="trending-up"></i>
+            </div>
+            <div class="analytics-card__content">
+              <div class="analytics-card__number" id="totalRevenueCount">₹0</div>
+              <div class="analytics-card__label">Revenue</div>
+            </div>
+          </div>
+          
+          <div class="analytics-card">
+            <div class="analytics-card__icon">
+              <i data-lucide="activity"></i>
+            </div>
+            <div class="analytics-card__content">
+              <div class="analytics-card__number" id="engagementRateCount">0%</div>
+              <div class="analytics-card__label">Engagement Rate</div>
+            </div>
           </div>
         </div>
 
+        <!-- Engagement Chart -->
+        <div class="admin-panel" data-reveal="up">
+          <div class="admin-panel__header">
+            <h2 class="admin-panel__title">Weekly Engagement Pulse</h2>
+            <p class="admin-panel__subtitle">Audience interactions across the last 7 days</p>
+          </div>
+          <div class="chart-container" id="engagementChart">
+            <!-- Chart will be rendered here -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin Layout -->
+    <section class="section">
+      <div class="container">
         <div class="admin-layout">
-          <article class="admin-panel reveal">
-            <h2 class="card-title">Create / Edit Event</h2>
-            <p class="card-subtitle">Publish premium listings with ticket inventory controls.</p>
-
-            <form id="adminEventForm" class="form-grid" novalidate>
-              <div class="full">
-                <label class="filter-label" for="adminEventTitle">Event Name</label>
-                <input class="form-input" id="adminEventTitle" required />
+          <!-- Event Creation Panel -->
+          <div class="admin-panel" data-reveal="up">
+            <div class="admin-panel__header">
+              <h2 class="admin-panel__title">Create Event</h2>
+              <p class="admin-panel__subtitle">Publish premium listings with ticket inventory controls</p>
+            </div>
+            
+            <form class="admin-form" id="adminEventForm">
+              <div class="form-grid">
+                <div class="form-group full">
+                  <label for="adminEventTitle">Event Name *</label>
+                  <input type="text" id="adminEventTitle" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="adminEventCategory">Category *</label>
+                  <select id="adminEventCategory" class="form-select" required>
+                    <option value="">Select Category</option>
+                    <option value="Cultural">Cultural</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Workshop">Workshop</option>
+                    <option value="Music">Music</option>
+                    <option value="Networking">Networking</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="adminEventClub">Club *</label>
+                  <select id="adminEventClub" class="form-select" required>
+                    <option value="">Select Club</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="adminEventDate">Date *</label>
+                  <input type="date" id="adminEventDate" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="adminEventTime">Time *</label>
+                  <input type="text" id="adminEventTime" class="form-input" placeholder="6:00 PM - 9:00 PM" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="adminEventVenue">Venue *</label>
+                  <input type="text" id="adminEventVenue" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="adminEventMode">Mode *</label>
+                  <select id="adminEventMode" class="form-select" required>
+                    <option value="offline">Offline</option>
+                    <option value="online">Online</option>
+                    <option value="hybrid">Hybrid</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="adminEventPrice">Ticket Price</label>
+                  <input type="number" id="adminEventPrice" class="form-input" min="0" value="0">
+                </div>
+                
+                <div class="form-group">
+                  <label for="adminEventSeats">Ticket Inventory</label>
+                  <input type="number" id="adminEventSeats" class="form-input" min="1" value="200">
+                </div>
+                
+                <div class="form-group">
+                  <label for="adminBannerUrl">Banner URL</label>
+                  <input type="url" id="adminBannerUrl" class="form-input" placeholder="https://...">
+                </div>
+                
+                <div class="form-group">
+                  <label for="adminPosterUrl">Poster URL</label>
+                  <input type="url" id="adminPosterUrl" class="form-input" placeholder="https://...">
+                </div>
+                
+                <div class="form-group full">
+                  <label for="adminEventDesc">Event Description *</label>
+                  <textarea id="adminEventDesc" class="form-textarea" required></textarea>
+                </div>
               </div>
-
-              <div>
-                <label class="filter-label" for="adminEventCategory">Category</label>
-                <select class="form-select" id="adminEventCategory" required></select>
-              </div>
-
-              <div>
-                <label class="filter-label" for="adminEventClub">Club</label>
-                <select class="form-select" id="adminEventClub" required></select>
-              </div>
-
-              <div>
-                <label class="filter-label" for="adminEventDate">Date</label>
-                <input class="form-input" id="adminEventDate" type="date" required />
-              </div>
-
-              <div>
-                <label class="filter-label" for="adminEventTime">Time</label>
-                <input class="form-input" id="adminEventTime" placeholder="6:00 PM - 9:00 PM" required />
-              </div>
-
-              <div>
-                <label class="filter-label" for="adminEventVenue">Venue</label>
-                <input class="form-input" id="adminEventVenue" required />
-              </div>
-
-              <div>
-                <label class="filter-label" for="adminEventMode">Mode</label>
-                <select class="form-select" id="adminEventMode" required>
-                  <option value="offline">Offline</option>
-                  <option value="online">Online</option>
-                  <option value="hybrid">Hybrid</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="filter-label" for="adminEventPrice">Ticket Price</label>
-                <input class="form-input" id="adminEventPrice" type="number" min="0" value="0" />
-              </div>
-
-              <div>
-                <label class="filter-label" for="adminEventSeats">Ticket Inventory</label>
-                <input class="form-input" id="adminEventSeats" type="number" min="1" value="200" />
-              </div>
-
-              <div>
-                <label class="filter-label" for="adminBannerUrl">Banner URL</label>
-                <input class="form-input" id="adminBannerUrl" placeholder="https://..." />
-              </div>
-
-              <div>
-                <label class="filter-label" for="adminPosterUrl">Poster URL</label>
-                <input class="form-input" id="adminPosterUrl" placeholder="https://..." />
-              </div>
-
-              <div class="full">
-                <label class="filter-label" for="adminEventDesc">Event Description</label>
-                <textarea class="form-textarea" id="adminEventDesc" required></textarea>
-              </div>
-
-              <div class="full" style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap">
-                <button class="btn-secondary" id="saveDraftBtn" type="button">Save Draft</button>
-                <button class="btn-primary" id="publishEventBtn" type="submit">Publish Event</button>
-                <span class="muted" id="publishStatus">No drafts created yet.</span>
+              
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="saveDraftBtn">Save Draft</button>
+                <button type="submit" class="btn btn-primary" id="publishEventBtn">Publish Event</button>
+                <span class="form-status" id="publishStatus">No drafts created yet</span>
               </div>
             </form>
-          </article>
+          </div>
 
-          <article class="admin-panel reveal">
-            <h2 class="card-title">Registrations & Attendees</h2>
-            <p class="card-subtitle">Manage attendees and export operational sheets.</p>
-
-            <div class="table-shell">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Booking Code</th>
-                    <th>Student</th>
-                    <th>Event</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="attendeeTableBody"></tbody>
-              </table>
+          <!-- Attendee Management Panel -->
+          <div class="admin-panel" data-reveal="up">
+            <div class="admin-panel__header">
+              <h2 class="admin-panel__title">Registrations & Attendees</h2>
+              <p class="admin-panel__subtitle">Manage attendees and export operational sheets</p>
             </div>
-
-            <div style="margin-top: 0.8rem; display: flex; gap: 0.6rem; flex-wrap: wrap">
-              <button class="btn-primary" id="exportAttendeesBtn" type="button">Export Attendees CSV</button>
-              <button class="btn-secondary" id="refreshAttendeesBtn" type="button">Refresh</button>
+            
+            <div class="attendee-table">
+              <div class="table-header">
+                <div>Booking Code</div>
+                <div>Student</div>
+                <div>Event</div>
+                <div>Status</div>
+              </div>
+              <div class="table-body" id="attendeeTableBody">
+                <!-- Attendees will be populated here -->
+              </div>
             </div>
-
-            <h3 style="margin-top: 1rem">Ticket Inventory Control</h3>
-            <div class="list-stack" id="inventoryList"></div>
-
-            <h3 style="margin-top: 1rem">QR Check-In Scanner</h3>
-            <input class="form-input" id="scanInput" placeholder="Enter / scan booking code" />
-            <div class="scan-box" id="scanResult">Awaiting booking code...</div>
-          </article>
+            
+            <div class="table-actions">
+              <button class="btn btn-primary" id="exportAttendeesBtn">Export CSV</button>
+              <button class="btn btn-secondary" id="refreshAttendeesBtn">Refresh</button>
+            </div>
+            
+            <!-- Ticket Inventory -->
+            <div class="inventory-section">
+              <h3>Ticket Inventory Control</h3>
+              <div class="inventory-list" id="inventoryList">
+                <!-- Inventory items will be populated here -->
+              </div>
+            </div>
+            
+            <!-- QR Scanner -->
+            <div class="scanner-section">
+              <h3>QR Check-In Scanner</h3>
+              <div class="scanner-container">
+                <input type="text" id="scanInput" class="form-input" placeholder="Enter or scan booking code">
+                <div class="scanner-result" id="scanResult">Awaiting booking code...</div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+    </section>
 
-        <div class="container" style="margin-top: 1rem">
-          <article class="admin-panel reveal">
-            <h2 class="card-title">Event Visibility Control</h2>
-            <p class="card-subtitle">Publish or unpublish events in one click.</p>
-            <div class="list-stack" id="publishList"></div>
-          </article>
+    <!-- Event Management Section -->
+    <section class="section">
+      <div class="container">
+        <div class="admin-panel" data-reveal="up">
+          <div class="admin-panel__header">
+            <h2 class="admin-panel__title">Event Visibility Control</h2>
+            <p class="admin-panel__subtitle">Publish or unpublish events in one click</p>
+          </div>
+          <div class="events-list" id="publishList">
+            <!-- Events will be populated here -->
+          </div>
         </div>
-      </section>
-    </main>
-  </body>
+      </div>
+    </section>
+  </main>
+
+  <!-- Admin Page Script -->
+  <script>
+    (() => {
+      const data = window.NMData;
+      if (!data) return;
+
+      // Initialize
+      function init() {
+        setupEventListeners();
+        populateFormOptions();
+        renderAnalytics();
+        renderAttendees();
+        renderInventory();
+        renderEventsList();
+        
+        // Initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      // Setup Event Listeners
+      function setupEventListeners() {
+        // Event form submission
+        document.getElementById('adminEventForm')?.addEventListener('submit', (e) => {
+          e.preventDefault();
+          publishEvent();
+        });
+
+        // Save draft
+        document.getElementById('saveDraftBtn')?.addEventListener('click', saveDraft);
+
+        // Export attendees
+        document.getElementById('exportAttendeesBtn')?.addEventListener('click', exportAttendees);
+
+        // Refresh attendees
+        document.getElementById('refreshAttendeesBtn')?.addEventListener('click', renderAttendees);
+
+        // QR scanner
+        document.getElementById('scanInput')?.addEventListener('input', handleScan);
+      }
+
+      // Populate Form Options
+      function populateFormOptions() {
+        // Populate clubs
+        const clubSelect = document.getElementById('adminEventClub');
+        if (clubSelect) {
+          data.clubs.forEach(club => {
+            const option = document.createElement('option');
+            option.value = club.id;
+            option.textContent = club.name;
+            clubSelect.appendChild(option);
+          });
+        }
+      }
+
+      // Render Analytics
+      function renderAnalytics() {
+        // Calculate analytics from data
+        const activeEvents = data.events.filter(e => new Date(e.date) > new Date()).length;
+        const totalRegistrations = data.student.bookings.length;
+        const totalRevenue = data.student.bookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0);
+        const engagementRate = Math.round((totalRegistrations / (data.events.length * 100)) * 100);
+
+        document.getElementById('activeEventsCount').textContent = activeEvents;
+        document.getElementById('totalRegistrationsCount').textContent = totalRegistrations;
+        document.getElementById('totalRevenueCount').textContent = window.NMFormat.currency(totalRevenue);
+        document.getElementById('engagementRateCount').textContent = `${engagementRate}%`;
+
+        // Render engagement chart (placeholder)
+        const chartContainer = document.getElementById('engagementChart');
+        if (chartContainer) {
+          chartContainer.innerHTML = `
+            <div class="chart-placeholder">
+              <i data-lucide="bar-chart-2"></i>
+              <p>Engagement chart visualization</p>
+            </div>
+          `;
+        }
+      }
+
+      // Render Attendees
+      function renderAttendees() {
+        const tbody = document.getElementById('attendeeTableBody');
+        if (!tbody) return;
+
+        const bookings = data.student.bookings.slice(0, 10); // Show first 10 for demo
+
+        if (bookings.length === 0) {
+          tbody.innerHTML = '<div class="table-empty">No registrations yet</div>';
+        } else {
+          tbody.innerHTML = bookings.map(booking => {
+            const event = data.events.find(e => e.id === booking.eventId);
+            return `
+              <div class="table-row">
+                <div>${booking.id}</div>
+                <div>${data.student.name}</div>
+                <div>${event.title}</div>
+                <div><span class="status-badge confirmed">Confirmed</span></div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Render Inventory
+      function renderInventory() {
+        const container = document.getElementById('inventoryList');
+        if (!container) return;
+
+        const events = data.events.slice(0, 5); // Show first 5 for demo
+
+        container.innerHTML = events.map(event => `
+          <div class="inventory-item">
+            <div class="inventory-item__info">
+              <h4>${event.title}</h4>
+              <p>${window.NMFormat.date(event.date)}</p>
+            </div>
+            <div class="inventory-item__stats">
+              <div class="inventory-stat">
+                <span>Total Seats</span>
+                <strong>200</strong>
+              </div>
+              <div class="inventory-stat">
+                <span>Booked</span>
+                <strong>${Math.floor(Math.random() * 150) + 20}</strong>
+              </div>
+              <div class="inventory-stat">
+                <span>Available</span>
+                <strong>${Math.floor(Math.random() * 50) + 10}</strong>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Render Events List
+      function renderEventsList() {
+        const container = document.getElementById('publishList');
+        if (!container) return;
+
+        container.innerHTML = data.events.map(event => `
+          <div class="event-control-item">
+            <div class="event-control-item__info">
+              <h4>${event.title}</h4>
+              <p>${event.category} • ${window.NMFormat.date(event.date)}</p>
+            </div>
+            <div class="event-control-item__actions">
+              <div class="toggle-switch ${event.featured ? 'active' : ''}" data-event-id="${event.id}">
+                <input type="checkbox" ${event.featured ? 'checked' : ''}>
+                <span class="toggle-slider"></span>
+              </div>
+              <button class="btn btn-sm btn-ghost">Edit</button>
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </div>
+          </div>
+        `).join('');
+
+        // Add toggle listeners
+        container.querySelectorAll('.toggle-switch').forEach(toggle => {
+          toggle.addEventListener('click', () => {
+            const eventId = toggle.dataset.eventId;
+            const event = data.events.find(e => e.id === eventId);
+            if (event) {
+              event.featured = !event.featured;
+              toggle.classList.toggle('active');
+              window.NMToast(`Event ${event.featured ? 'featured' : 'unfeatured'}`);
+            }
+          });
+        });
+      }
+
+      // Publish Event
+      function publishEvent() {
+        const formData = {
+          title: document.getElementById('adminEventTitle').value,
+          category: document.getElementById('adminEventCategory').value,
+          club: document.getElementById('adminEventClub').value,
+          date: document.getElementById('adminEventDate').value,
+          time: document.getElementById('adminEventTime').value,
+          venue: document.getElementById('adminEventVenue').value,
+          mode: document.getElementById('adminEventMode').value,
+          price: parseInt(document.getElementById('adminEventPrice').value) || 0,
+          seats: parseInt(document.getElementById('adminEventSeats').value) || 200,
+          banner: document.getElementById('adminBannerUrl').value,
+          poster: document.getElementById('adminPosterUrl').value,
+          description: document.getElementById('adminEventDesc').value
+        };
+
+        // Validate form
+        if (!formData.title || !formData.category || !formData.club || !formData.date || !formData.time || !formData.venue || !formData.description) {
+          window.NMToast('Please fill in all required fields');
+          return;
+        }
+
+        // Create new event
+        const newEvent = {
+          id: 'event-' + Date.now().toString(36),
+          slug: formData.title.toLowerCase().replace(/\s+/g, '-'),
+          title: formData.title,
+          category: formData.category,
+          subcategory: formData.category.toLowerCase(),
+          description: formData.description,
+          date: formData.date,
+          time: { start: formData.time.split(' - ')[0], end: formData.time.split(' - ')[1] },
+          venue: formData.venue,
+          format: formData.mode,
+          hostedBy: data.clubs.find(c => c.id === formData.club)?.name || 'Unknown',
+          image: formData.banner || `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000)}?w=600&h=400&fit=crop`,
+          gallery: [],
+          tiers: [
+            {
+              name: 'General',
+              price: formData.price,
+              perks: ['Entry to event', 'Access to all activities']
+            }
+          ],
+          agenda: [],
+          rules: [],
+          tags: [formData.category],
+          interested: 0,
+          featured: false
+        };
+
+        // Add to data
+        data.events.push(newEvent);
+        window.NMToast('Event published successfully!');
+        
+        // Reset form
+        document.getElementById('adminEventForm').reset();
+        
+        // Refresh displays
+        renderAnalytics();
+        renderEventsList();
+      }
+
+      // Save Draft
+      function saveDraft() {
+        window.NMToast('Draft saved successfully');
+        document.getElementById('publishStatus').textContent = 'Draft saved at ' + new Date().toLocaleTimeString();
+      }
+
+      // Export Attendees
+      function exportAttendees() {
+        window.NMToast('Exporting attendees...');
+        // In a real implementation, this would generate and download a CSV file
+      }
+
+      // Handle QR Scan
+      function handleScan(e) {
+        const code = e.target.value;
+        const scanResult = document.getElementById('scanResult');
+        
+        if (code.length >= 8) {
+          const booking = data.student.bookings.find(b => b.id.includes(code));
+          if (booking) {
+            const event = data.events.find(e => e.id === booking.eventId);
+            scanResult.innerHTML = `
+              <div class="scan-success">
+                <i data-lucide="check-circle"></i>
+                <div>
+                  <strong>Valid Ticket</strong>
+                  <p>${event.title} - ${data.student.name}</p>
+                </div>
+              </div>
+            `;
+            scanResult.classList.add('success');
+          } else {
+            scanResult.innerHTML = `
+              <div class="scan-error">
+                <i data-lucide="x-circle"></i>
+                <div>
+                  <strong>Invalid Ticket</strong>
+                  <p>Booking code not found</p>
+                </div>
+              </div>
+            `;
+            scanResult.classList.add('error');
+          }
+        } else {
+          scanResult.innerHTML = 'Awaiting booking code...';
+          scanResult.classList.remove('success', 'error');
+        }
+      }
+
+      // Initialize on DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
 </html>
