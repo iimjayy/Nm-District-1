@@ -13,11 +13,11 @@ window.NMData = {
       venue: "NM Main Quadrangle",
       format: "offline",
       hostedBy: "NMACC Student Council",
-      image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&h=400&fit=crop",
+      image: "assets/images/020b0ad05767be5e64f4b446f03f428d.jpg",
       gallery: [
-        "https://images.unsplash.com/photo-1459749411171-0475ed42445e?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=600&h=400&fit=crop"
+        "assets/images/0a2e1d19caa2992ccb170c2abdbbd6b1.jpg",
+        "assets/images/1370e36c1add1748beeb92ee1dfc64ce.jpg",
+        "assets/images/2678eaf1a162f9e0f05c17574526f2a7.jpg"
       ],
       tiers: [
         { name: "General Access", price: 499, seats: 420, seatsLeft: 89, perks: ["Entry to all stages", "Food court access", "Basic amenities"] },
@@ -52,10 +52,10 @@ window.NMData = {
       venue: "Seminar Hall B",
       format: "offline",
       hostedBy: "NM Finance Forum",
-      image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&h=400&fit=crop",
+      image: "assets/images/285e95a8f50a8c6d47afa30f99e4285c.jpg",
       gallery: [
-        "https://images.unsplash.com/photo-1554224154-260325ca2fc6?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop"
+        "assets/images/3321ae1b9b6cd7db540d6d49211068f7.jpg",
+        "assets/images/385a26a34f594dbaa1d6890e70664f81.jpg"
       ],
       tiers: [
         { name: "Participant", price: 199, seats: 110, seatsLeft: 34, perks: ["Case materials", "Lunch", "Certificate"] },
@@ -89,10 +89,10 @@ window.NMData = {
       venue: "Innovation Lab 3",
       format: "hybrid",
       hostedBy: "DataX NM",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop",
+      image: "assets/images/49592495dd5ed7b56deccc37d092881a.jpg",
       gallery: [
-        "https://images.unsplash.com/photo-1550745165-9bc0b252726a?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=600&h=400&fit=crop"
+        "assets/images/4f7b4ae0986f4a7502e84ba08890af84.jpg",
+        "assets/images/643821c3346d3269220af319cbc7a70b.jpg"
       ],
       tiers: [
         { name: "Campus Seat", price: 349, seats: 90, seatsLeft: 12, perks: ["In-person access", "Hands-on labs", "Certificate"] },
@@ -126,10 +126,10 @@ window.NMData = {
       venue: "College Turf Arena",
       format: "offline",
       hostedBy: "NM Sports Collective",
-      image: "https://images.unsplash.com/photo-1517466787929-bc90951f0935?w=600&h=400&fit=crop",
+      image: "assets/images/7229b3b9bee41bf3b83f3fb5bff91bf8.jpg",
       gallery: [
-        "https://images.unsplash.com/photo-1510916365622-e2c2b6b5ce8f?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1546519638-68e449375a20?w=600&h=400&fit=crop"
+        "assets/images/7927842edee4f607b83d0ec3a0904765.jpg",
+        "assets/images/79fe219bb15ea2779ab13247e3f150dd.jpg"
       ],
       tiers: [
         { name: "Player Registration", price: 0, seats: 80, seatsLeft: 23, perks: ["Tournament participation", "Team jersey", "Medical coverage"] },
@@ -162,10 +162,10 @@ window.NMData = {
       venue: "Main Auditorium",
       format: "offline",
       hostedBy: "Economics Association",
-      image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&h=400&fit=crop",
+      image: "assets/images/85d922c83af7fd97351b71dda21854d4.jpg",
       gallery: [
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&h=400&fit=crop"
+        "assets/images/385a26a34f594dbaa1d6890e70664f81.jpg",
+        "assets/images/863f1459ece4a8ad133f09bebc101559.jpg"
       ],
       tiers: [
         { name: "Student Pass", price: 299, seats: 220, seatsLeft: 78, perks: ["Lecture access", "Q&A session", "Certificate"] },
@@ -198,10 +198,10 @@ window.NMData = {
       venue: "Amphitheatre",
       format: "offline",
       hostedBy: "The Dramatic Society",
-      image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&h=400&fit=crop",
+      image: "assets/images/020b0ad05767be5e64f4b446f03f428d.jpg",
       gallery: [
-        "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=400&fit=crop"
+        "assets/images/87bc90ca9d0bb9f2fc79ae8891fe2e00.jpg",
+        "assets/images/8c5fe105397a5d73dbfae2653da1a7d6.jpg"
       ],
       tiers: [
         { name: "Front Bay", price: 149, seats: 35, seatsLeft: 8, perks: ["Premium seating", "Artist meet & greet"] },
@@ -234,10 +234,10 @@ window.NMData = {
       venue: "Biz Commons Lounge",
       format: "offline",
       hostedBy: "E-Cell NM",
-      image: "https://images.unsplash.com/photo-1515378791036-0646a3e779cc?w=600&h=400&fit=crop",
+      image: "assets/images/970bc67e4cbfcf6aed1876225951ccf2.jpg",
       gallery: [
-        "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop"
+        "assets/images/9a904ec055cc7d7fbd95443daea2dc01.jpg",
+        "assets/images/a3ae8184ed41f08408a6809bdd4c555c.jpg"
       ],
       tiers: [
         { name: "Networking Pass", price: 249, seats: 130, seatsLeft: 41, perks: ["Entry to all sessions", "Startup directory access", "Coffee & snacks"] }
@@ -269,10 +269,10 @@ window.NMData = {
       venue: "Student Activity Wing",
       format: "offline",
       hostedBy: "Campus Affairs Council",
-      image: "https://images.unsplash.com/photo-1517245136497-a6516e40a8f6?w=600&h=400&fit=crop",
+      image: "assets/images/a8052b514aed67559f8b56235be6d832.jpg",
       gallery: [
-        "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600&h=400&fit=crop"
+        "assets/images/863f1459ece4a8ad133f09bebc101559.jpg",
+        "assets/images/a87318b37485c9e886acbd4e57995123.jpg"
       ],
       tiers: [
         { name: "Applicant Slot", price: 0, seats: 360, seatsLeft: 127, perks: ["Interview slot", "Resume review", "Career guidance"] }
@@ -304,10 +304,10 @@ window.NMData = {
       venue: "Innovation Atrium",
       format: "offline",
       hostedBy: "Enactus NM",
-      image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600&h=400&fit=crop",
+      image: "assets/images/ae854b60c43597f5d16ee36deff2f43e.jpg",
       gallery: [
-        "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1504384764586-b4841bb7b6f4?w=600&h=400&fit=crop"
+        "assets/images/b5591a9630cb60402b7eb1947a4608bb.jpg",
+        "assets/images/c0d7398dedee2f06949cf074934dab96.jpg"
       ],
       tiers: [
         { name: "Team Pass", price: 299, seats: 200, seatsLeft: 67, perks: ["Hackathon access", "Mentorship", "Meals", "Certificate"] },
@@ -341,10 +341,10 @@ window.NMData = {
       venue: "Media Lab + Outdoor",
       format: "hybrid",
       hostedBy: "Photography Club",
-      image: "https://images.unsplash.com/photo-1502920917128-1aa50076ecbd?w=600&h=400&fit=crop",
+      image: "assets/images/c2a5ffd4099b6569d09a7e9e52e629ad.jpg",
       gallery: [
-        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&h=400&fit=crop"
+        "assets/images/c3440e9721d6beed4463eaa8690e93c8.jpg",
+        "assets/images/c5bef76946085b739a29cafc975eb0c3.jpg"
       ],
       tiers: [
         { name: "Participant", price: 399, seats: 45, seatsLeft: 12, perks: ["Workshop access", "Photography walk", "Portfolio review", "Certificate"] }
@@ -377,10 +377,10 @@ window.NMData = {
       venue: "Conference Hall A",
       format: "offline",
       hostedBy: "Debate Society",
-      image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&h=400&fit=crop",
+      image: "assets/images/c983bc230cc5ea898b993790cfb95b4d.jpg",
       gallery: [
-        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop"
+        "assets/images/e608269024d98c641c6156cec0aab89a.jpg",
+        "assets/images/385a26a34f594dbaa1d6890e70664f81.jpg"
       ],
       tiers: [
         { name: "Participant", price: 149, seats: 64, seatsLeft: 19, perks: ["Competition entry", "Certificate", "Lunch"] },
@@ -409,14 +409,14 @@ window.NMData = {
       name: "E-Cell NM",
       category: "Entrepreneurship",
       description: "NM's entrepreneurship nucleus connecting student founders, mentors, and investor networks. We organize startup weekends, pitch competitions, and founder meetups to foster the entrepreneurial spirit on campus.",
-      logo: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=80&fit=crop&crop=face",
-      banner: "https://images.unsplash.com/photo-1557804216-c291d0490221?w=600&h=300&fit=crop",
+      logo: "assets/images/f458f683c278a8ea9f7becc41acabaca.jpg",
+      banner: "assets/images/f60df5b643f14f72581006955dd306d8.jpg",
       members: 5400,
       founded: "2018",
       leadership: [
-        { name: "Siddhant Rao", role: "President", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" },
-        { name: "Nyra Shah", role: "Operations Lead", avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c1ca?w=40&h=40&fit=crop&crop=face" },
-        { name: "Ahaan Jain", role: "Partnerships Lead", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face" }
+        { name: "Siddhant Rao", role: "President", avatar: "assets/images/fdc75681b658e75869ad5eb26a418904.jpg" },
+        { name: "Nyra Shah", role: "Operations Lead", avatar: "assets/images/020b0ad05767be5e64f4b446f03f428d.jpg" },
+        { name: "Ahaan Jain", role: "Partnerships Lead", avatar: "assets/images/0a2e1d19caa2992ccb170c2abdbbd6b1.jpg" }
       ],
       socialLinks: {
         instagram: "https://instagram.com/ecellnm",
@@ -424,9 +424,9 @@ window.NMData = {
         website: "https://ecellnm.in"
       },
       gallery: [
-        "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1515378791036-0646a3e779cc?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop"
+        "assets/images/1370e36c1add1748beeb92ee1dfc64ce.jpg",
+        "assets/images/970bc67e4cbfcf6aed1876225951ccf2.jpg",
+        "assets/images/a3ae8184ed41f08408a6809bdd4c555c.jpg"
       ],
       events: ["founders-cafe-networking-2026", "committee-recruitment-drive-2026"]
     },
@@ -435,14 +435,14 @@ window.NMData = {
       name: "Finance Forum",
       category: "Finance",
       description: "The flagship club for market simulations, investment leagues, and industry-focused finance cohorts. We bridge academic knowledge with real-world financial markets through workshops, competitions, and networking events.",
-      logo: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=80&h=80&fit=crop&crop=face",
-      banner: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&h=300&fit=crop",
+      logo: "assets/images/2678eaf1a162f9e0f05c17574526f2a7.jpg",
+      banner: "assets/images/285e95a8f50a8c6d47afa30f99e4285c.jpg",
       members: 4900,
       founded: "2017",
       leadership: [
-        { name: "Tara Mehta", role: "President", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face" },
-        { name: "Vivaan Shah", role: "Research Lead", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" },
-        { name: "S. Kamat", role: "Quant Lead", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face" }
+        { name: "Tara Mehta", role: "President", avatar: "assets/images/3321ae1b9b6cd7db540d6d49211068f7.jpg" },
+        { name: "Vivaan Shah", role: "Research Lead", avatar: "assets/images/385a26a34f594dbaa1d6890e70664f81.jpg" },
+        { name: "S. Kamat", role: "Quant Lead", avatar: "assets/images/0a2e1d19caa2992ccb170c2abdbbd6b1.jpg" }
       ],
       socialLinks: {
         instagram: "https://instagram.com/nmfinanceforum",
@@ -450,9 +450,9 @@ window.NMData = {
         website: "https://nmfinance.club"
       },
       gallery: [
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1554224154-260325ca2fc6?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop"
+        "assets/images/49592495dd5ed7b56deccc37d092881a.jpg",
+        "assets/images/3321ae1b9b6cd7db540d6d49211068f7.jpg",
+        "assets/images/385a26a34f594dbaa1d6890e70664f81.jpg"
       ],
       events: ["finxcellence-case-wars-2026", "global-markets-masterclass-2026"]
     },
@@ -461,14 +461,14 @@ window.NMData = {
       name: "Dramatic Society",
       category: "Cultural",
       description: "From theatre to music nights and spoken-word circuits, this club powers NM's creative stage culture. We produce plays, organize open mic nights, and host cultural festivals that showcase student talent.",
-      logo: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=80&h=80&fit=crop&crop=face",
-      banner: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&h=300&fit=crop",
+      logo: "assets/images/49592495dd5ed7b56deccc37d092881a.jpg",
+      banner: "assets/images/4f7b4ae0986f4a7502e84ba08890af84.jpg",
       members: 6200,
       founded: "2016",
       leadership: [
-        { name: "Zoya Patil", role: "President", avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c1ca?w=40&h=40&fit=crop&crop=face" },
-        { name: "Karan D'Souza", role: "Curation Lead", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" },
-        { name: "Juhi Rao", role: "Production Head", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face" }
+        { name: "Zoya Patil", role: "President", avatar: "assets/images/020b0ad05767be5e64f4b446f03f428d.jpg" },
+        { name: "Karan D'Souza", role: "Curation Lead", avatar: "assets/images/fdc75681b658e75869ad5eb26a418904.jpg" },
+        { name: "Juhi Rao", role: "Production Head", avatar: "assets/images/3321ae1b9b6cd7db540d6d49211068f7.jpg" }
       ],
       socialLinks: {
         instagram: "https://instagram.com/nmdramatics",
@@ -476,9 +476,9 @@ window.NMData = {
         website: "https://nmdrama.live"
       },
       gallery: [
-        "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1517455023928-91e513cd7cf9?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=400&fit=crop"
+        "assets/images/87bc90ca9d0bb9f2fc79ae8891fe2e00.jpg",
+        "assets/images/643821c3346d3269220af319cbc7a70b.jpg",
+        "assets/images/8c5fe105397a5d73dbfae2653da1a7d6.jpg"
       ],
       events: ["campus-live-acoustic-sundowner-2026"]
     },
@@ -487,14 +487,14 @@ window.NMData = {
       name: "Sports Collective",
       category: "Sports",
       description: "Driving inter-collegiate sports culture with leagues, wellness challenges, and athletic showcases. We organize tournaments, fitness programs, and sports events that promote healthy competition and teamwork.",
-      logo: "https://images.unsplash.com/photo-1517466787929-bc90951f0935?w=80&h=80&fit=crop&crop=face",
-      banner: "https://images.unsplash.com/photo-1510916365622-e2c2b6b5ce8f?w=600&h=300&fit=crop",
+      logo: "assets/images/7229b3b9bee41bf3b83f3fb5bff91bf8.jpg",
+      banner: "assets/images/7927842edee4f607b83d0ec3a0904765.jpg",
       members: 3700,
       founded: "2015",
       leadership: [
-        { name: "Arjun Sood", role: "Captain", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face" },
-        { name: "Ishaan Vyas", role: "Coordinator", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" },
-        { name: "Pia Dandekar", role: "Media", avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c1ca?w=40&h=40&fit=crop&crop=face" }
+        { name: "Arjun Sood", role: "Captain", avatar: "assets/images/0a2e1d19caa2992ccb170c2abdbbd6b1.jpg" },
+        { name: "Ishaan Vyas", role: "Coordinator", avatar: "assets/images/385a26a34f594dbaa1d6890e70664f81.jpg" },
+        { name: "Pia Dandekar", role: "Media", avatar: "assets/images/020b0ad05767be5e64f4b446f03f428d.jpg" }
       ],
       socialLinks: {
         instagram: "https://instagram.com/nmsports",
@@ -502,9 +502,9 @@ window.NMData = {
         website: "https://nmsports.club"
       },
       gallery: [
-        "https://images.unsplash.com/photo-1510916365622-e2c2b6b5ce8f?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1546519638-68e449375a20?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=400&fit=crop"
+        "assets/images/7927842edee4f607b83d0ec3a0904765.jpg",
+        "assets/images/79fe219bb15ea2779ab13247e3f150dd.jpg",
+        "assets/images/79fe219bb15ea2779ab13247e3f150dd.jpg"
       ],
       events: ["nm-premier-night-league-2026"]
     },
@@ -513,14 +513,14 @@ window.NMData = {
       name: "Enactus NM",
       category: "Social Impact",
       description: "Student-led social entrepreneurship community building practical solutions for sustainable growth. We work on real-world projects that address social and environmental challenges while developing business skills.",
-      logo: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=80&h=80&fit=crop&crop=face",
-      banner: "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=600&h=300&fit=crop",
+      logo: "assets/images/85d922c83af7fd97351b71dda21854d4.jpg",
+      banner: "assets/images/863f1459ece4a8ad133f09bebc101559.jpg",
       members: 4100,
       founded: "2019",
       leadership: [
-        { name: "Krisha Shah", role: "President", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face" },
-        { name: "Neil Parekh", role: "Projects Lead", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" },
-        { name: "Reya Gokhale", role: "Outreach", avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c1ca?w=40&h=40&fit=crop&crop=face" }
+        { name: "Krisha Shah", role: "President", avatar: "assets/images/3321ae1b9b6cd7db540d6d49211068f7.jpg" },
+        { name: "Neil Parekh", role: "Projects Lead", avatar: "assets/images/fdc75681b658e75869ad5eb26a418904.jpg" },
+        { name: "Reya Gokhale", role: "Outreach", avatar: "assets/images/020b0ad05767be5e64f4b446f03f428d.jpg" }
       ],
       socialLinks: {
         instagram: "https://instagram.com/enactusnm",
@@ -528,9 +528,9 @@ window.NMData = {
         website: "https://enactusnm.org"
       },
       gallery: [
-        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1504384764586-b4841bb7b6f4?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=600&h=400&fit=crop"
+        "assets/images/ae854b60c43597f5d16ee36deff2f43e.jpg",
+        "assets/images/c0d7398dedee2f06949cf074934dab96.jpg",
+        "assets/images/b5591a9630cb60402b7eb1947a4608bb.jpg"
       ],
       events: ["sustainability-hackathon-2026"]
     },
@@ -539,14 +539,14 @@ window.NMData = {
       name: "DataX NM",
       category: "Technology",
       description: "Community for analytics builders, model thinkers, and students shaping tech-first business futures. We host hackathons, workshops on AI/ML, and tech talks from industry leaders.",
-      logo: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=80&h=80&fit=crop&crop=face",
-      banner: "https://images.unsplash.com/photo-1550745165-9bc0b252726a?w=600&h=300&fit=crop",
+      logo: "assets/images/87bc90ca9d0bb9f2fc79ae8891fe2e00.jpg",
+      banner: "assets/images/8c5fe105397a5d73dbfae2653da1a7d6.jpg",
       members: 3300,
       founded: "2020",
       leadership: [
-        { name: "Mihir Desai", role: "President", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" },
-        { name: "Sana D'Costa", role: "ML Lead", avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c1ca?w=40&h=40&fit=crop&crop=face" },
-        { name: "Yashvi Mody", role: "Workshops", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face" }
+        { name: "Mihir Desai", role: "President", avatar: "assets/images/fdc75681b658e75869ad5eb26a418904.jpg" },
+        { name: "Sana D'Costa", role: "ML Lead", avatar: "assets/images/020b0ad05767be5e64f4b446f03f428d.jpg" },
+        { name: "Yashvi Mody", role: "Workshops", avatar: "assets/images/3321ae1b9b6cd7db540d6d49211068f7.jpg" }
       ],
       socialLinks: {
         instagram: "https://instagram.com/dataxnm",
@@ -554,9 +554,9 @@ window.NMData = {
         website: "https://dataxnm.ai"
       },
       gallery: [
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1550745165-9bc0b252726a?w=600&h=400&fit=crop"
+        "assets/images/49592495dd5ed7b56deccc37d092881a.jpg",
+        "assets/images/9a904ec055cc7d7fbd95443daea2dc01.jpg",
+        "assets/images/4f7b4ae0986f4a7502e84ba08890af84.jpg"
       ],
       events: ["ai-finance-bootcamp-2026"]
     },
@@ -565,14 +565,14 @@ window.NMData = {
       name: "Debate Society",
       category: "Academic",
       description: "Fostering critical thinking and public speaking skills through competitive debates and discussions. We organize inter-college tournaments, workshops on argumentation, and weekly debate sessions.",
-      logo: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=80&h=80&fit=crop&crop=face",
-      banner: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=300&fit=crop",
+      logo: "assets/images/970bc67e4cbfcf6aed1876225951ccf2.jpg",
+      banner: "assets/images/9a904ec055cc7d7fbd95443daea2dc01.jpg",
       members: 2800,
       founded: "2014",
       leadership: [
-        { name: "Rohan Mehta", role: "President", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" },
-        { name: "Ananya Singh", role: "Debate Captain", avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c1ca?w=40&h=40&fit=crop&crop=face" },
-        { name: "Kabir Nair", role: "Research Head", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face" }
+        { name: "Rohan Mehta", role: "President", avatar: "assets/images/fdc75681b658e75869ad5eb26a418904.jpg" },
+        { name: "Ananya Singh", role: "Debate Captain", avatar: "assets/images/020b0ad05767be5e64f4b446f03f428d.jpg" },
+        { name: "Kabir Nair", role: "Research Head", avatar: "assets/images/0a2e1d19caa2992ccb170c2abdbbd6b1.jpg" }
       ],
       socialLinks: {
         instagram: "https://instagram.com/nmdebates",
@@ -580,9 +580,9 @@ window.NMData = {
         website: "https://nmdebates.club"
       },
       gallery: [
-        "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop"
+        "assets/images/c983bc230cc5ea898b993790cfb95b4d.jpg",
+        "assets/images/e608269024d98c641c6156cec0aab89a.jpg",
+        "assets/images/385a26a34f594dbaa1d6890e70664f81.jpg"
       ],
       events: ["debate-championship-2026"]
     },
@@ -591,14 +591,14 @@ window.NMData = {
       name: "Photography Club",
       category: "Creative Arts",
       description: "Capturing campus life and beyond through the lens. We organize photography walks, workshops, exhibitions, and photo competitions that help students develop their visual storytelling skills.",
-      logo: "https://images.unsplash.com/photo-1502920917128-1aa50076ecbd?w=80&h=80&fit=crop&crop=face",
-      banner: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=300&fit=crop",
+      logo: "assets/images/a3ae8184ed41f08408a6809bdd4c555c.jpg",
+      banner: "assets/images/a8052b514aed67559f8b56235be6d832.jpg",
       members: 2100,
       founded: "2017",
       leadership: [
-        { name: "Aisha Khan", role: "President", avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c1ca?w=40&h=40&fit=crop&crop=face" },
-        { name: "Rohit Patel", role: "Technical Lead", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" },
-        { name: "Meera Joshi", role: "Creative Director", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face" }
+        { name: "Aisha Khan", role: "President", avatar: "assets/images/020b0ad05767be5e64f4b446f03f428d.jpg" },
+        { name: "Rohit Patel", role: "Technical Lead", avatar: "assets/images/fdc75681b658e75869ad5eb26a418904.jpg" },
+        { name: "Meera Joshi", role: "Creative Director", avatar: "assets/images/3321ae1b9b6cd7db540d6d49211068f7.jpg" }
       ],
       socialLinks: {
         instagram: "https://instagram.com/nmphotography",
@@ -606,9 +606,9 @@ window.NMData = {
         website: "https://nmphoto.club"
       },
       gallery: [
-        "https://images.unsplash.com/photo-1502920917128-1aa50076ecbd?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&h=400&fit=crop"
+        "assets/images/c2a5ffd4099b6569d09a7e9e52e629ad.jpg",
+        "assets/images/c3440e9721d6beed4463eaa8690e93c8.jpg",
+        "assets/images/c5bef76946085b739a29cafc975eb0c3.jpg"
       ],
       events: ["photography-workshop-2026"]
     },
@@ -617,14 +617,14 @@ window.NMData = {
       name: "Literature Society",
       category: "Creative Arts",
       description: "Celebrating the written word through poetry slams, creative writing workshops, book clubs, and literary discussions. We provide a platform for writers, poets, and literature enthusiasts to express themselves.",
-      logo: "https://images.unsplash.com/photo-1481627834876-b7833e2f7db4?w=80&h=80&fit=crop&crop=face",
-      banner: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=300&fit=crop",
+      logo: "assets/images/a87318b37485c9e886acbd4e57995123.jpg",
+      banner: "assets/images/ae854b60c43597f5d16ee36deff2f43e.jpg",
       members: 1900,
       founded: "2016",
       leadership: [
-        { name: "Priya Sharma", role: "President", avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c1ca?w=40&h=40&fit=crop&crop=face" },
-        { name: "Vikram Malhotra", role: "Poetry Lead", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" },
-        { name: "Fatima Ali", role: "Workshops Coordinator", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face" }
+        { name: "Priya Sharma", role: "President", avatar: "assets/images/020b0ad05767be5e64f4b446f03f428d.jpg" },
+        { name: "Vikram Malhotra", role: "Poetry Lead", avatar: "assets/images/fdc75681b658e75869ad5eb26a418904.jpg" },
+        { name: "Fatima Ali", role: "Workshops Coordinator", avatar: "assets/images/3321ae1b9b6cd7db540d6d49211068f7.jpg" }
       ],
       socialLinks: {
         instagram: "https://instagram.com/nmliterature",
@@ -632,9 +632,9 @@ window.NMData = {
         website: "https://nmliterature.club"
       },
       gallery: [
-        "https://images.unsplash.com/photo-1481627834876-b7833e2f7db4?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&h=400&fit=crop"
+        "assets/images/b5591a9630cb60402b7eb1947a4608bb.jpg",
+        "assets/images/385a26a34f594dbaa1d6890e70664f81.jpg",
+        "assets/images/c983bc230cc5ea898b993790cfb95b4d.jpg"
       ],
       events: []
     },
@@ -643,14 +643,14 @@ window.NMData = {
       name: "Dance Club",
       category: "Cultural",
       description: "Expressing through movement and rhythm. We teach various dance forms, organize flash mobs, participate in competitions, and host annual dance showcases that celebrate diverse dance styles.",
-      logo: "https://images.unsplash.com/photo-1517455023928-91e513cd7cf9?w=80&h=80&fit=crop&crop=face",
-      banner: "https://images.unsplash.com/photo-1517455023928-91e513cd7cf9?w=600&h=300&fit=crop",
+      logo: "assets/images/c0d7398dedee2f06949cf074934dab96.jpg",
+      banner: "assets/images/c2a5ffd4099b6569d09a7e9e52e629ad.jpg",
       members: 3500,
       founded: "2015",
       leadership: [
-        { name: "Neha Reddy", role: "President", avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c1ca?w=40&h=40&fit=crop&crop=face" },
-        { name: "Arjun Singh", role: "Choreography Lead", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" },
-        { name: "Sara Khan", role: "Performance Coordinator", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face" }
+        { name: "Neha Reddy", role: "President", avatar: "assets/images/020b0ad05767be5e64f4b446f03f428d.jpg" },
+        { name: "Arjun Singh", role: "Choreography Lead", avatar: "assets/images/fdc75681b658e75869ad5eb26a418904.jpg" },
+        { name: "Sara Khan", role: "Performance Coordinator", avatar: "assets/images/3321ae1b9b6cd7db540d6d49211068f7.jpg" }
       ],
       socialLinks: {
         instagram: "https://instagram.com/nmdance",
@@ -658,9 +658,9 @@ window.NMData = {
         website: "https://nmdance.club"
       },
       gallery: [
-        "https://images.unsplash.com/photo-1517455023928-91e513cd7cf9?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&h=400&fit=crop"
+        "assets/images/643821c3346d3269220af319cbc7a70b.jpg",
+        "assets/images/8c5fe105397a5d73dbfae2653da1a7d6.jpg",
+        "assets/images/87bc90ca9d0bb9f2fc79ae8891fe2e00.jpg"
       ],
       events: []
     }
@@ -672,7 +672,7 @@ window.NMData = {
       name: "Nikhil Adani",
       role: "Global Markets Strategist",
       company: "Goldman Sachs",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face",
+      avatar: "assets/images/c3440e9721d6beed4463eaa8690e93c8.jpg",
       bio: "15+ years of experience in emerging markets and global macro strategy. Author of 'The New Silk Road: Navigating Global Capital Flows'."
     },
     {
@@ -680,7 +680,7 @@ window.NMData = {
       name: "Megha Shah",
       role: "Investment Associate",
       company: "Axis Capital",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c1ca?w=60&h=60&fit=crop&crop=face",
+      avatar: "assets/images/c5bef76946085b739a29cafc975eb0c3.jpg",
       bio: "Specializes in technology investments and growth equity. Led investments in 12+ startups with 3x average returns."
     },
     {
@@ -688,7 +688,7 @@ window.NMData = {
       name: "Kabir Taneja",
       role: "Vice President",
       company: "JP Morgan",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face",
+      avatar: "assets/images/c983bc230cc5ea898b993790cfb95b4d.jpg",
       bio: "Expert in derivatives and risk management. Regular speaker at financial conferences and academic institutions."
     },
     {
@@ -696,7 +696,7 @@ window.NMData = {
       name: "Sana D'Costa",
       role: "Machine Learning Lead",
       company: "Microsoft",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=face",
+      avatar: "assets/images/e608269024d98c641c6156cec0aab89a.jpg",
       bio: "AI researcher with 8+ years in machine learning applications for finance. Published author in top ML conferences."
     },
     {
@@ -704,7 +704,7 @@ window.NMData = {
       name: "Ananya Vora",
       role: "Impact Entrepreneur",
       company: "GreenTech Ventures",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c1ca?w=60&h=60&fit=crop&crop=face",
+      avatar: "assets/images/c5bef76946085b739a29cafc975eb0c3.jpg",
       bio: "Founded 3 social impact startups focusing on sustainable urban solutions. TEDx speaker and sustainability advocate."
     },
     {
@@ -712,7 +712,7 @@ window.NMData = {
       name: "Arjun Sood",
       role: "Sports Convenor",
       company: "NM College",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&h=60&fit=crop&crop=face",
+      avatar: "assets/images/f458f683c278a8ea9f7becc41acabaca.jpg",
       bio: "Former state-level football player, now organizing inter-collegiate sports events and promoting campus athletics."
     },
     {
@@ -720,7 +720,7 @@ window.NMData = {
       name: "Neel Joshi",
       role: "Lead Artist",
       company: "Independent",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&h=60&fit=crop&crop=face",
+      avatar: "assets/images/f458f683c278a8ea9f7becc41acabaca.jpg",
       bio: "Indie musician and composer with 2M+ streams on digital platforms. Regular performer at college cultural events."
     },
     {
@@ -728,7 +728,7 @@ window.NMData = {
       name: "Ritika Wagle",
       role: "Startup Mentor",
       company: "Venture Catalysts",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=face",
+      avatar: "assets/images/e608269024d98c641c6156cec0aab89a.jpg",
       bio: "Mentored 50+ early-stage startups across fintech, edtech, and healthtech. Angel investor with 20+ portfolio companies."
     }
   ],
@@ -739,7 +739,7 @@ window.NMData = {
     email: "aarav.kulkarni@nmcollege.in",
     department: "BMS",
     year: "SY",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+    avatar: "assets/images/f60df5b643f14f72581006955dd306d8.jpg",
     nmPoints: 1250,
     bookings: [
       {
@@ -770,7 +770,7 @@ window.NMData = {
     name: "Priya Nair",
     clubId: "ecell-nm",
     role: "Events Coordinator",
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b332c1ca?w=100&h=100&fit=crop&crop=face",
+    avatar: "assets/images/fdc75681b658e75869ad5eb26a418904.jpg",
     managedEvents: ["founders-cafe-networking-2026", "committee-recruitment-drive-2026"]
   }
 };
